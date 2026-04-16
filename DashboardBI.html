@@ -1,0 +1,3217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insight BI - Dashboard Executivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #050816;
+            --bg-secondary: #0A0F24;
+            --bg-tertiary: #120B2D;
+            --accent: #7C4DFF;
+            --accent-light: #8B5CFF;
+            --accent-glow: rgba(124, 77, 255, 0.3);
+            --white: #F8FAFC;
+            --gray: #94A3B8;
+            --gray-dark: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(124, 77, 255, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+            color: var(--white);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .glow-bg {
+            background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124, 77, 255, 0.06) 0%, transparent 60%);
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+/* Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(5, 8, 22, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            position: relative;
+            z-index: 5;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .logo-text span {
+            font-size: 0.7rem;
+            color: var(--gray);
+        }
+
+        .record-badge {
+            background: rgba(124, 77, 255, 0.15);
+            border: 1px solid rgba(124, 77, 255, 0.3);
+            padding: 0.4rem 1rem;
+        }
+
+        .department-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .dept-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--gray);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .dept-tab:hover {
+            background: rgba(124, 77, 255, 0.15);
+            border-color: var(--accent);
+            color: var(--white);
+        }
+        .dept-tab.active {
+            background: rgba(124, 77, 255, 0.25);
+            border-color: var(--accent);
+            color: var(--white);
+        }
+        .dept-tab.has-data {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+        .dept-tab.has-data .dept-badge {
+            background: #10b981;
+            color: white;
+        }
+        .dept-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent-light);
+        }
+
+        /* File Bar */
+        .file-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .file-info i { color: var(--accent); }
+        .file-name { color: var(--white); font-weight: 500; }
+        .file-change { 
+            color: var(--accent); 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.85rem;
+            text-decoration: underline;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--gray);
+        }
+
+        .btn-outline:hover { border-color: var(--accent); color: var(--white); }
+
+        .btn-primary {
+            background: var(--accent);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--accent-light); }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .nav-tab {
+            padding: 0.6rem 1.25rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            color: var(--gray);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .nav-tab:hover { background: rgba(124, 77, 255, 0.1); color: var(--white); }
+
+        .nav-tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.25rem;
+        }
+
+        .section-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .kpi-card.success { border-left: 3px solid var(--success); }
+        .kpi-card.warning { border-left: 3px solid var(--warning); }
+        .kpi-card.danger { border-left: 3px solid var(--danger); }
+        .kpi-card.info { border-left: 3px solid var(--accent); }
+
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .kpi-value.currency { color: var(--success); }
+        .kpi-value.highlight { color: var(--warning); }
+        .kpi-value.critical { color: var(--danger); }
+
+        /* Rankings Section */
+        .rankings-section {
+            margin-bottom: 2rem;
+        }
+        .rankings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .rankings-header .section-title {
+            margin-bottom: 0;
+        }
+        .ranking-select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--white);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ranking-select:hover {
+            border-color: var(--accent);
+        }
+        .ranking-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(124, 77, 255, 0.1);
+        }
+
+        .ranking-anim-out {
+            animation: rankingFadeOut 0.15s ease-out forwards;
+        }
+
+        @keyframes rankingFadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .rankings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1000px) { .rankings-grid { grid-template-columns: 1fr; } }
+
+        .ranking-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .ranking-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ranking-title i { color: var(--accent); }
+        .ranking-card.valor { border-left: 3px solid #10b981; }
+        .ranking-card.valor .ranking-title i { color: #10b981; }
+        .ranking-card.antigo { border-left: 3px solid #f59e0b; }
+        .ranking-card.antigo .ranking-title i { color: #f59e0b; }
+        .ranking-card.semmov { border-left: 3px solid #ef4444; }
+        .ranking-card.semmov .ranking-title i { color: #ef4444; }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .rank-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rank-info { flex: 1; min-width: 0; }
+
+        .rank-name {
+            font-size: 0.8rem;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rank-meta {
+            font-size: 0.7rem;
+            color: var(--gray-dark);
+            margin-top: 0.15rem;
+        }
+
+        .rank-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            white-space: nowrap;
+        }
+
+        .rank-bar {
+            height: 3px;
+            background: rgba(124, 77, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 0.4rem;
+            overflow: hidden;
+        }
+
+        .rank-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        .rank-bar-fill.valor { background: #10b981; }
+        .rank-bar-fill.antigo { background: #f59e0b; }
+        .rank-bar-fill.semmov { background: #ef4444; }
+
+        /* Insights Section */
+        .insights-section { margin-bottom: 2rem; }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1000px) { .insights-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .insights-grid { grid-template-columns: 1fr; } }
+
+        .insight-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        .insight-card:hover {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(124, 77, 255, 0.2);
+        }
+
+        .insight-card i {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+
+        .insight-text {
+            font-size: 0.85rem;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        /* Import Overlay */
+        .import-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 8, 22, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .import-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .import-back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--gray);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .import-back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        .dept-highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .import-card i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .import-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .import-card p {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .upload-btn-wrapper input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Tab contents */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Loading */
+        .loading { color: var(--accent); margin-top: 1rem; }
+
+        /* Table */
+        .table-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-filters {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .table-filters select, .table-filters input {
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--white);
+            font-size: 0.85rem;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        
+        th {
+            background: rgba(255,255,255,0.05);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover { background: rgba(124, 77, 255, 0.05); }
+
+        .risk-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .risk-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .risk-low { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 800px) { .charts-grid { grid-template-columns: 1fr; } }
+
+        .chart-box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .chart-box h3 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .chart-insight {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .chart-container { height: 280px; position: relative; }
+
+        /* Insights Section New */
+        .insights-section-new { margin-bottom: 2.5rem; }
+
+        .insights-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .insight-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 0 -0.5rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .insight-row:hover {
+            background: rgba(124, 77, 255, 0.1);
+            transform: translateX(4px);
+        }
+        .insight-row:last-child { border-bottom: none; }
+
+        .insight-modal-header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+        .insight-modal-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: rgba(124, 77, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        .insight-modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+        .insight-modal-content {
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .insight-main-text {
+            font-size: 1.1rem;
+            color: var(--white);
+            line-height: 1.6;
+        }
+        .insight-modal-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .insight-stat {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        .insight-stat .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+        .insight-stat .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .insight-list-section h4 {
+            font-size: 1rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .insight-list-modal {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .insight-item-modal {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .insight-item-modal:hover {
+            background: rgba(124, 77, 255, 0.1);
+            border-color: var(--accent);
+        }
+        .insight-item-modal.active {
+            background: rgba(124, 77, 255, 0.15);
+            border-color: var(--accent);
+        }
+        .insight-icon-small {
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+        .insight-text-small {
+            font-size: 0.85rem;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .insight-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(124, 77, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .insight-icon i { color: var(--accent); font-size: 0.9rem; }
+
+        .insight-content {
+            flex: 1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--white);
+        }
+
+        .insight-content .highlight {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        /* Alerts Section */
+        .alerts-section { margin-bottom: 2.5rem; }
+
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 800px) { .alerts-grid { grid-template-columns: 1fr; } }
+
+        .alert-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .alert-card.danger { border-color: rgba(239, 68, 68, 0.3); }
+        .alert-card.warning { border-color: rgba(245, 158, 11, 0.3); }
+        .alert-card.info { border-color: rgba(59, 130, 246, 0.3); }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-card.danger .alert-header i { color: var(--danger); }
+        .alert-card.warning .alert-header i { color: var(--warning); }
+        .alert-card.info .alert-header i { color: #3b82f6; }
+
+        .alert-title {
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .alert-card.danger .alert-value { color: var(--danger); }
+        .alert-card.warning .alert-value { color: var(--warning); }
+        .alert-card.info .alert-value { color: #3b82f6; }
+
+        .alert-desc {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+            margin-top: 0.25rem;
+        }
+
+        /* Recommendations Section */
+        .recommendations-section { margin-bottom: 2rem; }
+
+        .recommendations-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .recommendation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            font-size: 0.9rem;
+            color: var(--white);
+            line-height: 1.5;
+        }
+
+        .recommendation-bullet {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-top: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        /* Charts Dashboard Section */
+        .charts-dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1200px) { .charts-dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .charts-dashboard-grid { grid-template-columns: 1fr; } }
+
+        .chart-dashboard-card {
+            background: linear-gradient(145deg, rgba(30, 32, 48, 0.9) 0%, rgba(18, 18, 32, 0.95) 100%);
+            border: 1px solid rgba(124, 77, 255, 0.15);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+        .chart-dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), #10b981);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .chart-dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(124, 77, 255, 0.15);
+            border-color: rgba(124, 77, 255, 0.3);
+        }
+        .chart-dashboard-card:hover::before { opacity: 1; }
+
+        .chart-dashboard-card h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: 0.02em;
+        }
+
+        .chart-dashboard-card h4 i {
+            color: var(--accent);
+            font-size: 1rem;
+            background: rgba(124, 77, 255, 0.15);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .chart-dashboard-container {
+            height: 260px;
+            position: relative;
+        }
+
+        .chart-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .chart-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 0.5rem;
+        }
+        .chart-empty i {
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Table Search Bar */
+        .table-search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .search-input-wrapper input::placeholder { color: var(--gray); }
+        .search-input-wrapper input:focus { outline: none; border-color: var(--accent); }
+
+        .search-filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filters select {
+            padding: 0.75rem 2rem 0.75rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.85rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        .search-filters select:focus { outline: none; border-color: var(--accent); }
+
+        .filter-result-info {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        /* Analytical Table */
+        .table-analytical-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .analytical-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .analytical-table thead {
+            background: rgba(255,255,255,0.03);
+            position: sticky;
+            top: 0;
+        }
+
+        .analytical-table th {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .analytical-table th:hover { color: var(--white); }
+        .analytical-table th i { margin-left: 0.35rem; font-size: 0.65rem; opacity: 0.5; }
+
+        .analytical-table td {
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--white);
+        }
+
+        .analytical-table tbody tr:hover {
+            background: rgba(124, 77, 255, 0.08);
+        }
+
+        .analytical-table td:first-child { color: var(--gray); font-size: 0.8rem; }
+        .analytical-table td:nth-child(2) { font-weight: 500; }
+        .analytical-table td:nth-child(5) { font-family: 'Inter', monospace; }
+        
+        .analytical-table td .empty-value {
+            color: var(--gray-dark);
+            font-style: italic;
+        }
+
+        /* Risk Badges */
+        .risk-pill {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-pill.critico { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .risk-pill.alto { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .risk-pill.medio { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .risk-pill.atenção { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .risk-pill.baixo { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .risk-pill.regular { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .risk-pill.sem-dados { background: rgba(100, 116, 139, 0.2); color: #94A3B8; }
+
+        /* Status Text */
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+
+        /* Table Footer */
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-btn {
+            padding: 0.4rem 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--gray);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) { background: rgba(124, 77, 255, 0.2); border-color: var(--accent); color: var(--white); }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .page-info { font-size: 0.8rem; }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .table-analytical-container { overflow-x: auto; }
+            .analytical-table { min-width: 900px; }
+            .table-search-bar { flex-direction: column; }
+            .search-input-wrapper { min-width: 100%; }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed !important;
+            inset: 0;
+            background: rgba(5, 8, 22, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2147483647 !important;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            position: absolute !important;
+            z-index: 2147483647 !important;
+            background: linear-gradient(145deg, rgba(30, 32, 48, 0.98) 0%, rgba(18, 18, 32, 0.98) 100%);
+            border: 1px solid rgba(124, 77, 255, 0.2);
+            border-radius: 20px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(124, 77, 255, 0.3);
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay:not(.hidden) .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1.75rem;
+            border-bottom: 1px solid rgba(124, 77, 255, 0.1);
+        }
+
+        .modal-header h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-header h3 i {
+            color: var(--accent);
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: var(--gray);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.6rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .modal-body {
+            padding: 1.75rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Chart Detail Modal */
+        .chart-detail-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-radius: 16px;
+        }
+        .chart-detail-header h2 {
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .chart-detail-header h2 i {
+            color: var(--accent);
+        }
+        .chart-detail-pct {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-detail-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .chart-detail-stat {
+            text-align: center;
+            padding: 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        .chart-detail-stat:hover {
+            background: rgba(124, 77, 255, 0.08);
+            border-color: rgba(124, 77, 255, 0.2);
+        }
+        .chart-detail-stat .stat-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.25rem;
+        }
+        .chart-detail-stat .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .chart-detail-list h4 {
+            font-size: 0.95rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .chart-detail-items {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .chart-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chart-detail-item:hover {
+            background: rgba(124, 77, 255, 0.1);
+            border-color: rgba(124, 77, 255, 0.3);
+            transform: translateX(4px);
+        }
+        .chart-detail-item .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .chart-detail-item .item-name {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chart-detail-item .item-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .chart-detail-item .item-value {
+            font-weight: 600;
+            color: var(--accent);
+            margin-left: 1rem;
+        }
+        .chart-detail-more {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .alert-detail-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        .alert-detail-header h2 {
+            font-size: 1.25rem;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .alert-detail-count {
+            font-size: 1rem;
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        .alert-detail-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .alert-detail-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+        .alert-detail-item:hover {
+            background: rgba(124, 77, 255, 0.08);
+        }
+        .alert-detail-more {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Make alert cards clickable */
+        .alert-card { cursor: pointer; transition: all 0.2s; }
+        .alert-card:hover { transform: translateY(-2px); }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 500px) {
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+
+        .detail-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .detail-item.highlighted {
+            background: rgba(124, 77, 255, 0.15);
+            border-color: var(--accent);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(124, 77, 255, 0.3);
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .detail-label:hover {
+            color: var(--accent);
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            color: var(--white);
+            word-break: break-word;
+        }
+
+        .detail-value.empty {
+            color: var(--gray-dark);
+            font-style: italic;
+        }
+
+        .detail-value.risk-alto { color: #ef4444; }
+        .detail-value.risk-medio { color: #f59e0b; }
+        .detail-value.risk-baixo { color: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="glow-bg"></div>
+
+<!-- Import Overlay -->
+    <div class="import-overlay" id="import-overlay">
+        <div class="import-card">
+            <button class="import-back-btn" onclick="goBackToHome()">
+                <i class="fas fa-arrow-left"></i> Cancelar
+            </button>
+            <i class="fas fa-file-excel"></i>
+            <h2>Insight BI</h2>
+            <p>Selecione uma planilha Excel para o departamento <span id="upload-dept-label" class="dept-highlight">ALMOXARIFADO</span>.</p>
+            <div class="upload-btn-wrapper" style="position: relative; overflow: hidden; display: inline-block;">
+                    <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+                        <i class="fas fa-upload"></i> Carregar arquivo
+                    </button>
+                    <input type="file" id="file-input" accept=".xlsx,.xls" style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+            </div>
+            <div id="loading-txt" class="hidden loading">
+                <i class="fas fa-spinner fa-spin"></i> Processando dados...
+            </div>
+        </div>
+    </div>
+
+    <!-- App View -->
+    <div class="app-container hidden" id="app-view">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <div class="header-left">
+                    <div class="logo-icon">
+                        <i class="fas fa-sparkles" style="color: white; font-size: 0.9rem;"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Insight BI</h1>
+                        <span>Análise inteligente de planilhas</span>
+                    </div>
+                </div>
+                <div class="record-badge" id="record-badge">
+                    <span id="record-count">0</span> registros
+                </div>
+            </div>
+
+            <!-- Department Tabs -->
+            <div class="department-tabs" id="department-tabs">
+                <button class="dept-tab active" data-dept="ALMOXARIFADO" onclick="switchDepartment('ALMOXARIFADO')">
+                    <span class="dept-name">ALMOXARIFADO</span>
+                    <span class="dept-badge" id="badge-ALMOXARIFADO">0</span>
+                </button>
+                <button class="dept-tab" data-dept="NUTRIÇÃO" onclick="switchDepartment('NUTRIÇÃO')">
+                    <span class="dept-name">NUTRIÇÃO</span>
+                    <span class="dept-badge" id="badge-NUTRIÇÃO">0</span>
+                </button>
+                <button class="dept-tab" data-dept="ASSISTÊNCIA REDE" onclick="switchDepartment('ASSISTÊNCIA REDE')">
+                    <span class="dept-name">ASSISTÊNCIA REDE</span>
+                    <span class="dept-badge" id="badge-ASSISTÊNCIA REDE">0</span>
+                </button>
+                <button class="dept-tab" data-dept="COMPRAS" onclick="switchDepartment('COMPRAS')">
+                    <span class="dept-name">COMPRAS</span>
+                    <span class="dept-badge" id="badge-COMPRAS">0</span>
+                </button>
+                <button class="dept-tab" data-dept="FINANCEIRO" onclick="switchDepartment('FINANCEIRO')">
+                    <span class="dept-name">FINANCEIRO</span>
+                    <span class="dept-badge" id="badge-FINANCEIRO">0</span>
+                </button>
+            </div>
+
+            <!-- File Bar -->
+            <div class="file-bar">
+                <div class="file-info">
+                    <i class="fas fa-file-excel"></i>
+                    <span class="file-name" id="file-name">-</span>
+                    <button class="file-change" onclick="document.getElementById('file-input').click()">Trocar arquivo</button>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-outline" onclick="exportPDF()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+                <div class="nav-tab" data-tab="insights">Insights</div>
+                <div class="nav-tab" data-tab="tabela">Tabela</div>
+                <div class="nav-tab" data-tab="log">Log</div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <!-- KPIs Section -->
+                <section class="kpi-section">
+                    <h2 class="section-title">Indicadores consolidados</h2>
+                    <p class="section-subtitle">Visão executiva da base importada</p>
+                    <div class="kpi-grid" id="kpi-grid"></div>
+                </section>
+
+                <!-- Gráficos Section -->
+                <section class="charts-dashboard-section" style="margin-bottom: 2.5rem;">
+                    <h2 class="section-title">Análise Visual</h2>
+                    <p class="section-subtitle">Distribuição e composição da base</p>
+                    <div class="charts-dashboard-grid" id="dashboard-charts">
+                        <!-- Gráficos serão inseridos aqui -->
+                    </div>
+                </section>
+
+                <!-- Rankings Section -->
+                <section class="rankings-section">
+                    <div class="rankings-header">
+                        <h2 class="section-title">Rankings</h2>
+                        <select id="ranking-type-select" class="ranking-select" onchange="changeRankingType()">
+                            <option value="all">Todos os Rankings</option>
+                            <option value="valor">Maiores Valores</option>
+                            <option value="escola">Por Escola</option>
+                            <option value="antigo">Mais Antigos</option>
+                            <option value="semmov">Sem Movimentação</option>
+                        </select>
+                    </div>
+                    <div class="rankings-grid" id="rankings-grid"></div>
+                </section>
+
+                <!-- Insights Section -->
+                <section class="insights-section">
+                    <h2 class="section-title">Insights automáticos</h2>
+                    <div class="insights-grid" id="insights-grid"></div>
+                </section>
+            </div>
+
+            <!-- Insights Tab -->
+            <div id="insights" class="tab-content">
+                <!-- Insights Automáticos -->
+                <section class="insights-section-new">
+                    <h2 class="section-title">Insights automáticos</h2>
+                    <p class="section-subtitle">Interpretação executiva da base</p>
+                    <div class="insights-container" id="insights-list"></div>
+                </section>
+
+                <!-- Alertas Operacionais -->
+                <section class="alerts-section">
+                    <h2 class="section-title">Alertas operacionais</h2>
+                    <div class="alerts-grid" id="alerts-grid"></div>
+                </section>
+
+                <!-- Recomendações -->
+                <section class="recommendations-section">
+                    <h2 class="section-title">Recomendações</h2>
+                    <div class="recommendations-card" id="recommendations-list"></div>
+                </section>
+            </div>
+
+            <!-- Tabela Tab -->
+            <div id="tabela" class="tab-content">
+                <!-- Barra de Busca e Filtros -->
+                <div class="table-search-bar">
+                    <div class="search-input-wrapper" style="flex: 1;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="table-search" placeholder="Busca livre em todos os campos..." style="width: 100%;">
+                    </div>
+                </div>
+                
+                <!-- Resultado dos filtros -->
+                <div class="filter-result-info" id="filter-result-info">
+                    Exibindo X de Y registros após filtros.
+                </div>
+
+                <!-- Tabela Analítica -->
+                <div class="table-analytical-container">
+                    <table class="analytical-table">
+                        <thead id="dynamic-thead">
+                            <!-- Cabeçalho dinâmico será gerado -->
+                        </thead>
+                        <tbody id="table-body-analytical"></tbody>
+                    </table>
+                </div>
+
+                <!-- Rodapé da Tabela -->
+                <div class="table-footer">
+                    <span class="showing-text" id="showing-text">Mostrando X de Y registros</span>
+                    <div class="pagination">
+                        <button class="page-btn" id="prev-page" disabled>
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <span class="page-info" id="page-info">Página 1 de 1</span>
+                        <button class="page-btn" id="next-page" disabled>
+                            Próxima <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Tab -->
+            <div id="log" class="tab-content">
+                <div class="table-container" style="padding: 1rem;">
+                    <h3 style="margin-bottom: 1rem;">Log de Processamento</h3>
+                    <pre id="log-content" style="font-size: 0.8rem; color: var(--gray); font-family: monospace;"></pre>
+                </div>
+            </div>
+
+            <!-- Modal de Detalhes -->
+            <div id="detail-modal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Detalhes do Registro</h3>
+                        <button class="modal-close" onclick="closeDetailModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const DEPARTMENTS = ['ALMOXARIFADO', 'NUTRIÇÃO', 'ASSISTÊNCIA REDE', 'COMPRAS', 'FINANCEIRO'];
+
+        const deptData = {};
+        DEPARTMENTS.forEach(d => {
+            deptData[d] = {
+                rawData: [],
+                data: [],
+                fileName: '',
+                loaded: false,
+                processingLog: [],
+                excelHeaders: []
+            };
+        });
+
+        let currentDepartment = 'ALMOXARIFADO';
+        let rawData = [];
+        let dashboardData = [];
+        let currentFileName = '';
+        let processingLog = [];
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.addEventListener('change', handleFileSelect);
+            }
+
+            // Check for department selected in index.html
+            const savedDept = sessionStorage.getItem('selectedDepartment');
+            if (savedDept && DEPARTMENTS.includes(savedDept)) {
+                currentDepartment = savedDept;
+            } else {
+                currentDepartment = 'ALMOXARIFADO';
+            }
+
+            // Check for saved Excel data from index.html
+            const savedExcel = sessionStorage.getItem('excelData');
+            if (savedExcel) {
+                try {
+                    const parsed = JSON.parse(savedExcel);
+                    const dept = parsed.department || currentDepartment;
+                    currentDepartment = dept;
+                    switchDepartment(dept);
+
+                    // Process the data
+                    const data = new Uint8Array(parsed.data);
+                    processExcelData(data, parsed.name, dept);
+                    sessionStorage.removeItem('excelData');
+                    sessionStorage.removeItem('selectedDepartment');
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                    switchDepartment(currentDepartment);
+                }
+            } else {
+                switchDepartment(currentDepartment);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            resetDashboardState();
+
+            document.getElementById('loading-txt').classList.remove('hidden');
+            currentFileName = file.name;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                processExcelData(data, file.name, currentDepartment);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function switchDepartment(dept) {
+            if (!DEPARTMENTS.includes(dept)) return;
+
+            const oldDept = currentDepartment;
+            if (deptData[oldDept]) {
+                deptData[oldDept].rawData = rawData;
+                deptData[oldDept].data = dashboardData;
+                deptData[oldDept].fileName = currentFileName;
+                deptData[oldDept].loaded = dashboardData.length > 0;
+                deptData[oldDept].processingLog = [...processingLog];
+                deptData[oldDept].excelHeaders = window.excelHeaders || [];
+            }
+
+            currentDepartment = dept;
+
+            rawData = deptData[dept].rawData;
+            dashboardData = deptData[dept].data;
+            currentFileName = deptData[dept].fileName;
+            processingLog = deptData[dept].processingLog;
+            window.excelHeaders = deptData[dept].excelHeaders;
+
+            document.querySelectorAll('.dept-tab').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.dept === dept) t.classList.add('active');
+            });
+
+            updateDeptBadges();
+
+            if (deptData[dept].loaded) {
+                document.getElementById('app-view').classList.remove('hidden');
+                renderDepartmentView();
+            } else {
+                showEmptyDepartmentState(dept);
+            }
+        }
+
+        function updateDeptBadges() {
+            DEPARTMENTS.forEach(d => {
+                const badge = document.getElementById(`badge-${d}`);
+                const tab = document.querySelector(`.dept-tab[data-dept="${d}"]`);
+                if (badge && deptData[d].loaded) {
+                    badge.textContent = deptData[d].data.length;
+                    if (tab) tab.classList.add('has-data');
+                } else if (badge) {
+                    badge.textContent = '0';
+                    if (tab) tab.classList.remove('has-data');
+                }
+            });
+
+            const activeCount = document.getElementById('record-count');
+            if (activeCount) activeCount.textContent = dashboardData.length;
+        }
+
+        function showEmptyDepartmentState(dept) {
+            const deptLabel = dept || currentDepartment;
+
+            document.getElementById('app-view').classList.add('hidden');
+            const overlay = document.getElementById('import-overlay');
+            overlay.classList.remove('hidden');
+
+            const importCard = overlay.querySelector('.import-card');
+            if (importCard) {
+                const titleEl = importCard.querySelector('h2');
+                if (titleEl) titleEl.textContent = `Insight BI - ${deptLabel}`;
+            }
+
+            const label = document.getElementById('upload-dept-label');
+            if (label) label.textContent = deptLabel;
+
+            const desc = overlay.querySelector('p');
+            if (desc) desc.textContent = `Selecione uma planilha Excel para o departamento ${deptLabel}.`;
+
+            const heading = document.querySelector('.logo-text h1');
+            if (heading) heading.textContent = `Insight BI - ${deptLabel}`;
+        }
+
+        function renderDepartmentView() {
+            resetDashboardState();
+            renderDashboard();
+        }
+
+        function resetDashboardState() {
+            // Reset navigation to dashboard
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.nav-tab[data-tab="dashboard"]').classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('dashboard').classList.add('active');
+            
+            // Reset filters in table
+            const searchInput = document.getElementById('table-search');
+            if (searchInput) searchInput.value = '';
+            
+            const riscoSelect = document.getElementById('filter-risco-table');
+            if (riscoSelect) riscoSelect.value = '';
+            
+            const historicoSelect = document.getElementById('filter-historico');
+            if (historicoSelect) historicoSelect.value = '';
+            
+            const identSelect = document.getElementById('filter-identificacao');
+            if (identSelect) identSelect.value = '';
+        }
+
+        function processExcelData(data, fileName, dept) {
+            try {
+                const deptName = dept || currentDepartment;
+                log(`Iniciando processamento para ${deptName}...`);
+
+                deptData[deptName].processingLog = [];
+
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+                if (range.e.r >= 0) {
+                    const headerRow = [];
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+                        const cell = sheet[cellAddress];
+                        let header = cell ? String(cell.v).trim() : `Coluna_${C + 1}`;
+                        if (!header) header = `Coluna_${C + 1}`;
+                        headerRow.push(header);
+                    }
+                    window.excelHeaders = headerRow;
+                    deptData[deptName].excelHeaders = headerRow;
+                }
+
+                rawData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                deptData[deptName].rawData = rawData;
+
+                log(`Arquivo carregado: ${fileName}`);
+                log(`Total de linhas: ${rawData.length}`);
+                log(`Cabeçalhos: ${window.excelHeaders.join(', ')}`);
+
+                processData();
+
+                deptData[deptName].data = dashboardData;
+                deptData[deptName].fileName = fileName;
+                deptData[deptName].loaded = true;
+                deptData[deptName].processingLog = [...processingLog];
+
+                currentFileName = fileName;
+
+                document.getElementById('import-overlay').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                document.getElementById('file-name').textContent = fileName;
+
+                updateDeptBadges();
+
+                renderDashboard();
+            } catch (err) {
+                logError('Erro ao processar planilha', err);
+                alert('Erro ao processar planilha: ' + err.message);
+            }
+        }
+
+        function processData() {
+            dashboardData = [];
+            
+            // Detectar colunas automaticamente
+            if (rawData.length === 0) return;
+            
+            const sampleItem = rawData[0];
+            const availableKeys = Object.keys(sampleItem);
+            
+            // Mapear colunas automaticamente
+            const columnMap = detectAllColumns(availableKeys);
+            
+            log('Colunas detectadas: ' + JSON.stringify(columnMap));
+            
+            // Guardar para uso na tabela
+            window.detectedColumns = columnMap;
+            window.allColumnNames = availableKeys;
+            
+            for (let i = 0; i < rawData.length; i++) {
+                try {
+                    const item = rawData[i];
+                    const keys = Object.keys(item);
+                    if (keys.length === 0) continue;
+                    
+                    // Obter valores usando mapeamento automático
+                    const rawProcesso = item[columnMap.PROCESSO] ?? item['PROCESSO'] ?? item['Processo'] ?? item['Nº PROCESSO'] ?? item['NÚMERO'] ?? '';
+                    const rawObjeto = item[columnMap.OBJETO] ?? item['OBJETO'] ?? item['Objeto'] ?? item['DESCRIÇÃO'] ?? item['Descricao'] ?? item['DESCRIÇÃO DO ITEM'] ?? '';
+                    const rawCriterio = item[columnMap.CRITERIO] ?? item['CRITÉRIO JULG.'] ?? item['CRITERIO JULGAMENTO'] ?? item['Critério'] ?? item['MODALIDADE'] ?? '';
+                    const rawValor = item[columnMap.VALOR] ?? item['VALOR ESTIMADO'] ?? item['Valor'] ?? item['Valor Estimado'] ?? item['PREÇO'] ?? '';
+                    const rawDataAbertura = item[columnMap.DATA_ABERTURA] ?? item['DATA ABERTURA'] ?? item['DATA'] ?? item['Data'] ?? item['DATA DE ABERTURA'] ?? '';
+                    const rawGestao = item[columnMap.GESTAO] ?? item['GESTÃO'] ?? item['GESTAO'] ?? item['Gestão'] ?? item['SECRETARIA'] ?? item['UNIDADE'] ?? '';
+                    const rawHistorico = item[columnMap.HISTORICO] ?? item['PROTOCOLOS ANTERIORES'] ?? item['HISTORICO'] ?? item['TRÂMITE'] ?? '';
+                    const rawDatasAnteriores = item[columnMap.DATAS_ANTERIORES] ?? item['DATAS PROC. ANTERIO'] ?? item['DATAS ANTERIORES'] ?? '';
+                    
+                    // Verificar se a linha tem dados úteis
+                    const hasData = rawProcesso || rawObjeto || rawValor || rawGestao;
+                    if (!hasData) continue;
+                    
+                    const valor = parsePrice(rawValor);
+                    const dataAbertura = parseDate(rawDataAbertura);
+                    const aging = dataAbertura ? Math.floor((new Date() - dataAbertura) / (86400000)) : 0;
+                    const isProcesso = String(rawProcesso).includes('/') && /\d/.test(rawProcesso);
+                    
+                    // Extract last step from history
+                    const lastStep = extractLastStep(String(rawHistorico));
+                    const etapaAtual = mapEtapa(lastStep);
+                    
+                    // Extract last date from history dates
+                    const lastMovDate = extractLastDate(String(rawDatasAnteriores)) || dataAbertura;
+                    const diasSemMov = lastMovDate ? Math.floor((new Date() - lastMovDate) / (86400000)) : aging;
+                    
+                    // Calculate risk
+                    let risco = 'BAIXO';
+                    if (aging > 365 || diasSemMov > 60) risco = 'ALTO';
+                    else if (aging > 180 || diasSemMov > 30) risco = 'MÉDIO';
+                    
+                    // Criar objeto com todos os campos disponíveis
+                    const record = {
+                        // Campos processados
+                        processo: String(rawProcesso || '-'),
+                        objeto: String(rawObjeto || 'Sem objeto'),
+                        criterio: normalize(rawCriterio),
+                        valor: valor,
+                        dataAbertura: dataAbertura,
+                        gestao: normalize(rawGestao),
+                        etapaAtual: etapaAtual,
+                        isProcesso: isProcesso,
+                        aging: isNaN(aging) ? 0 : aging,
+                        diasSemMov: isNaN(diasSemMov) ? 0 : diasSemMov,
+                        risco: risco,
+                        // Guardar item original para referência
+                        _original: item
+                    };
+
+                    // Adicionar todos os campos originais como propriedades dinâmicas com nomes exatos do Excel
+                    availableKeys.forEach(key => {
+                        if (!(key in record)) {
+                            record[key] = item[key];
+                        }
+                    });
+
+                    dashboardData.push(record);
+                } catch (e) {
+                    log(`Erro na linha ${i}: ${e.message}`);
+                }
+            }
+            
+            log(`Registros processados: ${dashboardData.length}`);
+        }
+
+        function detectAllColumns(keys) {
+            const map = {};
+            const upperKeys = keys.map(k => ({ original: k, upper: String(k).toUpperCase().trim() }));
+            
+            upperKeys.forEach(({ original, upper }) => {
+                if (upper.includes('PROCESSO') || upper.includes('NÚMERO') || upper.includes('Nº') || upper.includes('COD')) map.PROCESSO = original;
+                if (upper.includes('OBJETO') || upper.includes('DESCRI') || upper.includes('ITEM') || upper.includes('PROJETO')) map.OBJETO = original;
+                if (upper.includes('CRITÉRIO') || upper.includes('JULGAMENTO') || upper.includes('MODALIDADE') || upper.includes('TIPO') || upper.includes('MODALID')) map.CRITERIO = original;
+                if (upper.includes('VALOR') || upper.includes('ESTIMADO') || upper.includes('PREÇO') || upper.includes('ORÇAMENTO')) map.VALOR = original;
+                if (upper.includes('ABERTURA') || upper.includes('DT_') || upper.includes('DATA') && !upper.includes('ANTERIOR')) map.DATA_ABERTURA = original;
+                if (upper.includes('GESTÃO') || upper.includes('SECRETARIA') || upper.includes('SETOR') || upper.includes('UNIDADE') || upper.includes('DEMANDA')) map.GESTAO = original;
+                if (upper.includes('PROTOCOLO') || upper.includes('TRÂMITE') || upper.includes('HISTÓRICO')) map.HISTORICO = original;
+                if (upper.includes('ANTERIOR') && upper.includes('DATA')) map.DATAS_ANTERIORES = original;
+            });
+            
+            return map;
+        }
+
+        function extractLastDate(datesStr) {
+            if (!datesStr) return null;
+            const dates = datesStr.split(/[\n,;]/).map(d => d.trim()).filter(d => d);
+            if (dates.length === 0) return null;
+            return parseDate(dates[dates.length - 1]);
+        }
+
+        function extractLastStep(historico) {
+            if (!historico) return '';
+            const lines = historico.split('\n').filter(l => l.trim());
+            return lines.length > 0 ? lines[lines.length - 1].toUpperCase() : '';
+        }
+
+        function mapEtapa(step) {
+            if (!step) return 'Sem histórico';
+            if (step.includes('COMPRAS')) return 'Compras';
+            if (step.includes('SELIC')) return 'SELIC';
+            if (step.includes('INFRA') || step.includes('OBRAS')) return 'Infraestrutura';
+            if (step.includes('GABINETE')) return 'Gabinete';
+            if (step.includes('CONTROLAD')) return 'Controladoria';
+            if (step.includes('ASSIST') || step.includes('REDE')) return 'Assistência à Rede';
+            if (step.includes('ARQUIVO')) return 'Arquivo';
+            if (step.includes('STI')) return 'STI';
+            return 'Em tramitação';
+        }
+
+        function normalize(val) {
+            return String(val || 'NÃO INFORMADO').trim().toUpperCase().replace(/\s+/g, ' ').substring(0, 30);
+        }
+
+        function parsePrice(val) {
+            if (typeof val === 'number') return val;
+            if (!val) return 0;
+            const clean = String(val).replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        }
+
+        function parseDate(val) {
+            if (!val) return null;
+            if (val instanceof Date) return val;
+            const parts = String(val).split(/[\/\-]/);
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            const d = new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        function formatCurrency(val) {
+            return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            processingLog.push(`[${time}] ${msg}`);
+        }
+
+        function logError(msg, err) {
+            processingLog.push(`[ERRO] ${msg}: ${err.message}`);
+        }
+
+        function renderDashboard() {
+            renderKPIs();
+            renderDashboardCharts();
+            renderRankings();
+            renderInsights();
+            renderTable();
+            
+            document.getElementById('log-content').textContent = processingLog.join('\n');
+        }
+
+function renderDashboardCharts() {
+            const container = document.getElementById('dashboard-charts');
+            const data = dashboardData;
+            const total = data.length;
+
+            const criterios = {};
+            data.forEach(d => { criterios[d.criterio || 'Não informado'] = (criterios[d.criterio || 'Não informado'] || 0) + 1; });
+
+            const gestoes = {};
+            data.forEach(d => { gestoes[d.gestao || 'Não informado'] = (gestoes[d.gestao || 'Não informado'] || 0) + 1; });
+
+            const etapas = {};
+            data.forEach(d => { etapas[d.etapaAtual || 'Não informado'] = (etapas[d.etapaAtual || 'Não informado'] || 0) + 1; });
+
+            const riscos = {};
+            data.forEach(d => { riscos[d.risco || 'BAIXO'] = (riscos[d.risco || 'BAIXO'] || 0) + 1; });
+
+            const colorsPie = {
+                'Por Critério': ['#7C4DFF', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#f97316', '#6366f1'],
+                'Por Gestão': ['#10b981', '#7C4DFF', '#06b6d4', '#f97316', '#8b5cf6', '#f59e0b', '#6366f1', '#ef4444'],
+                'Por Etapa Atual': ['#06b6d4', '#10b981', '#7C4DFF', '#f59e0b', '#8b5cf6', '#f97316', '#6366f1', '#ef4444'],
+                'Por Risco': ['#ef4444', '#f59e0b', '#10b981', '#7C4DFF', '#06b6d4']
+            };
+
+            const chartData = [
+                { category: 'criterio', title: 'Por Critério', icon: 'fa-tags', type: 'doughnut', data: criterios },
+                { category: 'gestao', title: 'Por Gestão', icon: 'fa-building', type: 'doughnut', data: gestoes },
+                { category: 'etapa', title: 'Por Etapa Atual', icon: 'fa-project-diagram', type: 'bar', data: etapas },
+                { category: 'risco', title: 'Por Risco', icon: 'fa-shield-alt', type: 'bar', data: riscos }
+            ];
+
+            container.innerHTML = chartData.map((chart, idx) => `
+                <div class="chart-dashboard-card" data-category="${chart.category}">
+                    <h4><i class="fas ${chart.icon}"></i> ${chart.title}</h4>
+                    <div class="chart-dashboard-container" id="chart-container-${idx}">
+                        <canvas id="dashboard-chart-${idx}"></canvas>
+                    </div>
+                </div>
+            `).join('');
+
+            chartData.forEach((chart, idx) => {
+                const ctx = document.getElementById(`dashboard-chart-${idx}`).getContext('2d');
+                const labels = Object.keys(chart.data);
+                const values = Object.values(chart.data);
+                const colors = colorsPie[chart.title].slice(0, labels.length);
+                const isBar = chart.type === 'bar';
+
+                const chartConfig = {
+                    type: isBar ? 'bar' : 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: isBar ? colors : colors.map(c => c + 'cc'),
+                            borderColor: isBar ? colors : 'transparent',
+                            borderWidth: isBar ? 0 : 2,
+                            borderRadius: isBar ? 8 : 0,
+                            borderSkipped: false,
+                            hoverBackgroundColor: isBar ? colors.map(c => c) : colors,
+                            hoverBorderWidth: 2,
+                            hoverBorderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            animateRotate: true,
+                            animateScale: true,
+                            duration: 1200,
+                            easing: 'easeOutQuart'
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            intersect: true,
+                            axis: 'x'
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const itemIdx = elements[0].index;
+                                openChartDetailModal(chart.category, labels[itemIdx], values[itemIdx], total);
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: !isBar,
+                                position: 'bottom',
+                                labels: {
+                                    color: '#94A3B8',
+                                    font: { size: 11, weight: '500' },
+                                    padding: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: 'rgba(18, 18, 32, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#94A3B8',
+                                borderColor: 'rgba(124, 77, 255, 0.3)',
+                                borderWidth: 1,
+                                cornerRadius: 12,
+                                padding: { x: 16, y: 12 },
+                                displayColors: true,
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                boxPadding: 4,
+                                titleFont: { size: 13, weight: '600' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const pct = ((value / total) * 100).toFixed(1);
+                                        return ` ${value} registros (${pct}%)`;
+                                    },
+                                    afterBody: function(context) {
+                                        return '';
+                                    }
+                                }
+                            }
+                        },
+                        scales: isBar ? {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.04)' },
+                                ticks: { color: '#64748B', font: { size: 11 } },
+                                border: { display: false }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { size: 11 } },
+                                border: { display: false }
+                            }
+                        } : undefined
+                    }
+                };
+
+                new Chart(ctx, chartConfig);
+            });
+        }
+
+        function openChartDetailModal(category, label, count, total) {
+            const pct = ((count / total) * 100).toFixed(1);
+            const relatedData = dashboardData.filter(d => {
+                if (category === 'criterio') return d.criterio === label;
+                if (category === 'gestao') return d.gestao === label;
+                if (category === 'etapa') return d.etapaAtual === label;
+                if (category === 'risco') return d.risco === label;
+                return false;
+            });
+            const valores = relatedData.map(d => d.valor).filter(v => v > 0);
+            const valorTotal = valores.reduce((a, b) => a + b, 0);
+
+            const modal = document.getElementById('detail-modal');
+            const modalBody = document.getElementById('modal-body');
+
+            modalBody.innerHTML = `
+                <div class="chart-detail-header">
+                    <h2><i class="fas fa-chart-${category === 'risco' ? 'exclamation' : 'pie'}"></i> ${label}</h2>
+                    <span class="chart-detail-pct">${pct}% do total</span>
+                </div>
+                <div class="chart-detail-stats">
+                    <div class="chart-detail-stat">
+                        <span class="stat-value">${count}</span>
+                        <span class="stat-label">Registros</span>
+                    </div>
+                    <div class="chart-detail-stat">
+                        <span class="stat-value">${valorTotal > 0 ? formatCurrency(valorTotal) : '—'}</span>
+                        <span class="stat-label">Valor Total</span>
+                    </div>
+                    <div class="chart-detail-stat">
+                        <span class="stat-value">${valores.length > 0 ? formatCurrency(valorTotal / valores.length) : '—'}</span>
+                        <span class="stat-label">Ticket Médio</span>
+                    </div>
+                </div>
+                <div class="chart-detail-list">
+                    <h4><i class="fas fa-list"></i> Registros (${relatedData.length})</h4>
+                    <div class="chart-detail-items">
+                        ${relatedData.slice(0, 20).map(d => `
+                            <div class="chart-detail-item" onclick="openDetailModalByIndex(${dashboardData.indexOf(d)})">
+                                <div class="item-info">
+                                    <span class="item-name">${d.objeto || '—'}</span>
+                                    <span class="item-meta">${d.gestao || '—'}</span>
+                                </div>
+                                <div class="item-value">${d.valor > 0 ? formatCurrency(d.valor) : '—'}</div>
+                            </div>
+                        `).join('')}
+                        ${relatedData.length > 20 ? `<div class="chart-detail-more">+ ${relatedData.length - 20} outros registros</div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function renderKPIs() {
+            const data = dashboardData;
+            const valores = data.map(d => d.valor).filter(v => v > 0);
+            const valorTotal = valores.reduce((a, b) => a + b, 0);
+            const ticketMedio = valores.length > 0 ? valorTotal / valores.length : 0;
+            const mediana = valores.length > 0 ? valores.sort((a, b) => a - b)[Math.floor(valores.length / 2)] : 0;
+            const processos = data.filter(d => d.isProcesso).length;
+            const semValor = data.filter(d => !d.valor).length;
+            const semHistorico = data.filter(d => d.etapaAtual === 'Sem histórico').length;
+            const riscoAlto = data.filter(d => d.risco === 'ALTO').length;
+            const riscoMedio = data.filter(d => d.risco === 'MÉDIO').length;
+            const maisAntigo = Math.max(...data.map(d => d.aging), 0);
+            const maiorTempoSemMov = Math.max(...data.map(d => d.diasSemMov), 0);
+
+            const col = window.detectedColumns || {};
+            const labelProcesso = col.PROCESSO || 'Processo';
+            const labelObjeto = col.OBJETO || 'Objeto';
+            const labelValor = col.VALOR || 'Valor';
+            const labelGestao = col.GESTAO || 'Gestão';
+            const labelHistorico = col.HISTORICO || 'Histórico';
+
+            const kpis = [
+                { label: 'Registros Totais', value: data.length, type: 'info' },
+                { label: labelProcesso + 's Formais', value: processos, type: 'info' },
+                { label: 'Requisições', value: data.length - processos, type: 'info' },
+                { label: labelValor + ' Total Estimado', value: formatCurrency(valorTotal), type: 'success' },
+                { label: 'Ticket Médio', value: formatCurrency(ticketMedio), type: 'info' },
+                { label: 'Mediana de ' + labelValor, value: formatCurrency(mediana), type: 'info' },
+                { label: 'Maior ' + labelValor, value: formatCurrency(Math.max(...valores, 0)), type: 'warning' },
+                { label: labelValor + ' Mínimo', value: valores.length > 0 ? formatCurrency(Math.min(...valores.filter(v => v > 0), 0)) : '-', type: 'info' },
+                { label: 'Sem ' + labelValor, value: semValor, type: 'warning' },
+                { label: 'Sem ' + labelHistorico, value: semHistorico, type: 'warning' },
+                { label: 'Risco Crítico', value: riscoAlto, type: 'danger' },
+                { label: 'Risco em Atenção', value: riscoMedio, type: 'warning' },
+                { label: labelProcesso + ' Mais Antigo', value: maisAntigo + ' dias', type: 'danger' },
+                { label: 'Maior Tempo sem Movimentação', value: maiorTempoSemMov + ' dias', type: 'danger' }
+            ];
+
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = kpis.map(k => `
+                <div class="kpi-card ${k.type}">
+                    <div class="kpi-label">${k.label}</div>
+                    <div class="kpi-value ${k.type === 'success' ? 'currency' : k.type === 'warning' ? 'highlight' : k.type === 'danger' ? 'critical' : ''}">${k.value}</div>
+                </div>
+            `).join('');
+        }
+
+        let currentRankingType = 'all';
+
+        function changeRankingType() {
+            const select = document.getElementById('ranking-type-select');
+            currentRankingType = select.value;
+            document.getElementById('rankings-grid').classList.add('ranking-anim-out');
+            setTimeout(() => {
+                renderRankings();
+                document.getElementById('rankings-grid').classList.remove('ranking-anim-out');
+            }, 150);
+        }
+
+        function renderRankings() {
+            const grid = document.getElementById('rankings-grid');
+            const type = currentRankingType;
+
+            const col = window.detectedColumns || {};
+            const labelValor = col.VALOR || 'Valor';
+            const labelProcesso = col.PROCESSO || 'Processo';
+            const labelObjeto = col.OBJETO || 'Objeto';
+
+            // Detectar coluna de unidade escolar
+            const headers = window.excelHeaders || Object.keys(dashboardData[0] || {});
+            const schoolCol = headers.find(h =>
+                h.toUpperCase().includes('UNIDADE') ||
+                h.toUpperCase().includes('ESCOLA') ||
+                h.toUpperCase().includes('COLÉGIO') ||
+                h.toUpperCase().includes('EDUCA') ||
+                h.toUpperCase().includes('NOME DA ESCOLA')
+            ) || headers[0];
+
+            // Detectar coluna de contrato
+            const contractCol = headers.find(h =>
+                h.toUpperCase().includes('CONTRATO') ||
+                h.toUpperCase().includes('NÚMERO') ||
+                h.toUpperCase().includes('Nº ') ||
+                h.toUpperCase().includes('PROCESSO')
+            ) || headers[0];
+
+            const getName = (d) => d[schoolCol] || d.objeto || d.gestao || '-';
+            const getContract = (d) => d[contractCol] || d.processo || '-';
+
+            const hasValor = dashboardData.some(d => d.valor > 0);
+            const hasAging = dashboardData.some(d => d.aging > 0);
+            const hasDiasSemMov = dashboardData.some(d => d.diasSemMov > 0);
+
+            const topValores = hasValor ? [...dashboardData].filter(d => d.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 10) : [];
+            const topAntigos = hasAging ? [...dashboardData].filter(d => d.aging > 0).sort((a, b) => b.aging - a.aging).slice(0, 10) : [];
+            const topSemMov = hasDiasSemMov ? [...dashboardData].filter(d => d.diasSemMov > 0).sort((a, b) => b.diasSemMov - a.diasSemMov).slice(0, 10) : [];
+
+            const maxValor = topValores[0]?.valor || 1;
+            const maxAntigo = topAntigos[0]?.aging || 1;
+            const maxSemMov = topSemMov[0]?.diasSemMov || 1;
+
+            const renderCard = (title, icon, data, max, getValue, getLabel, getMeta, barClass, valueFormat) => {
+                if (!data.length) return '';
+                return `
+                    <div class="ranking-card ${barClass}">
+                        <h3 class="ranking-title"><i class="fas ${icon}"></i> ${title}</h3>
+                        <div class="ranking-list">
+                            ${data.map((d, i) => `
+                                <div class="ranking-item">
+                                    <span class="rank-number">${i + 1}</span>
+                                    <div class="rank-info">
+                                        <div class="rank-name">${getLabel(d)}</div>
+                                        <div class="rank-meta">${getMeta(d)}</div>
+                                        <div class="rank-bar"><div class="rank-bar-fill ${barClass}" style="width: ${(getValue(d) / max) * 100}%"></div></div>
+                                    </div>
+                                    <span class="rank-value">${valueFormat(d)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            };
+
+            let html = '';
+
+            if (type === 'all' || type === 'valor') {
+                html += renderCard(`Maiores ${labelValor} (Contratos)`, 'fa-file-contract', topValores, maxValor, d => d.valor, getContract, getName, 'valor', d => formatCurrency(d.valor));
+            }
+
+            if (type === 'all' || type === 'escola') {
+                html += renderCard(`Por ${labelObjeto}`, 'fa-building', topValores, maxValor, d => d.valor, getName, d => d.objeto ? d.objeto.substring(0, 40) : '-', 'valor', d => formatCurrency(d.valor));
+            }
+
+            if (type === 'all' || type === 'antigo') {
+                html += renderCard(`${labelProcesso}s Mais Antigos`, 'fa-clock', topAntigos, maxAntigo, d => d.aging, getName, d => d.etapaAtual, 'antigo', d => d.aging + ' dias');
+            }
+
+            if (type === 'all' || type === 'semmov') {
+                html += renderCard('Sem Movimentação', 'fa-pause-circle', topSemMov, maxSemMov, d => d.diasSemMov, getName, d => d.etapaAtual, 'semmov', d => d.diasSemMov + ' dias');
+            }
+
+            grid.innerHTML = html || '<div class="chart-empty"><i class="fas fa-chart-bar"></i><p>Sem dados para exibir</p></div>';
+        }
+
+        function renderInsights() {
+            const data = dashboardData;
+            const valores = data.map(d => d.valor).filter(v => v > 0);
+            const valorTotal = valores.reduce((a, b) => a + b, 0);
+            const processos = data.filter(d => d.isProcesso).length;
+            const semValor = data.filter(d => !d.valor).length;
+            const semHistorico = data.filter(d => d.etapaAtual === 'Sem histórico').length;
+            const riscoAlto = data.filter(d => d.risco === 'ALTO').length;
+            const riscoMedio = data.filter(d => d.risco === 'MÉDIO').length;
+            const maisAntigo = Math.max(...data.map(d => d.aging), 0);
+            const mediana = valores.length > 0 ? valores.sort((a, b) => a - b)[Math.floor(valores.length / 2)] : 0;
+            const ticketMedio = valores.length > 0 ? valorTotal / valores.length : 0;
+            
+            // Análises adicionais
+            const etapas = {};
+            data.forEach(d => { etapas[d.etapaAtual] = (etapas[d.etapaAtual] || 0) + 1; });
+            const etapaMaisFrequente = Object.entries(etapas).sort((a, b) => b[1] - a[1])[0];
+            
+            const criterios = {};
+            data.forEach(d => { criterios[d.criterio] = (criterios[d.criterio] || 0) + 1; });
+            const criterioMais = Object.entries(criterios).sort((a, b) => b[1] - a[1])[0];
+            
+            const gestoes = {};
+            data.forEach(d => { gestoes[d.gestao] = (gestoes[d.gestao] || 0) + 1; });
+            const gestaoMais = Object.entries(gestoes).sort((a, b) => b[1] - a[1])[0];
+            
+            // ============ INSIGHTS AUTOMÁTICOS ============
+            const insights = [];
+            
+            insights.push({ 
+                icon: 'fa-database', 
+                text: `A base contém <span class="highlight">${data.length} registros</span> após a limpeza inicial.` 
+            });
+            
+            if (criterioMais && criterioMais[1] > 1) {
+                const pct = ((criterioMais[1] / data.length) * 100).toFixed(1);
+                insights.push({ 
+                    icon: 'fa-tags', 
+                    text: `A maior categoria é <span class="highlight">${criterioMais[0]}</span>, concentrando <span class="highlight">${criterioMais[1]} registros (${pct}%)</span>.` 
+                });
+            }
+            
+            if (valores.length > 0) {
+                insights.push({ 
+                    icon: 'fa-coins', 
+                    text: `Valor total estimado da base: <span class="highlight">${formatCurrency(valorTotal)}</span>, com ticket médio de <span class="highlight">${formatCurrency(ticketMedio)}</span>.` 
+                });
+                
+                const maior = Math.max(...valores);
+                const maiorItem = data.find(d => d.valor === maior);
+                insights.push({ 
+                    icon: 'fa-arrow-up', 
+                    text: `O registro de maior valor é <span class="highlight">${maiorItem?.objeto || 'N/A'}</span>, com <span class="highlight">${formatCurrency(maior)}</span>.` 
+                });
+            }
+            
+            insights.push({ 
+                icon: 'fa-hourglass-half', 
+                text: `O processo mais antigo está aberto há <span class="highlight">${maisAntigo} dias</span>.` 
+            });
+            
+            const maisSemMov = Math.max(...data.map(d => d.diasSemMov), 0);
+            if (maisSemMov > 30) {
+                insights.push({ 
+                    icon: 'fa-pause-circle', 
+                    text: `Há registros sem movimentação há mais de <span class="highlight">${maisSemMov} dias</span> — atenção aos gargalos.` 
+                });
+            }
+            
+            if (etapaMaisFrequente && etapaMaisFrequente[1] > 1) {
+                const pct = ((etapaMaisFrequente[1] / data.length) * 100).toFixed(1);
+                insights.push({ 
+                    icon: 'fa-exchange-alt', 
+                    text: `A etapa que mais retém processos atualmente é <span class="highlight">${etapaMaisFrequente[0]}</span> (<span class="highlight">${etapaMaisFrequente[1]} registros</span>).` 
+                });
+            }
+            
+            if (semHistorico > 0) {
+                const pct = ((semHistorico / data.length) * 100).toFixed(1);
+                insights.push({ 
+                    icon: 'fa-history', 
+                    text: `<span class="highlight">${semHistorico} registros</span> estão sem histórico de tramitação (${pct}%).` 
+                });
+            }
+            
+            if (semValor > 0) {
+                const pct = ((semValor / data.length) * 100).toFixed(1);
+                insights.push({ 
+                    icon: 'fa-tags', 
+                    text: `<span class="highlight">${semValor} registros</span> estão sem valor estimado (${pct}%).` 
+                });
+            }
+            
+            // Render insights
+            const insightsContainer = document.getElementById('insights-list');
+            if (insightsContainer) {
+                if (insights.length > 0) {
+                    let html = '';
+                    insights.forEach((i, idx) => {
+                        html += `<div class="insight-row" onclick="showInsightModal(${idx})" style="cursor: pointer;">
+                            <div class="insight-icon"><i class="fas ${i.icon}"></i></div>
+                            <div class="insight-content">${i.text}</div>
+                        </div>`;
+                    });
+                    insightsContainer.innerHTML = html;
+                } else {
+                    insightsContainer.innerHTML = '<div class="insight-row"><div class="insight-content">Nenhum insight disponível. Carregue um arquivo Excel primeiro.</div></div>';
+                }
+            }
+            window.insightsData = { insights, data, valores, valorTotal, ticketMedio, processos, semValor, semHistorico, riscoAlto, riscoMedio, maisAntigo, criterioMais, gestaoMais, etapaMaisFrequente };
+            
+            // ============ ALERTAS OPERACIONAIS ============
+            const semEtapa = data.filter(d => d.etapaAtual === 'Em tramitação' || !d.etapaAtual).length;
+            
+            const alertsGrid = document.getElementById('alerts-grid');
+            const riscoAltoData = data.filter(d => d.risco === 'ALTO');
+            const semHistoricoData = data.filter(d => d.etapaAtual === 'Sem histórico');
+            const semEtapaData = data.filter(d => !d.etapaAtual || d.etapaAtual === 'Em tramitação');
+
+            alertsGrid.innerHTML = `
+                <div class="alert-card danger" onclick="showAlertDetails('crítico', ${riscoAlto}, '${riscoAltoData.slice(0, 20).map(d => d.objeto || '-').join('|')}')">
+                    <div class="alert-header">
+                        <span class="alert-title"><i class="fas fa-exclamation-triangle"></i> Registros em risco crítico</span>
+                        <span class="alert-value">${riscoAlto}</span>
+                    </div>
+                    <div class="alert-desc">Mais de 365 dias de abertura ou +60 dias parados.</div>
+                </div>
+                <div class="alert-card warning" onclick="showAlertDetails('histórico', ${semHistorico}, '${semHistoricoData.slice(0, 20).map(d => d.objeto || '-').join('|')}')">
+                    <div class="alert-header">
+                        <span class="alert-title"><i class="fas fa-history"></i> Sem histórico</span>
+                        <span class="alert-value">${semHistorico}</span>
+                    </div>
+                    <div class="alert-desc">Registros sem tramitação registrada.</div>
+                </div>
+                <div class="alert-card info" onclick="showAlertDetails('etapa', ${semEtapa}, '${semEtapaData.slice(0, 20).map(d => d.objeto || '-').join('|')}')">
+                    <div class="alert-header">
+                        <span class="alert-title"><i class="fas fa-question-circle"></i> Setor atual indefinido</span>
+                        <span class="alert-value">${semEtapa}</span>
+                    </div>
+                    <div class="alert-desc">Não foi possível identificar a etapa atual.</div>
+                </div>
+            `;
+            
+            // ============ RECOMENDAÇÕES ============
+            const recommendations = [];
+            
+            if (riscoAlto > 0) {
+                const criticos = data.filter(d => d.risco === 'ALTO').sort((a, b) => b.valor - a.valor);
+                recommendations.push(`Priorizar os <span class="highlight">${riscoAlto} registros críticos</span>, especialmente os de maior valor.`);
+            }
+            
+            if (semHistorico > 0) {
+                recommendations.push(`Atualizar tramitação dos <span class="highlight">${semHistorico} registros sem histórico</span>.`);
+            }
+            
+            if (gestaoMais && gestaoMais[1] > data.length * 0.3) {
+                const pct = ((gestaoMais[1] / data.length) * 100).toFixed(0);
+                recommendations.push(`Acompanhar de perto <span class="highlight">${gestaoMais[0]}</span>, que concentra <span class="highlight">${pct}% dos registros</span>.`);
+            }
+            
+            if (semValor > data.length * 0.2) {
+                recommendations.push(`Tratar os <span class="highlight">${semValor} registros sem valor estimado</span> para melhorar a análise financeira.`);
+            }
+            
+            if (semEtapa > 0) {
+                recommendations.push(`Revisar <span class="highlight">${semEtapa} registros sem etapa atual definida</span>.`);
+            }
+            
+            if (maisSemMov > 60) {
+                recommendations.push(`Realizar mutirão de tramitação para os <span class="highlight">${data.filter(d => d.diasSemMov > 60).length} registros parados há mais de 60 dias</span>.`);
+            }
+            
+            // Limitar a 6 recomendações
+            const recs = recommendations.slice(0, 6);
+            
+            const recContainer = document.getElementById('recommendations-list');
+            recContainer.innerHTML = recs.map(r => `
+                <div class="recommendation-item">
+                    <div class="recommendation-bullet"></div>
+                    <span>${r}</span>
+                </div>
+            `).join('');
+            
+            // Also update dashboard insights
+            const dashboardInsights = document.getElementById('insights-grid');
+            if (dashboardInsights) {
+                let html = '';
+                insights.slice(0, 8).forEach((i, idx) => {
+                    html += `<div class="insight-card" onclick="showInsightModal(${idx})" style="cursor: pointer;">
+                        <span class="insight-text"><i class="fas ${i.icon}"></i> ${i.text}</span>
+                    </div>`;
+                });
+                dashboardInsights.innerHTML = html;
+            }
+        }
+
+        function renderTable() {
+            // Initialize table state
+            window.tableState = {
+                filteredData: [...dashboardData],
+                currentPage: 1,
+                itemsPerPage: 15,
+                sortColumn: null,
+                sortDirection: 'asc'
+            };
+            
+            // Gerar cabeçalho dinâmico baseado nas colunas detectadas
+            renderDynamicHeader();
+
+            // Setup event listeners
+            const searchInput = document.getElementById('table-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', applyTableFilters);
+            }
+
+            // Setup pagination
+            const prevPage = document.getElementById('prev-page');
+            const nextPage = document.getElementById('next-page');
+            if (prevPage) prevPage.addEventListener('click', () => changePage(-1));
+            if (nextPage) nextPage.addEventListener('click', () => changePage(1));
+
+            // Initial render
+            renderAnalyticalTable();
+        }
+
+        function renderDynamicHeader() {
+            const thead = document.getElementById('dynamic-thead');
+            const excelHeaders = window.excelHeaders || [];
+
+            if (!excelHeaders || excelHeaders.length === 0) {
+                excelHeaders = window.allColumnNames || [];
+            }
+
+            const usedKeys = new Set();
+            const allColumns = [];
+
+            excelHeaders.forEach((header, idx) => {
+                let key = header;
+                let counter = 1;
+                while (usedKeys.has(key)) {
+                    key = `${header}_${counter}`;
+                    counter++;
+                }
+                usedKeys.add(key);
+                allColumns.push({
+                    key: key,
+                    label: header,
+                    sortable: true,
+                    originalKey: header
+                });
+            });
+
+            allColumns.unshift({ key: 'index', label: '#', sortable: false });
+
+            let headerHTML = '<tr>';
+            allColumns.forEach(col => {
+                if (col.sortable) {
+                    headerHTML += `<th data-sort="${col.key}">${col.label} <i class="fas fa-sort"></i></th>`;
+                } else {
+                    headerHTML += `<th>${col.label}</th>`;
+                }
+            });
+            headerHTML += '</tr>';
+
+            thead.innerHTML = headerHTML;
+
+            document.querySelectorAll('#dynamic-thead th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => sortTable(th.dataset.sort));
+            });
+
+            window.tableColumns = allColumns;
+            window.excelHeaders = excelHeaders;
+        }
+
+        function applyTableFilters() {
+            const search = document.getElementById('table-search').value.toLowerCase();
+            const columns = window.tableColumns || [];
+            const excelHeaders = window.excelHeaders || [];
+
+            window.tableState.filteredData = dashboardData.filter(d => {
+                if (search) {
+                    let found = false;
+                    columns.forEach(col => {
+                        if (col.key === 'index') return;
+                        const val = d[col.key] !== undefined ? d[col.key] : d[col.originalKey];
+                        if (val && String(val).toLowerCase().includes(search)) {
+                            found = true;
+                        }
+                    });
+                    if (!found) return false;
+                }
+                return true;
+            });
+
+            window.tableState.currentPage = 1;
+            renderAnalyticalTable();
+        }
+
+        function sortTable(column) {
+            const state = window.tableState;
+
+            if (state.sortColumn === column) {
+                state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortColumn = column;
+                state.sortDirection = 'asc';
+            }
+
+            const columns = window.tableColumns || [];
+            const colInfo = columns.find(c => c.key === column);
+            const originalKey = colInfo ? colInfo.originalKey : column;
+
+            state.filteredData.sort((a, b) => {
+                let valA = a[column] !== undefined ? a[column] : a[originalKey];
+                let valB = b[column] !== undefined ? b[column] : b[originalKey];
+
+                if (valA === null || valA === undefined) valA = '';
+                if (valB === null || valB === undefined) valB = '';
+
+                if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
+
+                if (valA < valB) return state.sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return state.sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderAnalyticalTable();
+        }
+
+        function changePage(delta) {
+            const state = window.tableState;
+            const totalPages = Math.ceil(state.filteredData.length / state.itemsPerPage);
+            state.currentPage = Math.max(1, Math.min(totalPages, state.currentPage + delta));
+            renderAnalyticalTable();
+        }
+
+        function renderAnalyticalTable() {
+            const state = window.tableState;
+            const { filteredData, currentPage, itemsPerPage } = state;
+            const columns = window.tableColumns || [];
+            const excelHeaders = window.excelHeaders || [];
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            document.getElementById('filter-result-info').textContent =
+                `Exibindo ${filteredData.length} de ${dashboardData.length} registros após filtros.`;
+
+            const tbody = document.getElementById('table-body-analytical');
+            tbody.innerHTML = pageData.map((d, idx) => {
+                const globalIdx = start + idx + 1;
+
+                const formatValue = (val) => {
+                    if (val === null || val === undefined || val === '') return '—';
+                    if (typeof val === 'number') {
+                        if (val > 1000) return formatCurrency(val);
+                        return val.toLocaleString('pt-BR');
+                    }
+                    if (val instanceof Date && !isNaN(val)) {
+                        return val.toLocaleDateString('pt-BR');
+                    }
+                    return String(val).substring(0, 50);
+                };
+
+                let cellsHTML = '';
+                columns.forEach(col => {
+                    const rawValue = d[col.key] !== undefined ? d[col.key] : d[col.originalKey];
+                    let cellValue = formatValue(rawValue);
+                    cellsHTML += `<td>${cellValue}</td>`;
+                });
+
+                const rowIndex = start + idx;
+                return `<tr onclick="openDetailModalByIndex(${rowIndex})" style="cursor: pointer;">${cellsHTML}</tr>`;
+            }).join('');
+            
+            // Update footer
+            document.getElementById('showing-text').textContent = 
+                `Mostrando ${start + 1}-${Math.min(end, filteredData.length)} de ${filteredData.length} registros`;
+            
+            document.getElementById('page-info').textContent = 
+                `Página ${currentPage} de ${totalPages}`;
+            
+            // Update pagination buttons
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+            if (prevBtn) prevBtn.disabled = currentPage === 1;
+            if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+        }
+
+        // Tab Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            html2canvas(document.getElementById('app-view')).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                doc.save('dashboard-insight-bi.pdf');
+            });
+        }
+
+        function openDetailModalByIndex(dataIndex) {
+            const state = window.tableState;
+            const record = state.filteredData[dataIndex];
+            
+            if (!record) return;
+            
+            openDetailModal(record);
+        }
+
+        function openDetailModal(record) {
+            const modal = document.getElementById('detail-modal');
+            const modalBody = document.getElementById('modal-body');
+            
+            // Format helpers
+            const formatDate = (dateObj) => {
+                if (!dateObj) return null;
+                if (dateObj instanceof Date && !isNaN(dateObj)) {
+                    return dateObj.toLocaleDateString('pt-BR');
+                }
+                return null;
+            };
+            
+            const formatValue = (val) => {
+                if (val === null || val === undefined || val === '') return null;
+                if (typeof val === 'number') {
+                    if (val > 1000) return formatCurrency(val);
+                    return val.toLocaleString('pt-BR');
+                }
+                return String(val);
+            };
+            
+            // Get all keys from the record
+            const keys = Object.keys(record).filter(k => !k.startsWith('_'));
+            
+            // Group data by categories
+            const processInfo = [];
+            const objectInfo = [];
+            const financialInfo = [];
+            const datesInfo = [];
+            const workflowInfo = [];
+            const otherInfo = [];
+            
+            keys.forEach(key => {
+                let value = record[key];
+                let label = key;
+                
+                // Format label to be more readable
+                label = label.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                
+                switch(key) {
+                    case 'processo':
+                    case 'index':
+                        if (value) processInfo.push({ label, value });
+                        break;
+                    case 'objeto':
+                    case 'criterio':
+                    case 'gestao':
+                        if (value) objectInfo.push({ label, value });
+                        break;
+                    case 'valor':
+                        const formatted = formatValue(value);
+                        if (formatted && formatted !== '—') financialInfo.push({ label, value: formatted });
+                        break;
+                    case 'dataAbertura':
+                        const dateVal = formatDate(value);
+                        if (dateVal) datesInfo.push({ label, value: dateVal });
+                        break;
+                    case 'aging':
+                    case 'diasSemMov':
+                        if (value > 0) datesInfo.push({ label, value: value + ' dias' });
+                        break;
+                    case 'etapaAtual':
+                    case 'risco':
+                    case 'status':
+                    case 'isProcesso':
+                        if (value) workflowInfo.push({ label, value: String(value) });
+                        break;
+                    default:
+                        const otherVal = formatValue(value);
+                        if (otherVal && otherVal !== '—') otherInfo.push({ label, value: otherVal });
+                }
+            });
+            
+            // Build modal content
+            let contentHTML = '';
+            
+            if (processInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-folder-open"></i> Identificação</div>
+                        <div class="detail-grid">
+                            ${processInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-${idx}">
+                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (objectInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-file-alt"></i> Objeto e Categoria</div>
+                        <div class="detail-grid">
+                            ${objectInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-obj-${idx}">
+                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (financialInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-coins"></i> Informações Financeiras</div>
+                        <div class="detail-grid">
+                            ${financialInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-fin-${idx}">
+                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-value" style="color: #10b981;">${item.value}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (datesInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-calendar"></i> Datas e Temporização</div>
+                        <div class="detail-grid">
+${datesInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-date-${idx}">
+                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (workflowInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-project-diagram"></i> Fluxo e Risco</div>
+                        <div class="detail-grid">
+                            ${workflowInfo.map((item, idx) => {
+                                let valueClass = '';
+                                if (item.label === 'Risco') {
+                                    if (record.risco === 'ALTO') valueClass = 'risk-alto';
+                                    else if (record.risco === 'MÉDIO') valueClass = 'risk-medio';
+                                    else valueClass = 'risk-baixo';
+                                }
+                                return `
+                                    <div class="detail-item" id="detail-item-flow-${idx}">
+                                        <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                        <div class="detail-value ${valueClass}">${item.value}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (otherInfo.length > 0) {
+                contentHTML += `
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fas fa-ellipsis-h"></i> Outras Informações</div>
+                        <div class="detail-grid">
+                            ${otherInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-other-${idx}">
+                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-value">${item.value}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+modalBody.innerHTML = contentHTML;
+            modal.classList.remove('hidden');
+        }
+
+        function showAlertDetails(type, count, items) {
+            const titles = {
+                'crítico': 'Registros em Risco Crítico',
+                'histórico': 'Registros Sem Histórico',
+                'etapa': 'Setor Atual Indefinido'
+            };
+            const icons = {
+                'crítico': 'fa-exclamation-triangle',
+                'histórico': 'fa-history',
+                'etapa': 'fa-question-circle'
+            };
+            const colors = {
+                'crítico': '#ef4444',
+                'histórico': '#f59e0b',
+                'etapa': '#06b6d4'
+            };
+
+            const itemsList = items ? items.split('|').filter(i => i && i !== '-') : [];
+            const modal = document.getElementById('detail-modal');
+            const modalBody = document.getElementById('modal-body');
+
+            modalBody.innerHTML = `
+                <div class="alert-detail-header">
+                    <h2><i class="fas ${icons[type]}" style="color: ${colors[type]}"></i> ${titles[type]}</h2>
+                    <span class="alert-detail-count" style="background: ${colors[type]}">${count} registros</span>
+                </div>
+                <div class="alert-detail-list">
+                    ${itemsList.length > 0 ? itemsList.map(item => `
+                        <div class="alert-detail-item">${item}</div>
+                    `).join('') : '<p style="color: var(--gray)">Nenhum registro para exibir.</p>'}
+                    ${count > 20 ? `<div class="alert-detail-more">+ ${count - 20} outros registros</div>` : ''}
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function highlightDetailItem(labelElement) {
+            document.querySelectorAll('.detail-item.highlighted').forEach(el => el.classList.remove('highlighted'));
+
+            const item = labelElement.parentElement;
+            item.classList.add('highlighted');
+            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                item.classList.remove('highlighted');
+            }, 3000);
+        }
+
+        function showInsightModal(idx) {
+            const insightsInfo = window.insightsData || { insights: [], data: [] };
+            const { insights, data } = insightsInfo;
+            if (!insights || insights.length === 0) {
+                alert('Nenhum insight disponível. Carregue um arquivo primeiro.');
+                return;
+            }
+            const insight = insights[idx];
+            if (!insight) {
+                alert('Insight não encontrado.');
+                return;
+            }
+            console.log('Opening insight modal for:', insight.text.substring(0, 50));
+
+            const modal = document.getElementById('detail-modal');
+            const modalBody = document.getElementById('modal-body');
+
+            const relatedRecords = data.slice(0, 20);
+            const otherInsights = insights.filter((_, i) => i !== idx);
+
+            modalBody.innerHTML = `
+                <div class="insight-modal-header">
+                    <div class="insight-modal-icon"><i class="fas ${insight.icon}"></i></div>
+                    <h2>Insight Analisado</h2>
+                </div>
+                <div class="insight-modal-content">
+                    <div class="insight-main-text">${insight.text}</div>
+                </div>
+                <div class="insight-modal-stats">
+                    <div class="insight-stat">
+                        <span class="stat-value">${data.length}</span>
+                        <span class="stat-label">Total Registros</span>
+                    </div>
+                    <div class="insight-stat">
+                        <span class="stat-value">${otherInsights.length}</span>
+                        <span class="stat-label">Outros Insights</span>
+                    </div>
+                </div>
+                <div class="insight-list-section">
+                    <h4><i class="fas fa-list"></i> Todos os Insights</h4>
+                    <div class="insight-list-modal">
+                        ${insights.map((i, iidx) => `
+                            <div class="insight-item-modal ${iidx === idx ? 'active' : ''}" onclick="showInsightModal(${iidx}); event.stopPropagation();">
+                                <div class="insight-icon-small"><i class="fas ${i.icon}"></i></div>
+                                <div class="insight-text-small">${i.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        function goBackToHome() {
+            document.getElementById('import-overlay').classList.add('hidden');
+            document.getElementById('loading-txt').classList.add('hidden');
+
+            if (dashboardData.length > 0) {
+                document.getElementById('app-view').classList.remove('hidden');
+                renderDashboard();
+            } else {
+                currentDepartment = 'ALMOXARIFADO';
+                switchDepartment('ALMOXARIFADO');
+            }
+        }
+
+        // Close modal on click outside
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDetailModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDetailModal();
+            }
+        });
+    </script>
+</body>
+</html>

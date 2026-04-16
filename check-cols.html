@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <input type="file" id="fileInput" onchange="readExcel(this)">
+    <pre id="output"></pre>
+    <script>
+    function readExcel(input) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+            document.getElementById('output').textContent = JSON.stringify(json[0], null, 2);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    </script>
+</body>
+</html>
