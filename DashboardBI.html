@@ -2526,8 +2526,12 @@
 
             // Try multiple export formats with CORS proxy
             const exportUrls = [
-                `https://corsproxy.io/?https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`,
+                // CSV exports
+                `https://corsproxy.io/?${encodeURIComponent(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`)}`,
+                `https://r.jina.ai/http://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`,
+                // Alternative: use gviz JSON format
+                `https://corsproxy.io/?${encodeURIComponent(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tq=select*&sheet=0`)}`,
             ];
 
             tryImportWithFallback(exportUrls, 0);
@@ -2536,18 +2540,21 @@
         function tryImportWithFallback(urls, index) {
             if (index >= urls.length) {
                 document.getElementById('loading-txt').classList.add('hidden');
-                alert('Não foi possível importar a planilha.\n\nMotivo: Restrições de segurança do navegador (CORS).\n\nSolução: Na planilha do Google, vá em Arquivo > Baixar > Microsoft Excel (.xlsx) e carregue o arquivo aqui.');
+                alert('Não foi possível importar a planilha.\n\nPossíveis causas:\n1. Planilha não está compartilhada como "Qualquer pessoa com o link"\n2. O proxy CORS está temporariamente indisponível\n\nSolução alternativa: Na planilha do Google, vá em Arquivo > Baixar > Microsoft Excel (.xlsx) e carregue o arquivo aqui.');
                 return;
             }
 
             const csvUrl = urls[index];
+            console.log(`Trying URL ${index + 1}:`, csvUrl);
             
             fetch(csvUrl)
                 .then(response => {
-                    if (!response.ok) throw new Error('Failed');
+                    console.log(`Response ${index + 1}:`, response.status, response.type);
+                    if (!response.ok) throw new Error('Failed: ' + response.status);
                     return response.text();
                 })
                 .then(csvText => {
+                    console.log(`Data length ${index + 1}:`, csvText.length);
                     if (!csvText || csvText.trim() === '') throw new Error('Empty');
                     
                     // Parse CSV to workbook
