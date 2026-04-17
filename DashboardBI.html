@@ -2493,7 +2493,7 @@
             input.addEventListener('change', handleChange);
         }
 
-        function importGoogleSheet() {
+function importGoogleSheet() {
             const urlInput = document.getElementById('google-sheet-url');
             const url = urlInput.value.trim();
             
@@ -2520,19 +2520,36 @@
             
             if (!spreadsheetId) {
                 document.getElementById('loading-txt').classList.add('hidden');
-                alert('Link inválido. Certifique-se de que o link é do Google Planilhas e está compartilhado como "Qualquer pessoa com o link".');
+                alert('Link inválido. Certifique-se de que o link é do Google Planilhas.');
                 return;
             }
 
-            // Convert to CSV export URL (first sheet)
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+            // Try multiple export formats with CORS proxy
+            const exportUrls = [
+                `https://corsproxy.io/?https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`)}`,
+            ];
 
+            tryImportWithFallback(exportUrls, 0);
+        }
+
+        function tryImportWithFallback(urls, index) {
+            if (index >= urls.length) {
+                document.getElementById('loading-txt').classList.add('hidden');
+                alert('Não foi possível importar a planilha.\n\nMotivo: Restrições de segurança do navegador (CORS).\n\nSolução: Na planilha do Google, vá em Arquivo > Baixar > Microsoft Excel (.xlsx) e carregue o arquivo aqui.');
+                return;
+            }
+
+            const csvUrl = urls[index];
+            
             fetch(csvUrl)
                 .then(response => {
-                    if (!response.ok) throw new Error('Não foi possível acessar a planilha. Verifique se está compartilhada como "Qualquer pessoa com o link".');
+                    if (!response.ok) throw new Error('Failed');
                     return response.text();
                 })
                 .then(csvText => {
+                    if (!csvText || csvText.trim() === '') throw new Error('Empty');
+                    
                     // Parse CSV to workbook
                     const workbook = XLSX.read(csvText, { type: 'string' });
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -2557,6 +2574,23 @@
                     deptData[currentDepartment].data = dashboardData;
                     deptData[currentDepartment].fileName = 'Google Planilhas';
                     deptData[currentDepartment].loaded = true;
+                    currentFileName = 'Google Planilhas';
+
+                    document.getElementById('import-overlay').classList.add('hidden');
+                    document.getElementById('app-view').classList.remove('hidden');
+                    document.getElementById('file-name').textContent = currentFileName;
+
+                    updateDeptBadges();
+                    renderDashboard();
+                    
+                    document.getElementById('loading-txt').classList.add('hidden');
+                    document.getElementById('google-sheet-url').value = '';
+                })
+                .catch(err => {
+                    console.log(`Attempt ${index + 1} failed, trying next...`);
+                    tryImportWithFallback(urls, index + 1);
+                });
+        }
                     currentFileName = 'Google Planilhas';
 
                     document.getElementById('import-overlay').classList.add('hidden');
