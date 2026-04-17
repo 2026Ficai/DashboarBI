@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insight BI - Dashboard Executivo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,6 +29,20 @@
             --border-hover: rgba(124, 77, 255, 0.4);
         }
 
+        [data-theme="light"] {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #F1F5F9;
+            --accent: #7C4DFF;
+            --accent-light: #8B5CFF;
+            --accent-glow: rgba(124, 77, 255, 0.15);
+            --white: #0F172A;
+            --gray: #64748B;
+            --gray-dark: #94A3B8;
+            --border: rgba(0,0,0,0.08);
+            --border-hover: rgba(124, 77, 255, 0.4);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
@@ -36,6 +50,7 @@
             color: var(--white);
             min-height: 100vh;
             position: relative;
+            transition: background 0.3s, color 0.3s;
         }
 
         .glow-bg {
@@ -44,6 +59,11 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
+            transition: background 0.3s;
+        }
+
+        [data-theme="light"] .glow-bg {
+            background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124, 77, 255, 0.03) 0%, transparent 60%);
         }
 
 /* Header */
@@ -54,6 +74,103 @@
             background: rgba(5, 8, 22, 0.9);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        [data-theme="light"] .app-header {
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .import-overlay, [data-theme="light"] .modal-overlay {
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        [data-theme="light"] .modal-content {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+            border: 1px solid rgba(124, 77, 255, 0.2);
+        }
+
+        [data-theme="light"] .import-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%);
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .insight-modal-header {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
+        }
+
+        [data-theme="light"] .chart-detail-header {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.08) 0%, rgba(16, 185, 129, 0.03) 100%);
+        }
+
+        [data-theme="light"] .insight-stat, [data-theme="light"] .chart-detail-stat, 
+        [data-theme="light"] .insight-item-modal, [data-theme="light"] .chart-detail-item,
+        [data-theme="light"] .detail-item, [data-theme="light"] .alert-detail-header,
+        [data-theme="light"] .insight-modal-content {
+            background: rgba(0,0,0,0.03);
+            border-color: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .insight-row:hover, [data-theme="light"] .insight-item-modal:hover,
+        [data-theme="light"] .chart-detail-item:hover {
+            background: rgba(124, 77, 255, 0.08);
+        }
+
+        [data-theme="light"] .insight-item-modal.active {
+            background: rgba(124, 77, 255, 0.12);
+            border-color: var(--accent);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+
+        .theme-toggle-track {
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        [data-theme="light"] .theme-toggle-track {
+            background: rgba(124, 77, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--white);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        [data-theme="light"] .theme-toggle-thumb {
+            left: 22px;
+            background: var(--accent);
+        }
+
+        .theme-toggle-icon {
+            font-size: 0.9rem;
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+
+        [data-theme="light"] .theme-toggle-icon {
+            color: var(--accent);
         }
 
         /* Navigation Tabs */
@@ -155,10 +272,6 @@
             border-radius: 10px;
             font-size: 0.7rem;
             font-weight: 600;
-        }
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--accent-light);
         }
 
         /* File Bar */
@@ -283,7 +396,7 @@
             margin-bottom: 2rem;
         }
 
-        @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
 
         .kpi-card {
@@ -291,18 +404,78 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.25rem;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(90deg, var(--accent), var(--success), var(--warning), var(--danger), var(--accent));
+            background-size: 400% 400%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: borderGlow 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--accent), var(--success), var(--warning), var(--danger), var(--accent));
+            background-size: 400% 400%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: borderGlow 3s linear infinite;
+            pointer-events: none;
         }
 
         .kpi-card:hover {
-            border-color: var(--border-hover);
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .kpi-card:hover::before,
+        .kpi-card:hover::after {
+            opacity: 1;
         }
 
         .kpi-card.success { border-left: 3px solid var(--success); }
         .kpi-card.warning { border-left: 3px solid var(--warning); }
         .kpi-card.danger { border-left: 3px solid var(--danger); }
         .kpi-card.info { border-left: 3px solid var(--accent); }
+
+        .kpi-card.success::before, .kpi-card.success::after { background: linear-gradient(90deg, var(--success), #059669, #34D399, var(--success)); }
+        .kpi-card.warning::before, .kpi-card.warning::after { background: linear-gradient(90deg, var(--warning), #D97706, #FBBF24, var(--warning)); }
+        .kpi-card.danger::before, .kpi-card.danger::after { background: linear-gradient(90deg, var(--danger), #DC2626, #F87171, var(--danger)); }
+        .kpi-card.info::before, .kpi-card.info::after { background: linear-gradient(90deg, var(--accent), var(--accent-light), #A78BFA, var(--accent)); }
+
+        [data-theme="light"] .kpi-card::before, [data-theme="light"] .kpi-card::after {
+            background: linear-gradient(90deg, #7C4DFF, #10b981, #f59e0b, #ef4444, #7C4DFF);
+        }
+
+        [data-theme="light"] .kpi-card.success::before, [data-theme="light"] .kpi-card.success::after { background: linear-gradient(90deg, #10b981, #059669, #34D399, #10b981); }
+        [data-theme="light"] .kpi-card.warning::before, [data-theme="light"] .kpi-card.warning::after { background: linear-gradient(90deg, #f59e0b, #D97706, #FBBF24, #f59e0b); }
+        [data-theme="light"] .kpi-card.danger::before, [data-theme="light"] .kpi-card.danger::after { background: linear-gradient(90deg, #ef4444, #DC2626, #F87171, #ef4444); }
+        [data-theme="light"] .kpi-card.info::before, [data-theme="light"] .kpi-card.info::after { background: linear-gradient(90deg, #7C4DFF, #8B5CFF, #A78BFA, #7C4DFF); }
 
         .kpi-label {
             font-size: 0.7rem;
@@ -338,22 +511,64 @@
             margin-bottom: 0;
         }
         .ranking-select {
-            background: rgba(255,255,255,0.05);
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            padding: 0.6rem 2.5rem 0.6rem 1rem;
             color: var(--white);
             font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            min-width: 160px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .ranking-select:hover {
             border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.1) 0%, rgba(255,255,255,0.05) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
         .ranking-select:focus {
             outline: none;
             border-color: var(--accent);
-            background: rgba(124, 77, 255, 0.1);
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.15) 0%, rgba(124, 77, 255, 0.05) 100%);
+            box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.2), 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        [data-theme="light"] .ranking-select {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border-color: rgba(0,0,0,0.12);
+            color: #0F172A;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        }
+
+        [data-theme="light"] .ranking-select:hover {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="light"] .ranking-select:focus {
+            background: linear-gradient(135deg, #F0FDF4 0%, #F8FAFC 100%);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15), 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .ranking-select option {
+            background: var(--bg-secondary);
+            color: var(--white);
+            padding: 0.75rem;
+        }
+
+        [data-theme="light"] .ranking-select option {
+            background: #FFFFFF;
+            color: #0F172A;
         }
 
         .ranking-anim-out {
@@ -506,7 +721,7 @@
         .import-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(5, 8, 22, 0.95);
+            background: var(--bg-primary); opacity: 0.95;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -936,6 +1151,13 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
         }
+
+        [data-theme="light"] .chart-dashboard-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%);
+            border: 1px solid rgba(124, 77, 255, 0.15);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
         .chart-dashboard-card::before {
             content: '';
             position: absolute;
@@ -952,6 +1174,11 @@
             box-shadow: 0 8px 32px rgba(124, 77, 255, 0.15);
             border-color: rgba(124, 77, 255, 0.3);
         }
+
+        [data-theme="light"] .chart-dashboard-card:hover {
+            box-shadow: 0 8px 32px rgba(124, 77, 255, 0.12);
+        }
+
         .chart-dashboard-card:hover::before { opacity: 1; }
 
         .chart-dashboard-card h4 {
@@ -965,12 +1192,20 @@
             letter-spacing: 0.02em;
         }
 
+        [data-theme="light"] .chart-dashboard-card h4 {
+            color: var(--white);
+        }
+
         .chart-dashboard-card h4 i {
             color: var(--accent);
             font-size: 1rem;
             background: rgba(124, 77, 255, 0.15);
             padding: 0.5rem;
             border-radius: 8px;
+        }
+
+        [data-theme="light"] .chart-dashboard-card h4 i {
+            background: rgba(124, 77, 255, 0.12);
         }
 
         .chart-dashboard-container {
@@ -1223,6 +1458,12 @@
             transform: scale(0.95) translateY(20px);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .modal-content.item-modal-content {
+            max-width: 560px;
+            min-width: 400px;
+        }
+
         .modal-overlay:not(.hidden) .modal-content {
             transform: scale(1) translateY(0);
         }
@@ -1231,32 +1472,48 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 1.75rem;
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid rgba(124, 77, 255, 0.1);
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.08) 0%, transparent 100%);
+        }
+
+        [data-theme="light"] .modal-header {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.05) 0%, transparent 100%);
         }
 
         .modal-header h3 {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--white);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.65rem;
         }
 
         .modal-header h3 i {
             color: var(--accent);
+            width: 32px;
+            height: 32px;
+            background: rgba(124, 77, 255, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
         }
 
         .modal-close {
             background: rgba(255,255,255,0.05);
-            border: none;
+            border: 1px solid var(--border);
             color: var(--gray);
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
-            padding: 0.6rem;
-            border-radius: 10px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
         .modal-close:hover {
@@ -1265,9 +1522,23 @@
         }
 
         .modal-body {
-            padding: 1.75rem;
+            padding: 1.25rem;
             overflow-y: auto;
             flex: 1;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(124, 77, 255, 0.3);
+            border-radius: 3px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(124, 77, 255, 0.5);
         }
 
         /* Chart Detail Modal */
@@ -1460,46 +1731,371 @@
             .detail-grid { grid-template-columns: 1fr; }
         }
 
-        .detail-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
+        .detail-section {
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        .detail-section:nth-child(1) { animation-delay: 0.05s; }
+        .detail-section:nth-child(2) { animation-delay: 0.1s; }
+        .detail-section:nth-child(3) { animation-delay: 0.15s; }
+        .detail-section:nth-child(4) { animation-delay: 0.2s; }
+        .detail-section:nth-child(5) { animation-delay: 0.25s; }
+        .detail-section:nth-child(6) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-section-title i {
+            width: 28px;
+            height: 28px;
+            background: rgba(124, 77, 255, 0.12);
             border-radius: 8px;
-            padding: 0.75rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+        }
+
+        @media (max-width: 500px) {
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+
+        .detail-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .detail-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .detail-item:hover {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.08) 0%, rgba(255,255,255,0.04) 100%);
+            border-color: rgba(124, 77, 255, 0.3);
+            transform: translateX(4px);
+        }
+        .detail-item:hover::before {
+            opacity: 1;
         }
         .detail-item.highlighted {
-            background: rgba(124, 77, 255, 0.15);
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.2) 0%, rgba(124, 77, 255, 0.08) 100%);
             border-color: var(--accent);
             transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(124, 77, 255, 0.3);
+            box-shadow: 0 0 24px rgba(124, 77, 255, 0.25);
+        }
+        .detail-item.highlighted::before {
+            opacity: 1;
         }
 
         .detail-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--gray);
             text-transform: uppercase;
-            margin-bottom: 0.25rem;
-            cursor: pointer;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
             transition: color 0.2s;
+            pointer-events: none;
         }
-        .detail-label:hover {
-            color: var(--accent);
+        .detail-label i {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+        .detail-item:hover .detail-label {
+            color: var(--accent-light);
         }
 
         .detail-value {
             font-size: 0.9rem;
             color: var(--white);
             word-break: break-word;
+            font-weight: 500;
+            line-height: 1.4;
+            pointer-events: none;
         }
 
         .detail-value.empty {
             color: var(--gray-dark);
             font-style: italic;
+            font-weight: 400;
+        }
+
+        .detail-value.risk-alto { 
+            color: #ef4444; 
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .detail-value.risk-alto::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.75rem;
+        }
+        .detail-value.risk-medio { 
+            color: #f59e0b;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .detail-value.risk-medio::before {
+            content: '\f06a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.75rem;
+        }
+        .detail-value.risk-baixo { 
+            color: #10b981;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .detail-value.risk-baixo::before {
+            content: '\f05a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.75rem;
+        }
+
+        .detail-value.currency {
+            color: #10b981;
+            font-weight: 600;
+            font-family: 'Inter', monospace;
+        }
+
+        .detail-value.date {
+            color: var(--accent-light);
+            font-family: 'Inter', monospace;
+            font-size: 0.85rem;
+        }
+
+        .detail-value.status {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        [data-theme="light"] .detail-item {
+            background: linear-gradient(135deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 100%);
+        }
+        [data-theme="light"] .detail-item:hover {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.06) 0%, rgba(0,0,0,0.02) 100%);
         }
 
         .detail-value.risk-alto { color: #ef4444; }
         .detail-value.risk-medio { color: #f59e0b; }
         .detail-value.risk-baixo { color: #10b981; }
+
+        .item-detail-content {
+            padding: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .item-detail-content::-webkit-scrollbar {
+            width: 5px;
+        }
+        .item-detail-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .item-detail-content::-webkit-scrollbar-thumb {
+            background: rgba(124, 77, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .item-detail-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            text-align: left;
+        }
+
+        .item-detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.08) 0%, rgba(255,255,255,0.04) 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            word-break: break-word;
+            white-space: pre-wrap;
+            text-align: left;
+            line-height: 1.5;
+            animation: fadeInScale 0.3s ease-out;
+            overflow-wrap: anywhere;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .item-detail-value.currency {
+            color: #10b981;
+            font-family: 'Inter', monospace;
+            font-size: 1.25rem;
+        }
+
+        .item-detail-value.date {
+            color: var(--accent-light);
+            font-family: 'Inter', monospace;
+            font-size: 1rem;
+        }
+
+        .item-detail-value.risk-alto {
+            color: #ef4444;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .item-detail-value.risk-alto::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 1rem;
+        }
+
+        .item-detail-value.risk-medio {
+            color: #f59e0b;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .item-detail-value.risk-medio::before {
+            content: '\f06a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 1rem;
+        }
+
+        .item-detail-value.risk-baixo {
+            color: #10b981;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .item-detail-value.risk-baixo::before {
+            content: '\f05a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 1rem;
+        }
+
+        .item-detail-value.empty {
+            color: var(--gray-dark);
+            font-style: italic;
+        }
+
+        .item-detail-hint {
+            font-size: 0.75rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .item-detail-hint i {
+            color: var(--accent);
+        }
+
+        .item-detail-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            margin-top: 0.5rem;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: rgba(124, 77, 255, 0.1);
+            border: 1px solid rgba(124, 77, 255, 0.2);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(124, 77, 255, 0.2);
+            border-color: var(--accent);
+            transform: translateX(2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn i {
+            font-size: 0.8rem;
+        }
+
+        .nav-info {
+            font-size: 0.8rem;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .detail-modal-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            margin-top: 1rem;
+            gap: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -1540,8 +2136,17 @@
                         <span>Análise inteligente de planilhas</span>
                     </div>
                 </div>
-                <div class="record-badge" id="record-badge">
-                    <span id="record-count">0</span> registros
+                <div class="header-right" style="display: flex; align-items: center;">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-moon theme-toggle-icon"></i>
+                        <div class="theme-toggle-track">
+                            <div class="theme-toggle-thumb"></div>
+                        </div>
+                        <i class="fas fa-sun theme-toggle-icon"></i>
+                    </div>
+                    <div class="record-badge" id="record-badge">
+                        <span id="record-count">0</span> registros
+                    </div>
                 </div>
             </div>
 
@@ -1575,6 +2180,9 @@
                     <i class="fas fa-file-excel"></i>
                     <span class="file-name" id="file-name">-</span>
                     <button class="file-change" onclick="document.getElementById('file-input').click()">Trocar arquivo</button>
+                    <button class="file-change" onclick="atualizarDados()" style="color: var(--accent);">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
                 </div>
                 <div class="file-actions">
                     <button class="btn btn-outline" onclick="exportPDF()">
@@ -1716,6 +2324,19 @@
                     <div class="modal-body" id="modal-body"></div>
                 </div>
             </div>
+
+            <!-- Modal de Detalhe do Item -->
+            <div id="item-detail-modal" class="modal-overlay hidden">
+                <div class="modal-content item-modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-magnifying-glass"></i> <span id="item-detail-label">Detalhes</span></h3>
+                        <button class="modal-close" onclick="closeItemDetailModal()">
+                            <i class="fas fa-times"></i> Fechar
+                        </button>
+                    </div>
+                    <div class="modal-body" id="item-detail-body"></div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1782,6 +2403,25 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            if (typeof XLSX === 'undefined') {
+                console.error('XLSX not loaded, trying to load...');
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                script.onload = () => {
+                    console.log('XLSX loaded dynamically');
+                    processSelectedFile(file);
+                };
+                script.onerror = () => {
+                    alert('Erro: Biblioteca não carregou.\n\nABRA O ARQUIVO VIA SERVIDOR LOCAL (http://localhost) E NÃO diretamente (file://).\n\nUse: python -m http.server 8000\nOu extensão Live Server do VS Code');
+                };
+                document.head.appendChild(script);
+                return;
+            }
+
+            processSelectedFile(file);
+        }
+
+        function processSelectedFile(file) {
             resetDashboardState();
 
             document.getElementById('loading-txt').classList.remove('hidden');
@@ -1789,10 +2429,37 @@
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                processExcelData(data, file.name, currentDepartment);
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    processExcelData(data, file.name, currentDepartment);
+                } catch (err) {
+                    console.error('Erro ao processar arquivo:', err);
+                    alert('Erro ao processar arquivo: ' + err.message);
+                }
+            };
+            reader.onerror = (err) => {
+                console.error('Erro no FileReader:', err);
+                alert('Erro ao ler arquivo. Tente selecionar o arquivo novamente.');
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function atualizarDados() {
+            const input = document.getElementById('file-input');
+            // Force a new file selection by clearing and triggering click
+            input.value = '';
+            input.click();
+            
+            // Set up a one-time listener to process the selected file
+            const handleChange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    processSelectedFile(file);
+                }
+                // Remove listener after handling
+                input.removeEventListener('change', handleChange);
+            };
+            input.addEventListener('change', handleChange);
         }
 
         function switchDepartment(dept) {
@@ -1877,6 +2544,16 @@
         }
 
         function resetDashboardState() {
+            // Destroy existing charts
+            if (window.charts) {
+                Object.values(window.charts).forEach(chart => {
+                    if (chart && typeof chart.destroy === 'function') {
+                        chart.destroy();
+                    }
+                });
+                window.charts = {};
+            }
+
             // Reset navigation to dashboard
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelector('.nav-tab[data-tab="dashboard"]').classList.add('active');
@@ -2129,9 +2806,17 @@
             document.getElementById('log-content').textContent = processingLog.join('\n');
         }
 
-function renderDashboardCharts() {
+        function renderDashboardCharts() {
             const container = document.getElementById('dashboard-charts');
             const data = dashboardData;
+            
+            // Department-specific charts
+            if (currentDepartment === 'ALMOXARIFADO') {
+                renderAlmoxarifadoCharts(container, data);
+                return;
+            }
+            
+            // Default charts for other departments
             const total = data.length;
 
             const criterios = {};
@@ -2160,21 +2845,21 @@ function renderDashboardCharts() {
                 { category: 'risco', title: 'Por Risco', icon: 'fa-shield-alt', type: 'bar', data: riscos }
             ];
 
-            container.innerHTML = chartData.map((chart, idx) => `
-                <div class="chart-dashboard-card" data-category="${chart.category}">
-                    <h4><i class="fas ${chart.icon}"></i> ${chart.title}</h4>
+            container.innerHTML = chartData.map((chartItem, idx) => `
+                <div class="chart-dashboard-card" data-category="${chartItem.category}">
+                    <h4><i class="fas ${chartItem.icon}"></i> ${chartItem.title}</h4>
                     <div class="chart-dashboard-container" id="chart-container-${idx}">
                         <canvas id="dashboard-chart-${idx}"></canvas>
                     </div>
                 </div>
             `).join('');
 
-            chartData.forEach((chart, idx) => {
+            chartData.forEach((chartItem, idx) => {
                 const ctx = document.getElementById(`dashboard-chart-${idx}`).getContext('2d');
-                const labels = Object.keys(chart.data);
-                const values = Object.values(chart.data);
-                const colors = colorsPie[chart.title].slice(0, labels.length);
-                const isBar = chart.type === 'bar';
+                const labels = Object.keys(chartItem.data);
+                const values = Object.values(chartItem.data);
+                const colors = colorsPie[chartItem.title].slice(0, labels.length);
+                const isBar = chartItem.type === 'bar';
 
                 const chartConfig = {
                     type: isBar ? 'bar' : 'pie',
@@ -2209,7 +2894,7 @@ function renderDashboardCharts() {
                         onClick: (event, elements) => {
                             if (elements.length > 0) {
                                 const itemIdx = elements[0].index;
-                                openChartDetailModal(chart.category, labels[itemIdx], values[itemIdx], total);
+                                openChartDetailModal(chartItem.category, labels[itemIdx], values[itemIdx], total);
                             }
                         },
                         plugins: {
@@ -2250,24 +2935,238 @@ function renderDashboardCharts() {
                                     }
                                 }
                             }
-                        },
-                        scales: isBar ? {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(255,255,255,0.04)' },
-                                ticks: { color: '#64748B', font: { size: 11 } },
-                                border: { display: false }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#64748B', font: { size: 11 } },
-                                border: { display: false }
-                            }
-                        } : undefined
+                        }
                     }
                 };
 
-                new Chart(ctx, chartConfig);
+                const chart = new Chart(ctx, chartConfig);
+                window.charts = window.charts || {};
+                window.charts[`dashboard-chart-${idx}`] = chart;
+            });
+        }
+
+        function renderAlmoxarifadoCharts(container, data) {
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="chart-dashboard-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                        <div class="kpi-label">Nenhum dado disponível para gráficos</div>
+                        <div class="kpi-value">Importe uma planilha para o almoxarifado</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Column mapping for almoxarifado
+            const col = window.detectedColumns || {};
+            
+            // Try to map columns - fallback to common names if not detected
+            const mapColumn = (possibleNames) => {
+                for (const name of possibleNames) {
+                    if (col[name]) return col[name];
+                    // Try case-insensitive match
+                    const match = Object.keys(col).find(key => 
+                        key.toLowerCase() === name.toLowerCase()
+                    );
+                    if (match) return col[match];
+                }
+                return null;
+            };
+            
+            // Get column names with fallbacks
+            const COL_ITEM = mapColumn(['ITEM', 'DESCRIÇÃO', 'DESCRIPTION', 'PRODUTO', 'NOME']) || 'ITEM';
+            const COL_CATEGORIA = mapColumn(['CATEGORIA', 'CATEGORY', 'TIPO', 'SETOR']) || 'CATEGORIA';
+            const COL_SALDO_ATUAL = mapColumn(['SALDO ATUAL', 'SALDO', 'ESTOQUE ATUAL', 'QUANTIDADE']) || 'SALDO ATUAL';
+            const COL_CONSUMO_MEDIO = mapColumn(['CONSUMO MÉDIO', 'CONSUMO MEDIO', 'CONSUMO MEDIO MENSAL', 'CONSUMO MENSAL']) || 'CONSUMO MÉDIO';
+            
+            // Helper to safely get numeric value
+            const getNumericValue = (item, column) => {
+                if (!column || !item[column]) return 0;
+                const val = parseFloat(item[column]);
+                return isNaN(val) ? 0 : val;
+            };
+            
+            // Prepare data for almoxarifado charts
+            
+            // 1. Items with lowest stock (for bar chart)
+            const lowestStockItems = data
+                .map(item => ({
+                    name: item[COL_ITEM] || 'Item não identificado',
+                    saldo: getNumericValue(item, COL_SALDO_ATUAL)
+                }))
+                .filter(item => item.saldo > 0) // Only items with positive stock
+                .sort((a, b) => a.saldo - b.saldo) // Ascending order (lowest first)
+                .slice(0, 8); // Top 8 lowest stock
+            
+            // 2. Most consumed items (for bar chart)
+            const mostConsumedItems = data
+                .map(item => ({
+                    name: item[COL_ITEM] || 'Item não identificado',
+                    consumo: getNumericValue(item, COL_CONSUMO_MEDIO)
+                }))
+                .filter(item => item.consumo > 0) // Only items with consumption
+                .sort((a, b) => b.consumo - a.consumo) // Descending order (highest first)
+                .slice(0, 8); // Top 8 most consumed
+            
+            // 3. Distribution by category (for pie/doughnut chart)
+            const categoriaDistribution = {};
+            data.forEach(item => {
+                const categoria = item[COL_CATEGORIA] || 'Não categorizado';
+                categoriaDistribution[categoria] = (categoriaDistribution[categoria] || 0) + 1;
+            });
+            
+            // 4. Monthly consumption trend (for line chart) - simplified
+            // For now, we'll just show total consumption by category as a bar chart
+            // In a real scenario, this would need temporal data
+            const consumoPorCategoria = {};
+            data.forEach(item => {
+                const categoria = item[COL_CATEGORIA] || 'Não categorizado';
+                const consumo = getNumericValue(item, COL_CONSUMO_MEDIO);
+                consumoPorCategoria[categoria] = (consumoPorCategoria[categoria] || 0) + consumo;
+            });
+            
+            // Define almoxarifado-specific charts
+            const almoxarifadoChartData = [
+                {
+                    category: 'lowest_stock',
+                    title: 'Itens com Menor Saldo',
+                    icon: 'fa-box-open',
+                    type: 'bar',
+                    labels: lowestStockItems.map(item => item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name),
+                    values: lowestStockItems.map(item => item.saldo),
+                    color: '#ef4444' // Red for low stock alert
+                },
+                {
+                    category: 'most_consumed',
+                    title: 'Itens Mais Consumidos',
+                    icon: 'fa-shopping-cart',
+                    type: 'bar',
+                    labels: mostConsumedItems.map(item => item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name),
+                    values: mostConsumedItems.map(item => item.consumo),
+                    color: '#10b981' // Green for consumption
+                },
+                {
+                    category: 'category_distribution',
+                    title: 'Distribuição por Categoria',
+                    icon: 'fa-layer-group',
+                    type: 'doughnut',
+                    labels: Object.keys(categoriaDistribution),
+                    values: Object.values(categoriaDistribution),
+                    colors: ['#7C4DFF', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#f97316', '#6366f1']
+                },
+                {
+                    category: 'consumption_by_category',
+                    title: 'Consumo por Categoria',
+                    icon: 'fa-chart-bar',
+                    type: 'bar',
+                    labels: Object.keys(consumoPorCategoria),
+                    values: Object.values(consumoPorCategoria),
+                    color: '#f59e0b' // Amber for consumption by category
+                }
+            ];
+
+            container.innerHTML = almoxarifadoChartData.map((chartItem, idx) => `
+                <div class="chart-dashboard-card" data-category="${chartItem.category}">
+                    <h4><i class="fas ${chartItem.icon}"></i> ${chartItem.title}</h4>
+                    <div class="chart-dashboard-container" id="chart-container-${idx}">
+                        <canvas id="dashboard-chart-${idx}"></canvas>
+                    </div>
+                </div>
+            `).join('');
+
+            almoxarifadoChartData.forEach((chartItem, idx) => {
+                const ctx = document.getElementById(`dashboard-chart-${idx}`).getContext('2d');
+                const labels = chartItem.labels || [];
+                const values = chartItem.values || [];
+                const isBar = chartItem.type === 'bar';
+                
+                let backgroundColor, borderColor;
+                if (chartItem.colors) {
+                    backgroundColor = chartItem.colors.slice(0, labels.length);
+                    borderColor = chartItem.colors.slice(0, labels.length);
+                } else {
+                    const singleColor = chartItem.color || '#7C4DFF';
+                    backgroundColor = isBar ? [singleColor] : Array(labels.length).fill(singleColor + '66');
+                    borderColor = isBar ? 'transparent' : Array(labels.length).fill(singleColor);
+                }
+
+                const chartConfig = {
+                    type: isBar ? 'bar' : 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: chartItem.title,
+                            data: values,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor,
+                            borderWidth: isBar ? 0 : 2,
+                            borderRadius: isBar ? 6 : 0,
+                            borderSkipped: false,
+                            hoverBackgroundColor: isBar ? backgroundColor.map(c => c.includes('rgba') ? c : c + '99') : backgroundColor,
+                            hoverBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            animateRotate: true,
+                            animateScale: true,
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            intersect: true,
+                            axis: 'x'
+                        },
+                        plugins: {
+                            legend: {
+                                display: chartItem.type !== 'bar',
+                                position: 'bottom',
+                                labels: {
+                                    color: '#94A3B8',
+                                    font: { size: 10, weight: '500' },
+                                    padding: 10,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: 'rgba(18, 18, 32, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#94A3B8',
+                                borderColor: 'rgba(124, 77, 255, 0.3)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                padding: { x: 12, y: 8 },
+                                displayColors: true,
+                                boxWidth: 6,
+                                boxHeight: 6,
+                                boxPadding: 3,
+                                titleFont: { size: 12, weight: '600' },
+                                bodyFont: { size: 11 },
+                                callbacks: {
+                                    label: function(context) {
+                                        let value = context.raw;
+                                        if (chartItem.category === 'category_distribution' || chartItem.category === 'consumption_by_category') {
+                                            const total = context.dataset._meta[Object.keys(context.dataset._meta)[0]].total;
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return `${value} (${percentage}%)`;
+                                        } else if (chartItem.category === 'lowest_stock' || chartItem.category === 'most_consumed') {
+                                            return value.toLocaleString('pt-BR');
+                                        }
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const chart = new Chart(ctx, chartConfig);
+                window.charts = window.charts || {};
+                window.charts[`dashboard-chart-${idx}`] = chart;
             });
         }
 
@@ -2326,6 +3225,13 @@ function renderDashboardCharts() {
         }
 
         function renderKPIs() {
+            // Department-specific KPI rendering
+            if (currentDepartment === 'ALMOXARIFADO') {
+                renderAlmoxarifadoKPIs();
+                return;
+            }
+            
+            // Default KPIs for other departments
             const data = dashboardData;
             const valores = data.map(d => d.valor).filter(v => v > 0);
             const valorTotal = valores.reduce((a, b) => a + b, 0);
@@ -2338,14 +3244,14 @@ function renderDashboardCharts() {
             const riscoMedio = data.filter(d => d.risco === 'MÉDIO').length;
             const maisAntigo = Math.max(...data.map(d => d.aging), 0);
             const maiorTempoSemMov = Math.max(...data.map(d => d.diasSemMov), 0);
-
+            
             const col = window.detectedColumns || {};
             const labelProcesso = col.PROCESSO || 'Processo';
             const labelObjeto = col.OBJETO || 'Objeto';
             const labelValor = col.VALOR || 'Valor';
             const labelGestao = col.GESTAO || 'Gestão';
             const labelHistorico = col.HISTORICO || 'Histórico';
-
+            
             const kpis = [
                 { label: 'Registros Totais', value: data.length, type: 'info' },
                 { label: labelProcesso + 's Formais', value: processos, type: 'info' },
@@ -2355,6 +3261,8 @@ function renderDashboardCharts() {
                 { label: 'Mediana de ' + labelValor, value: formatCurrency(mediana), type: 'info' },
                 { label: 'Maior ' + labelValor, value: formatCurrency(Math.max(...valores, 0)), type: 'warning' },
                 { label: labelValor + ' Mínimo', value: valores.length > 0 ? formatCurrency(Math.min(...valores.filter(v => v > 0), 0)) : '-', type: 'info' },
+                { label: 'Tempo Médio de Abertura', value: Math.round(data.reduce((s, d) => s + (d.aging || 0), 0) / data.length) + ' dias', type: 'info' },
+                { label: 'Média sem Movimentação', value: Math.round(data.reduce((s, d) => s + (d.diasSemMov || 0), 0) / data.length) + ' dias', type: 'info' },
                 { label: 'Sem ' + labelValor, value: semValor, type: 'warning' },
                 { label: 'Sem ' + labelHistorico, value: semHistorico, type: 'warning' },
                 { label: 'Risco Crítico', value: riscoAlto, type: 'danger' },
@@ -2362,7 +3270,7 @@ function renderDashboardCharts() {
                 { label: labelProcesso + ' Mais Antigo', value: maisAntigo + ' dias', type: 'danger' },
                 { label: 'Maior Tempo sem Movimentação', value: maiorTempoSemMov + ' dias', type: 'danger' }
             ];
-
+            
             const grid = document.getElementById('kpi-grid');
             grid.innerHTML = kpis.map(k => `
                 <div class="kpi-card ${k.type}">
@@ -2370,6 +3278,198 @@ function renderDashboardCharts() {
                     <div class="kpi-value ${k.type === 'success' ? 'currency' : k.type === 'warning' ? 'highlight' : k.type === 'danger' ? 'critical' : ''}">${k.value}</div>
                 </div>
             `).join('');
+        }
+        
+        function renderAlmoxarifadoKPIs() {
+            const data = dashboardData;
+            if (!data || data.length === 0) {
+                // Show empty state
+                const grid = document.getElementById('kpi-grid');
+                grid.innerHTML = `
+                    <div class="kpi-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                        <div class="kpi-label">Nenhum dado disponível</div>
+                        <div class="kpi-value">Importe uma planilha para o almoxarifado</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Column mapping for almoxarifado
+            const col = window.detectedColumns || {};
+            
+            // Try to map columns - fallback to common names if not detected
+            const mapColumn = (possibleNames) => {
+                for (const name of possibleNames) {
+                    if (col[name]) return col[name];
+                    // Try case-insensitive match
+                    const match = Object.keys(col).find(key => 
+                        key.toLowerCase() === name.toLowerCase()
+                    );
+                    if (match) return col[match];
+                }
+                return null;
+            };
+            
+            // Get column names with fallbacks
+            const COL_ITEM = mapColumn(['ITEM', 'DESCRIÇÃO', 'DESCRIPTION', 'PRODUTO', 'NOME']) || 'ITEM';
+            const COL_CATEGORIA = mapColumn(['CATEGORIA', 'CATEGORY', 'TIPO', 'SETOR']) || 'CATEGORIA';
+            const COL_SALDO_ATUAL = mapColumn(['SALDO ATUAL', 'SALDO', 'ESTOQUE ATUAL', 'QUANTIDADE']) || 'SALDO ATUAL';
+            const COL_ESTOQUE_MINIMO = mapColumn(['ESTOQUE MÍNIMO', 'ESTOQUE MINIMO', 'MINIMO', 'MINIMUM', 'ESTOQUE MIN']) || 'ESTOQUE MÍNIMO';
+            const COL_CONSUMO_MEDIO = mapColumn(['CONSUMO MÉDIO', 'CONSUMO MEDIO', 'CONSUMO MEDIO MENSAL', 'CONSUMO MENSAL']) || 'CONSUMO MÉDIO';
+            const COL_VALOR_UNITARIO = mapColumn(['VALOR UNITÁRIO', 'VALOR UNITARIO', 'PREÇO UNITÁRIO', 'CUSTO UNITÁRIO']) || 'VALOR UNITÁRIO';
+            const COL_VALOR_TOTAL = mapColumn(['VALOR TOTAL', 'VALOR EM ESTOQUE', 'TOTAL']) || 'VALOR TOTAL';
+            const COL_CONSUMO_PERIODO = mapColumn(['CONSUMO NO PERÍODO', 'CONSUMO PERÍODO', 'CONSUMO TOTAL']) || 'CONSUMO NO PERÍODO';
+            const COL_REQUISICOES_ATENDIDAS = mapColumn(['REQUISIÇÕES ATENDIDAS', 'ATENDIMENTOS', 'REQ ATENDIDAS']) || 'REQUISIÇÕES ATENDIDAS';
+            const COL_PERCENTUAL_ATENDIMENTO = mapColumn(['% ATENDIMENTO', 'PERCENTUAL ATENDIMENTO', 'TAXA ATENDIMENTO']) || '% ATENDIMENTO';
+            const COL_TEMPO_ATENDIMENTO = mapColumn(['TEMPO ATENDIMENTO', 'TEMPO MÉDIO ATENDIMENTO']) || 'TEMPO ATENDIMENTO';
+            const COL_PERDAS = mapColumn(['PERDAS', 'AVARIAS', 'VENCIMENTOS', 'PERDA TOTAL']) || 'PERDAS';
+            const COL_GIRO = mapColumn(['GIRO DE ESTOQUE', 'GIRO', 'ROTACAO', 'ROTACAÃO']) || 'GIRO DE ESTOQUE';
+            const COL_COBERTURA = mapColumn(['COBERTURA DE ESTOQUE', 'COBERTURA', 'DIAS DE ESTOQUE']) || 'COBERTURA DE ESTOQUE';
+            
+            // Helper to safely get numeric value
+            const getNumericValue = (item, column) => {
+                if (!column || !item[column]) return 0;
+                const val = parseFloat(item[column]);
+                return isNaN(val) ? 0 : val;
+            };
+            
+            // Helper to safely get formatted value
+            const getFormattedValue = (item, column, isCurrency = false) => {
+                if (!column || !(column in item)) return 'Dados insuficientes';
+                const val = item[column];
+                if (val === null || val === undefined || val === '' || (isNaN(val) && val !== 0)) return 'Dados insuficientes';
+                
+                if (isCurrency) {
+                    return formatCurrency(parseFloat(val) || 0);
+                }
+                
+                return val.toString();
+            };
+            
+            // Calculate KPIs
+            const registrosTotais = data.length;
+            
+            // Saldo atual em estoque (sum of current stock)
+            const saldoAtualEstoque = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_SALDO_ATUAL), 0);
+            
+            // Itens abaixo do estoque mínimo
+            const itensAbaixoMinimo = data.filter(item => {
+                const saldo = getNumericValue(item, COL_SALDO_ATUAL);
+                const minimo = getNumericValue(item, COL_ESTOQUE_MINIMO);
+                return saldo > 0 && minimo > 0 && saldo < minimo;
+            }).length;
+            
+            // Itens sem movimentação (assuming we have a column for this, or calculate from other data)
+            // For now, we'll check if there's a consumption column with 0 value
+            const itensSemMovimentacao = data.filter(item => {
+                const consumo = getNumericValue(item, COL_CONSUMO_MEDIO);
+                return consumo === 0;
+            }).length;
+            
+            // Giro de estoque (consumo médio / estoque médio)
+            // We'll calculate average giro across items that have both values
+            const giroValues = data.map(item => {
+                const consumo = getNumericValue(item, COL_CONSUMO_MEDIO);
+                const saldo = getNumericValue(item, COL_SALDO_ATUAL);
+                return saldo > 0 ? consumo / saldo : 0;
+            }).filter(giro => giro > 0); // Only consider positive values
+            const giroEstoque = giroValues.length > 0 
+                ? (giroValues.reduce((a, b) => a + b, 0) / giroValues.length).toFixed(2)
+                : 'Dados insuficientes';
+            
+            // Cobertura de estoque (dias) = estoque atual / consumo diário
+            // Assuming consumo médio is monthly, so daily = monthly/30
+            const coberturaValues = data.map(item => {
+                const saldo = getNumericValue(item, COL_SALDO_ATUAL);
+                const consumoMensal = getNumericValue(item, COL_CONSUMO_MEDIO);
+                if (saldo > 0 && consumoMensal > 0) {
+                    return (saldo / (consumoMensal / 30)); // Convert to days
+                }
+                return 0;
+            }).filter(cobertura => cobertura > 0);
+            const coberturaEstoque = coberturaValues.length > 0
+                ? Math.round(coberturaValues.reduce((a, b) => a + b, 0) / coberturaValues.length)
+                : 'Dados insuficientes';
+            
+            // Consumo médio mensal (average of consumption column)
+            const consumoMedioMensal = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_CONSUMO_MEDIO), 0);
+            
+            // Requisições atendidas
+            const requisicoesAtendidas = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_REQUISICOES_ATENDIDAS), 0);
+            
+            // % de requisições atendidas integralmente
+            const percentualAtendimentoValues = data.map(item => {
+                const perc = getNumericValue(item, COL_PERCENTUAL_ATENDIMENTO);
+                return perc || 0;
+            });
+            const percentualAtendimento = percentualAtendimentoValues.length > 0
+                ? (percentualAtendimentoValues.reduce((a, b) => a + b, 0) / percentualAtendimentoValues.length).toFixed(1) + '%'
+                : 'Dados insuficientes';
+            
+            // Tempo médio de atendimento (in days)
+            const tempoAtendimentoValues = data.map(item => {
+                const tempo = getNumericValue(item, COL_TEMPO_ATENDIMENTO);
+                return tempo || 0;
+            }).filter(tempo => tempo > 0); // Only consider positive values
+            const tempoMedioAtendimento = tempoAtendimentoValues.length > 0
+                ? Math.round(tempoAtendimentoValues.reduce((a, b) => a + b, 0) / tempoAtendimentoValues.length) + ' dias'
+                : 'Dados insuficiente';
+            
+            // Valor total estocado
+            const valorTotalEstocado = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_VALOR_TOTAL, true), 0);
+            
+            // Valor consumido no período
+            const valorConsumidoPeriodo = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_CONSUMO_PERIODO, true), 0);
+            
+            // Índice de perdas / avarias / vencimentos
+            const perdasTotal = data.reduce((sum, item) => 
+                sum + getNumericValue(item, COL_PERDAS), 0);
+            const indicePerdas = valorTotalEstocado > 0 
+                ? ((perdasTotal / valorTotalEstocado) * 100).toFixed(2) + '%'
+                : 'Dados insuficientes';
+            
+            // Define KPIs with priority order
+            const kpis = [
+                // High priority
+                { label: 'REGISTROS TOTAIS', value: registrosTotais, type: 'info' },
+                { label: 'SALDO ATUAL EM ESTOQUE', value: formatNumber(saldoAtualEstoque), type: 'success' },
+                { label: 'ITENS ABAIXO DO ESTOQUE MÍNIMO', value: itensAbaixoMinimo, type: itensAbaixoMinimo > 0 ? 'warning' : 'info' },
+                { label: 'REQUISIÇÕES ATENDIDAS', value: requisicoesAtendidas, type: 'info' },
+                { label: 'VALOR TOTAL ESTOCADO', value: formatCurrency(valorTotalEstocado), type: 'success' },
+                
+                // Medium priority
+                { label: 'ITENS SEM MOVIMENTAÇÃO', value: itensSemMovimentacao, type: itensSemMovimentacao > 0 ? 'warning' : 'info' },
+                { label: 'COBERTURA DE ESTOQUE (DIAS)', value: coberturaEstoque, type: typeof coberturaEstoque === 'string' ? 'info' : (coberturaEstoque < 30 ? 'warning' : 'success') },
+                { label: 'CONSUMO MÉDIO MENSAL', value: formatNumber(consumoMedioMensal), type: 'info' },
+                { label: '% REQUISIÇÕES ATENDIDAS INTEGRALMENTE', value: percentualAtendimento, type: percentualAtendimento === 'Dados insuficientes' ? 'info' : (parseFloat(percentualAtendimento) >= 95 ? 'success' : 'warning') },
+                { label: 'TEMPO MÉDIO DE ATENDIMENTO', value: tempoMedioAtendimento, type: tempoMedioAtendimento === 'Dados insuficiente' ? 'info' : 'info' },
+                
+                // Low priority
+                { label: 'GIRO DE ESTOQUE', value: giroEstoque, type: giroEstoque === 'Dados insuficientes' ? 'info' : 'info' },
+                { label: 'VALOR CONSUMIDO NO PERÍODO', value: formatCurrency(valorConsumidoPeriodo), type: 'success' },
+                { label: 'ÍNDICE DE PERDAS / AVARIAS / VENCIMENTOS', value: indicePerdas, type: parseFloat(indicePerdas) > 5 ? 'danger' : (parseFloat(indicePerdas) > 2 ? 'warning' : 'success') }
+            ];
+            
+            // Filter out KPIs with "Dados insuficientes" if preferred, or keep them as is
+            // For now, we'll keep them but they'll show the message
+            
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = kpis.map(k => `
+                <div class="kpi-card ${k.type}">
+                    <div class="kpi-label">${k.label}</div>
+                    <div class="kpi-value ${k.type === 'success' ? 'currency' : k.type === 'warning' ? 'highlight' : k.type === 'danger' ? 'critical' : ''}">${k.value}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Helper function to format numbers with thousand separators
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         let currentRankingType = 'all';
@@ -2666,6 +3766,13 @@ function renderDashboardCharts() {
         }
 
         function renderTable() {
+            // Department-specific table rendering
+            if (currentDepartment === 'ALMOXARIFADO') {
+                renderAlmoxarifadoTable();
+                return;
+            }
+            
+            // Default table rendering for other departments
             // Initialize table state
             window.tableState = {
                 filteredData: [...dashboardData],
@@ -2677,20 +3784,35 @@ function renderDashboardCharts() {
             
             // Gerar cabeçalho dinâmico baseado nas colunas detectadas
             renderDynamicHeader();
-
+            
             // Setup event listeners
             const searchInput = document.getElementById('table-search');
             if (searchInput) {
                 searchInput.addEventListener('input', applyTableFilters);
             }
-
+            
             // Setup pagination
             const prevPage = document.getElementById('prev-page');
             const nextPage = document.getElementById('next-page');
             if (prevPage) prevPage.addEventListener('click', () => changePage(-1));
             if (nextPage) nextPage.addEventListener('click', () => changePage(1));
-
+            
             // Initial render
+            renderAnalyticalTable();
+        }
+        
+        function renderAlmoxarifadoTable() {
+            // Initialize table state
+            window.tableState = {
+                filteredData: [...dashboardData],
+                currentPage: 1,
+                itemsPerPage: 15,
+                sortColumn: null,
+                sortDirection: 'asc'
+            };
+            
+            // Use generic table rendering
+            renderDynamicHeader();
             renderAnalyticalTable();
         }
 
@@ -2891,12 +4013,15 @@ function renderDashboardCharts() {
             
             if (!record) return;
             
-            openDetailModal(record);
+            window.currentDetailRecordIndex = dataIndex;
+            openDetailModal(record, dataIndex);
         }
 
-        function openDetailModal(record) {
+        function openDetailModal(record, recordIndex) {
             const modal = document.getElementById('detail-modal');
             const modalBody = document.getElementById('modal-body');
+            
+            window.currentDetailRecordIndex = recordIndex !== undefined ? recordIndex : 0;
             
             // Format helpers
             const formatDate = (dateObj) => {
@@ -2942,25 +4067,28 @@ function renderDashboardCharts() {
                     case 'objeto':
                     case 'criterio':
                     case 'gestao':
+                    case 'categoria':
                         if (value) objectInfo.push({ label, value });
                         break;
                     case 'valor':
                         const formatted = formatValue(value);
-                        if (formatted && formatted !== '—') financialInfo.push({ label, value: formatted });
+                        if (formatted && formatted !== '—') financialInfo.push({ label, value: formatted, isCurrency: true });
                         break;
                     case 'dataAbertura':
+                    case 'dataMovimentacao':
+                    case 'dataEncerramento':
                         const dateVal = formatDate(value);
-                        if (dateVal) datesInfo.push({ label, value: dateVal });
+                        if (dateVal) datesInfo.push({ label, value: dateVal, isDate: true });
                         break;
                     case 'aging':
                     case 'diasSemMov':
-                        if (value > 0) datesInfo.push({ label, value: value + ' dias' });
+                        if (value > 0) datesInfo.push({ label, value: value + ' dias', isAging: true });
                         break;
                     case 'etapaAtual':
                     case 'risco':
                     case 'status':
                     case 'isProcesso':
-                        if (value) workflowInfo.push({ label, value: String(value) });
+                        if (value) workflowInfo.push({ label, value: String(value), isStatus: String(value).length < 20 });
                         break;
                     default:
                         const otherVal = formatValue(value);
@@ -2977,8 +4105,8 @@ function renderDashboardCharts() {
                         <div class="detail-section-title"><i class="fas fa-folder-open"></i> Identificação</div>
                         <div class="detail-grid">
                             ${processInfo.map((item, idx) => `
-                                <div class="detail-item" id="detail-item-${idx}">
-                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                <div class="detail-item" id="detail-item-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value || ''}', '')">
+                                    <div class="detail-label"><i class="fas fa-tag"></i>${item.label}</div>
                                     <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
                                 </div>
                             `).join('')}
@@ -2993,8 +4121,8 @@ function renderDashboardCharts() {
                         <div class="detail-section-title"><i class="fas fa-file-alt"></i> Objeto e Categoria</div>
                         <div class="detail-grid">
                             ${objectInfo.map((item, idx) => `
-                                <div class="detail-item" id="detail-item-obj-${idx}">
-                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                <div class="detail-item" id="detail-item-obj-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value || ''}', '')">
+                                    <div class="detail-label"><i class="fas fa-list"></i>${item.label}</div>
                                     <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
                                 </div>
                             `).join('')}
@@ -3009,9 +4137,9 @@ function renderDashboardCharts() {
                         <div class="detail-section-title"><i class="fas fa-coins"></i> Informações Financeiras</div>
                         <div class="detail-grid">
                             ${financialInfo.map((item, idx) => `
-                                <div class="detail-item" id="detail-item-fin-${idx}">
-                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
-                                    <div class="detail-value" style="color: #10b981;">${item.value}</div>
+                                <div class="detail-item" id="detail-item-fin-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value}', 'currency')">
+                                    <div class="detail-label"><i class="fas fa-money-bill-wave"></i>${item.label}</div>
+                                    <div class="detail-value currency">${item.value}</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -3024,10 +4152,10 @@ function renderDashboardCharts() {
                     <div class="detail-section">
                         <div class="detail-section-title"><i class="fas fa-calendar"></i> Datas e Temporização</div>
                         <div class="detail-grid">
-${datesInfo.map((item, idx) => `
-                                <div class="detail-item" id="detail-item-date-${idx}">
-                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
-                                    <div class="detail-value ${!item.value ? 'empty' : ''}">${item.value || '—'}</div>
+                            ${datesInfo.map((item, idx) => `
+                                <div class="detail-item" id="detail-item-date-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value}', '${item.isAging ? 'date' : ''}')">
+                                    <div class="detail-label"><i class="fas fa-clock"></i>${item.label}</div>
+                                    <div class="detail-value ${item.isAging ? 'date' : !item.value ? 'empty' : ''}">${item.value || '—'}</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -3042,14 +4170,15 @@ ${datesInfo.map((item, idx) => `
                         <div class="detail-grid">
                             ${workflowInfo.map((item, idx) => {
                                 let valueClass = '';
-                                if (item.label === 'Risco') {
-                                    if (record.risco === 'ALTO') valueClass = 'risk-alto';
-                                    else if (record.risco === 'MÉDIO') valueClass = 'risk-medio';
-                                    else valueClass = 'risk-baixo';
+                                let riskType = '';
+                                if (item.label.toLowerCase().includes('risco')) {
+                                    if (record.risco === 'ALTO') { valueClass = 'risk-alto'; riskType = 'risk-alto'; }
+                                    else if (record.risco === 'MÉDIO') { valueClass = 'risk-medio'; riskType = 'risk-medio'; }
+                                    else { valueClass = 'risk-baixo'; riskType = 'risk-baixo'; }
                                 }
                                 return `
-                                    <div class="detail-item" id="detail-item-flow-${idx}">
-                                        <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                    <div class="detail-item" id="detail-item-flow-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value}', '${riskType}')">
+                                        <div class="detail-label"><i class="fas fa-circle-info"></i>${item.label}</div>
                                         <div class="detail-value ${valueClass}">${item.value}</div>
                                     </div>
                                 `;
@@ -3062,21 +4191,48 @@ ${datesInfo.map((item, idx) => `
             if (otherInfo.length > 0) {
                 contentHTML += `
                     <div class="detail-section">
-                        <div class="detail-section-title"><i class="fas fa-ellipsis-h"></i> Outras Informações</div>
+                        <div class="detail-section-title"><i class="fas fa-layer-group"></i> Outras Informações</div>
                         <div class="detail-grid">
                             ${otherInfo.map((item, idx) => `
-                                <div class="detail-item" id="detail-item-other-${idx}">
-                                    <div class="detail-label" onclick="highlightDetailItem(this)">${item.label}</div>
+                                <div class="detail-item" id="detail-item-other-${idx}" onclick="openItemDetailModal('${item.label}', '${item.value}', '')">
+                                    <div class="detail-label"><i class="fas fa-info-circle"></i>${item.label}</div>
                                     <div class="detail-value">${item.value}</div>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
-            }
+}
             
-modalBody.innerHTML = contentHTML;
+            const filteredData = window.tableState?.filteredData || window.dashboardData || [];
+            const totalRecords = filteredData.length;
+            
+            contentHTML += `
+                <div class="detail-modal-nav">
+                    <button class="nav-btn" onclick="navigateDetailModal(-1)" ${window.currentDetailRecordIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left"></i> Voltar
+                    </button>
+                    <span class="nav-info">${window.currentDetailRecordIndex + 1} de ${totalRecords}</span>
+                    <button class="nav-btn" onclick="navigateDetailModal(1)" ${window.currentDetailRecordIndex >= totalRecords - 1 ? 'disabled' : ''}>
+                        Avançar <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            `;
+            
+            modalBody.innerHTML = contentHTML;
             modal.classList.remove('hidden');
+        }
+
+        function navigateDetailModal(direction) {
+            const currentIdx = window.currentDetailRecordIndex;
+            const filteredData = window.tableState?.filteredData || window.dashboardData || [];
+            const newIndex = currentIdx + direction;
+            
+            if (newIndex < 0 || newIndex >= filteredData.length) return;
+            
+            const record = filteredData[newIndex];
+            window.currentDetailRecordIndex = newIndex;
+            openDetailModal(record, newIndex);
         }
 
         function showAlertDetails(type, count, items) {
@@ -3186,6 +4342,149 @@ modalBody.innerHTML = contentHTML;
             document.getElementById('detail-modal').classList.add('hidden');
         }
 
+        function closeItemDetailModal() {
+            document.getElementById('item-detail-modal').classList.add('hidden');
+        }
+
+        function openItemDetailModal(recordIndex, itemIndex, item) {
+            const modal = document.getElementById('item-detail-modal');
+            const labelEl = document.getElementById('item-detail-label');
+            const bodyEl = document.getElementById('item-detail-body');
+            
+            window.currentDetailRecordIndex = recordIndex;
+            window.currentDetailItemIndex = itemIndex;
+            
+            const label = item.label;
+            const value = item.value;
+            const type = item.type || '';
+            
+            const isCurrency = type === 'currency';
+            const isDate = type === 'date';
+            const isRisk = type === 'risk-alto' || type === 'risk-medio' || type === 'risk-baixo';
+            const isEmpty = !value || value === '—';
+            
+            let valueClass = '';
+            if (isCurrency) valueClass = 'currency';
+            else if (isDate) valueClass = 'date';
+            else if (isRisk) valueClass = type;
+            
+            const formattedLabel = label.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            
+            labelEl.textContent = formattedLabel;
+            
+            bodyEl.innerHTML = `
+                <div class="item-detail-content">
+                    <div class="item-detail-label">${formattedLabel}</div>
+                    <div class="item-detail-value ${valueClass} ${isEmpty ? 'empty' : ''}">${value || '—'}</div>
+                    ${isCurrency ? '<div class="item-detail-hint"><i class="fas fa-coins"></i> Valor monetário</div>' : ''}
+                    ${isDate ? '<div class="item-detail-hint"><i class="fas fa-calendar"></i> Data registrada</div>' : ''}
+                    ${isRisk ? '<div class="item-detail-hint"><i class="fas fa-shield-halved"></i> Nível de risco</div>' : ''}
+                </div>
+                <div class="item-detail-nav">
+                    <button class="nav-btn" id="nav-prev" onclick="navigateItemDetail(-1)" ${recordIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left"></i> Voltar
+                    </button>
+                    <span class="nav-info">${recordIndex + 1} de ${window.dashboardData?.length || 0}</span>
+                    <button class="nav-btn" id="nav-next" onclick="navigateItemDetail(1)" ${recordIndex >= (window.dashboardData?.length || 0) - 1 ? 'disabled' : ''}>
+                        Avançar <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function navigateItemDetail(direction) {
+            const recordIndex = window.currentDetailRecordIndex;
+            const data = window.dashboardData || [];
+            const newIndex = recordIndex + direction;
+            
+            if (newIndex < 0 || newIndex >= data.length) return;
+            
+            const record = data[newIndex];
+            const col = window.detectedColumns || {};
+            const keys = Object.keys(record).filter(k => k !== 'aging' && k !== 'diasSemMov' && k !== 'index');
+            
+            const processInfo = [];
+            const objectInfo = [];
+            const financialInfo = [];
+            const datesInfo = [];
+            const workflowInfo = [];
+            const otherInfo = [];
+            
+            keys.forEach(key => {
+                let value = record[key];
+                let label = key;
+                
+                label = label.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                
+                switch(key) {
+                    case 'processo':
+                    case 'index':
+                        if (value) processInfo.push({ label, value, type: '' });
+                        break;
+                    case 'objeto':
+                    case 'criterio':
+                    case 'gestao':
+                    case 'categoria':
+                        if (value) objectInfo.push({ label, value, type: '' });
+                        break;
+                    case 'valor':
+                        const formatted = formatValue(value);
+                        if (formatted && formatted !== '—') financialInfo.push({ label, value: formatted, type: 'currency' });
+                        break;
+                    case 'dataAbertura':
+                    case 'dataMovimentacao':
+                    case 'dataEncerramento':
+                        const dateVal = formatDate(value);
+                        if (dateVal) datesInfo.push({ label, value: dateVal, type: 'date' });
+                        break;
+                    case 'aging':
+                    case 'diasSemMov':
+                        if (value > 0) datesInfo.push({ label, value: value + ' dias', type: 'date' });
+                        break;
+                    case 'etapaAtual':
+                    case 'risco':
+                    case 'status':
+                    case 'isProcesso':
+                        if (value) {
+                            let riskType = '';
+                            if (key === 'risco') {
+                                if (value === 'ALTO') riskType = 'risk-alto';
+                                else if (value === 'MÉDIO') riskType = 'risk-medio';
+                                else riskType = 'risk-baixo';
+                            }
+                            workflowInfo.push({ label, value: String(value), type: riskType });
+                        }
+                        break;
+                    default:
+                        const otherVal = formatValue(value);
+                        if (otherVal && otherVal !== '—') otherInfo.push({ label, value: otherVal, type: '' });
+                }
+            });
+            
+            const allItems = [...processInfo, ...objectInfo, ...financialInfo, ...datesInfo, ...workflowInfo, ...otherInfo];
+            
+            if (allItems.length > 0) {
+                openItemDetailModal(newIndex, 0, allItems[0]);
+            }
+        }
+
+        function handleDetailKeydown(e) {
+            if (e.key === 'ArrowLeft') {
+                navigateItemDetail(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateItemDetail(1);
+            }
+        }
+
+        function highlightDetailItem(labelElement, value, type) {
+            const item = labelElement.parentElement;
+            const label = item.querySelector('.detail-label').textContent;
+            
+            openItemDetailModal(label, value, type);
+        }
+
         function goBackToHome() {
             document.getElementById('import-overlay').classList.add('hidden');
             document.getElementById('loading-txt').classList.add('hidden');
@@ -3199,6 +4498,74 @@ modalBody.innerHTML = contentHTML;
             }
         }
 
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : '');
+            localStorage.setItem('theme', newTheme);
+            updateChartTheme();
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        }
+
+        function updateChartTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const textColor = isLight ? '#64748B' : '#94A3B8';
+            const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+            const legendColor = isLight ? '#0F172A' : '#F8FAFC';
+            const tooltipBg = isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(18, 18, 32, 0.95)';
+            const tooltipTitle = isLight ? '#0F172A' : '#ffffff';
+            const tooltipBody = isLight ? '#64748B' : '#94A3B8';
+            const tooltipBorder = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(124, 77, 255, 0.3)';
+            
+            window.charts = window.charts || {};
+            Object.values(window.charts).forEach(chart => {
+                if (!chart.options) return;
+                
+                if (chart.options.scales) {
+                    if (chart.options.scales.x) {
+                        chart.options.scales.x.ticks = { color: textColor };
+                        chart.options.scales.x.grid = { color: gridColor };
+                        chart.options.scales.x.border = { color: gridColor };
+                    }
+                    if (chart.options.scales.y) {
+                        chart.options.scales.y.ticks = { color: textColor };
+                        chart.options.scales.y.grid = { color: gridColor };
+                        chart.options.scales.y.border = { color: gridColor };
+                    }
+                }
+                
+                if (chart.options.plugins) {
+                    if (chart.options.plugins.legend) {
+                        chart.options.plugins.legend.labels = { 
+                            ...chart.options.plugins.legend.labels,
+                            color: legendColor 
+                        };
+                    }
+                    if (chart.options.plugins.tooltip) {
+                        chart.options.plugins.tooltip = {
+                            ...chart.options.plugins.tooltip,
+                            backgroundColor: tooltipBg,
+                            titleColor: tooltipTitle,
+                            bodyColor: tooltipBody,
+                            borderColor: tooltipBorder,
+                            borderWidth: 1
+                        };
+                    }
+                }
+                
+                chart.update();
+            });
+        }
+
+        initTheme();
+
         // Close modal on click outside
         document.getElementById('detail-modal').addEventListener('click', function(e) {
             if (e.target === this) {
@@ -3206,10 +4573,35 @@ modalBody.innerHTML = contentHTML;
             }
         });
 
-        // Close modal on Escape key
+        // Close item-detail-modal on click outside
+        document.getElementById('item-detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeItemDetailModal();
+            }
+        });
+
+        // Close modals on Escape key and handle arrow navigation
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeDetailModal();
+                closeItemDetailModal();
+            }
+            
+            // Arrow key navigation for detail modals
+            if (document.getElementById('detail-modal') && !document.getElementById('detail-modal').classList.contains('hidden')) {
+                if (e.key === 'ArrowLeft') {
+                    navigateDetailModal(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navigateDetailModal(1);
+                }
+            }
+            
+            if (document.getElementById('item-detail-modal') && !document.getElementById('item-detail-modal').classList.contains('hidden')) {
+                if (e.key === 'ArrowLeft') {
+                    navigateItemDetail(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navigateItemDetail(1);
+                }
             }
         });
     </script>
