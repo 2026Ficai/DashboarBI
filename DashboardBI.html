@@ -571,6 +571,22 @@
             color: #0F172A;
         }
 
+        [data-theme="light"] #google-sheet-url {
+            background: #FFFFFF;
+            border-color: rgba(0,0,0,0.12);
+            color: #0F172A;
+        }
+
+        [data-theme="light"] #google-sheet-url::placeholder {
+            color: #94A3B8;
+        }
+
+        [data-theme="light"] #google-sheet-url:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+        }
+
         .ranking-anim-out {
             animation: rankingFadeOut 0.15s ease-out forwards;
         }
@@ -2116,6 +2132,21 @@
                     </button>
                     <input type="file" id="file-input" accept=".xlsx,.xls" style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
             </div>
+            <div style="margin: 1.5rem 0; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <p style="color: var(--gray); margin-bottom: 0.75rem; font-size: 0.85rem;">Ou importe do Google Planilhas:</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="google-sheet-url" placeholder="Cole o link do Google Planilhas..." 
+                        style="flex: 1; padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+                               border-radius: 8px; color: var(--white); font-size: 0.85rem;"
+                        onkeypress="if(event.key==='Enter')importGoogleSheet()">
+                    <button class="btn btn-primary" onclick="importGoogleSheet()" style="padding: 0.6rem 1rem;">
+                        <i class="fas fa-link"></i>
+                    </button>
+                </div>
+                <p style="color: var(--gray-dark); font-size: 0.7rem; margin-top: 0.5rem;">
+                    A planilha deve estar compartilhada como "Qualquer pessoa com o link"
+                </p>
+            </div>
             <div id="loading-txt" class="hidden loading">
                 <i class="fas fa-spinner fa-spin"></i> Processando dados...
             </div>
@@ -2460,6 +2491,89 @@
                 input.removeEventListener('change', handleChange);
             };
             input.addEventListener('change', handleChange);
+        }
+
+        function importGoogleSheet() {
+            const urlInput = document.getElementById('google-sheet-url');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Por favor, insira o link do Google Planilhas.');
+                return;
+            }
+
+            document.getElementById('loading-txt').classList.remove('hidden');
+
+            // Extract spreadsheet ID from various URL formats
+            let spreadsheetId = '';
+            
+            // Pattern 1: /d/e/2PACX-.../pubhtml
+            const match1 = url.match(/\/d\/e\/([a-zA-Z0-9_-]+)\//);
+            // Pattern 2: /d/.../edit
+            const match2 = url.match(/\/d\/([a-zA-Z0-9_-]+)\/edit/);
+            // Pattern 3: /spreadsheets/d/...
+            const match3 = url.match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+            
+            if (match1) spreadsheetId = match1[1];
+            else if (match2) spreadsheetId = match2[1];
+            else if (match3) spreadsheetId = match3[1];
+            
+            if (!spreadsheetId) {
+                document.getElementById('loading-txt').classList.add('hidden');
+                alert('Link inválido. Certifique-se de que o link é do Google Planilhas e está compartilhado como "Qualquer pessoa com o link".');
+                return;
+            }
+
+            // Convert to CSV export URL (first sheet)
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+
+            fetch(csvUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Não foi possível acessar a planilha. Verifique se está compartilhada como "Qualquer pessoa com o link".');
+                    return response.text();
+                })
+                .then(csvText => {
+                    // Parse CSV to workbook
+                    const workbook = XLSX.read(csvText, { type: 'string' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const data = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    
+                    if (data.length === 0) {
+                        throw new Error('A planilha está vazia.');
+                    }
+
+                    // Process data
+                    rawData = data;
+                    deptData[currentDepartment].rawData = rawData;
+                    
+                    // Extract headers
+                    if (data.length > 0) {
+                        window.excelHeaders = Object.keys(data[0]);
+                        deptData[currentDepartment].excelHeaders = window.excelHeaders;
+                    }
+
+                    processData();
+                    
+                    deptData[currentDepartment].data = dashboardData;
+                    deptData[currentDepartment].fileName = 'Google Planilhas';
+                    deptData[currentDepartment].loaded = true;
+                    currentFileName = 'Google Planilhas';
+
+                    document.getElementById('import-overlay').classList.add('hidden');
+                    document.getElementById('app-view').classList.remove('hidden');
+                    document.getElementById('file-name').textContent = currentFileName;
+
+                    updateDeptBadges();
+                    renderDashboard();
+                    
+                    document.getElementById('loading-txt').classList.add('hidden');
+                    urlInput.value = '';
+                })
+                .catch(err => {
+                    document.getElementById('loading-txt').classList.add('hidden');
+                    console.error('Erro ao importar do Google Planilhas:', err);
+                    alert('Erro ao importar: ' + err.message);
+                });
         }
 
         function switchDepartment(dept) {
