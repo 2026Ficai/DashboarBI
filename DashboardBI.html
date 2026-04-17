@@ -2591,24 +2591,6 @@
                     tryImportWithFallback(urls, index + 1);
                 });
         }
-                    currentFileName = 'Google Planilhas';
-
-                    document.getElementById('import-overlay').classList.add('hidden');
-                    document.getElementById('app-view').classList.remove('hidden');
-                    document.getElementById('file-name').textContent = currentFileName;
-
-                    updateDeptBadges();
-                    renderDashboard();
-                    
-                    document.getElementById('loading-txt').classList.add('hidden');
-                    urlInput.value = '';
-                })
-                .catch(err => {
-                    document.getElementById('loading-txt').classList.add('hidden');
-                    console.error('Erro ao importar do Google Planilhas:', err);
-                    alert('Erro ao importar: ' + err.message);
-                });
-        }
 
         function switchDepartment(dept) {
             if (!DEPARTMENTS.includes(dept)) return;
