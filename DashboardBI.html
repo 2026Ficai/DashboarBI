@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashboardBI - Almoxarifado</title>
+    <title>DashboardBI - Sistema de Gestão</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
@@ -29,6 +29,7 @@
             --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
             --radius: 12px;
             --radius-sm: 8px;
+            --accent-contrast: var(--accent-light);
         }
 
         [data-theme="purple"] {
@@ -46,6 +47,25 @@
             --border: #2D1F4A;
             --border-light: #3D2A5C;
             --card-bg: linear-gradient(145deg, #150A28 0%, #120520 100%);
+            --accent-contrast: #FFFFFF;
+        }
+
+        [data-theme="luna"] {
+            --bg-primary: #01122D;
+            --bg-secondary: #011C40;
+            --bg-tertiary: #023859;
+            --bg-sidebar: #011636;
+            --accent: #26658C;
+            --accent-light: #A7EBF2;
+            --accent-dim: #54ACBF;
+            --accent-glow: rgba(167, 235, 242, 0.15);
+            --text-primary: #F0F9FF;
+            --text-secondary: #BBE1FA;
+            --text-muted: #8AA7B8;
+            --border: #023859;
+            --border-light: #26658C;
+            --card-bg: linear-gradient(145deg, #011C40 0%, #011636 100%);
+            --accent-contrast: #000000;
         }
 
         [data-theme="light"] {
@@ -63,6 +83,27 @@
             --border: #E0E0E0;
             --border-light: #D0D0D0;
             --card-bg: linear-gradient(145deg, #FFFFFF 0%, #F8F8F8 100%);
+            --accent-contrast: #FFFFFF;
+        }
+
+        [data-theme="hemo"] {
+            --bg-primary: #F3F6FA;
+            --bg-secondary: #F3F6FA;
+            --bg-tertiary: #E8EEF5;
+            --bg-sidebar: #F3F6FA;
+            --accent: #2563EB;
+            --accent-light: #06B6D4;
+            --accent-dim: #3B82F6;
+            --accent-glow: rgba(37, 99, 235, 0.15);
+            --text-primary: #334155;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --border-light: rgba(255, 255, 255, 0.5);
+            --card-bg: #F3F6FA;
+            --accent-contrast: #FFFFFF;
+            --shadow: 8px 8px 16px #D1D9E6, -8px -8px 16px #FFFFFF;
+            --shadow-lg: 12px 12px 24px #D1D9E6, -12px -12px 24px #FFFFFF;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -102,24 +143,46 @@
             margin-bottom: 2rem;
         }
 
-        .nav-item {
+        .sidebar-section {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        .nav-item, .nav-module {
             padding: 0.75rem 1rem;
             color: var(--text-secondary);
             border-radius: var(--radius-sm);
             cursor: pointer;
             margin-bottom: 0.25rem;
             transition: all 0.2s;
+            font-size: 0.9rem;
         }
 
-        .nav-item:hover {
+        .nav-item:hover, .nav-module:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
         }
 
         .nav-item.active {
             background: var(--accent);
-            color: var(--accent-light);
+            color: var(--accent-contrast);
             box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .nav-module {
+            border-left: 3px solid transparent;
+            padding-left: 0.8rem;
+        }
+        .nav-module.active {
+            border-left-color: var(--accent-light);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            box-shadow: none;
         }
 
         .main {
@@ -127,6 +190,7 @@
             margin-left: 220px;
             padding: 1.5rem;
             background: var(--bg-primary);
+            overflow-y: auto;
         }
 
         .header {
@@ -169,38 +233,10 @@
         .theme-btn:hover { transform: scale(1.1); }
         .theme-btn.active { border-color: var(--accent-light); box-shadow: 0 0 10px var(--accent-glow); }
 
-        .filters {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-
-        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
-        .filter-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-        .filter-select, .filter-input {
-            padding: 0.5rem 0.75rem;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            min-width: 120px;
-        }
-        .filter-select:focus, .filter-input:focus {
-            outline: none;
-            border-color: var(--accent-light);
-        }
-
         .btn {
             padding: 0.5rem 1.25rem;
             background: var(--accent);
-            color: var(--accent-light);
+            color: var(--accent-contrast);
             border: none;
             border-radius: var(--radius-sm);
             cursor: pointer;
@@ -211,7 +247,7 @@
 
         .kpiss {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -231,21 +267,28 @@
         }
 
         .kpi-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 0.5rem;
+            line-height: 1.2;
+            height: 2.4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .kpi-value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--text-primary);
         }
 
         .kpi-value.highlight { color: var(--accent-light); }
-        .kpi-sub { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
+        .kpi-sub { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem; }
 
         .charts {
             display: grid;
@@ -300,14 +343,6 @@
             gap: 0.5rem;
         }
 
-        .table-title::before {
-            content: '';
-            width: 3px;
-            height: 14px;
-            background: var(--accent-light);
-            border-radius: 2px;
-        }
-
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -347,6 +382,7 @@
             align-items: center;
             gap: 0.75rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
         .file-name {
@@ -355,17 +391,67 @@
             color: var(--text-secondary);
         }
 
-        .hidden { display: none !important; }
+        /* NOVO CSS PARA ABAS E COMPONENTES */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tabela Analítica */
+        .tabela-search-bar { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .search-input-wrapper { flex: 1; position: relative; min-width: 200px; }
+        .search-input-wrapper input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); font-size: 0.875rem; }
+        .search-input-wrapper input:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 10px var(--accent-glow); }
+        .search-input-wrapper::before { content: '🔍'; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-warning { background: rgba(228, 180, 52, 0.15); color: var(--warning); }
+        .badge-danger { background: rgba(167, 63, 71, 0.15); color: var(--danger); }
+        .badge-info { background: rgba(6, 182, 212, 0.15); color: var(--secondary); }
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }
+        .pagination-btns { display: flex; gap: 0.5rem; }
+        .page-btn { padding: 0.25rem 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); cursor: pointer; transition: all 0.2s; }
+        .page-btn:hover { background: var(--accent); color: var(--accent-contrast); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { color: var(--accent-light); }
+
+        /* Insights */
+        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+        .insight-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-light); }
+        .insight-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-light); }
+        .insight-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .insight-title { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .insight-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .insight-desc { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Relatórios */
+        .relatorios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .relatorio-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .relatorio-header { display: flex; align-items: center; gap: 0.75rem; }
+        .relatorio-header i { font-size: 1.5rem; color: var(--accent-light); }
+        .relatorio-title { font-size: 1.125rem; font-weight: 600; }
+        .relatorio-desc { font-size: 0.875rem; color: var(--text-muted); flex: 1; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-content { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; position: relative; box-shadow: var(--shadow-lg); }
+        .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; }
+        .modal-close:hover { color: var(--accent-light); }
+        .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
 
         @media (max-width: 1200px) {
-            .kpiss { grid-template-columns: repeat(2, 1fr); }
+            .kpiss { grid-template-columns: repeat(3, 1fr); }
             .charts { grid-template-columns: 1fr; }
         }
-
         @media (max-width: 768px) {
-            .sidebar { position: relative; width: 100%; height: auto; }
+            .sidebar { position: relative; width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
             .main { margin-left: 0; }
             .kpiss { grid-template-columns: 1fr; }
+            .theme-btns { display: none; }
+            .file-bar { flex-direction: column; align-items: stretch; }
+            #btnExportCSV { margin-left: 0 !important; }
         }
     </style>
 </head>
@@ -373,23 +459,31 @@
     <nav class="sidebar">
         <div class="logo">DashboardBI</div>
         <div class="logo-sub">Sistema de Gestão</div>
-        <div class="nav-item active" data-tab="almoxarifado">Almoxarifado</div>
-        <div class="nav-item" data-tab="dashboard">Dashboard</div>
-        <div class="nav-item" data-tab="tabela">Tabela</div>
-        <div class="nav-item" data-tab="insights">Insights</div>
-        <div class="nav-item" data-tab="relatorios">Relatórios</div>
-        <div class="nav-item" data-tab="configuracoes">Configurações</div>
+        
+        <div class="sidebar-section">Módulos</div>
+        <div class="nav-module active" data-module="almoxarifado">Almoxarifado</div>
+        <div class="nav-module" data-module="nutricao">Nutrição Escolar</div>
+        <div class="nav-module" data-module="compras">Compras</div>
+        <div class="nav-module" data-module="financeiro">Financeiro</div>
+        
+        <div class="sidebar-section" style="margin-top: 1.5rem;">Visões</div>
+        <div class="nav-item active" data-tab="main">Visão Executiva</div>
+        <div class="nav-item" data-tab="tabela">Tabela Analítica</div>
+        <div class="nav-item" data-tab="insights">Insights Automáticos</div>
+        <div class="nav-item" data-tab="relatorios">Relatórios e Exportação</div>
     </nav>
 
-    <main class="main" id="almoxarifadoContent">
+    <main class="main">
         <div class="header">
             <div>
-                <h1 class="header-title">Almoxarifado</h1>
-                <p class="header-sub">Visão executiva da base importada</p>
+                <h1 class="header-title" id="mainHeaderTitle">Dashboard</h1>
+                <p class="header-sub" id="mainHeaderSub">Carregando...</p>
             </div>
             <div class="theme-btns">
                 <button class="theme-btn active" data-theme="green" title="Green">🟢</button>
                 <button class="theme-btn" data-theme="purple" title="Purple">✦</button>
+                <button class="theme-btn" data-theme="luna" title="Luna">🌙</button>
+                <button class="theme-btn" data-theme="hemo" title="Hemo">💧</button>
                 <button class="theme-btn" data-theme="light" title="Light">☀</button>
             </div>
         </div>
@@ -397,424 +491,478 @@
         <div class="file-bar">
             <span class="file-name" id="fileName">Nenhum arquivo importado</span>
             <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); cursor: pointer; margin-right: 1rem;">
+                <input type="checkbox" id="chkMesclar" checked style="accent-color: var(--accent-light); width: 16px; height: 16px;">
+                Mesclar dados (Manter anteriores)
+            </label>
             <button class="btn" id="btnTrocar">Trocar arquivo</button>
             <button class="btn" id="btnAtualizar">Atualizar</button>
+            <button class="btn" id="btnExportCSV" style="margin-left: auto;">Exportar CSV</button>
         </div>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label class="filter-label">Mês</label>
-                <select class="filter-select" id="filterMes">
-                    <option value="todos">Todos</option>
-                    <option value="janeiro">Janeiro</option>
-                    <option value="fevereiro">Fevereiro</option>
-                    <option value="marco">Março</option>
-                    <option value="abril">Abril</option>
-                </select>
+        <!-- CONTEÚDO PRINCIPAL (MAIN) -->
+        <div id="mainContent" class="tab-content active">
+            <div class="kpiss" id="mainKpis">
+                <!-- KPIs gerados via JS -->
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Modalidade</label>
-                <select class="filter-select" id="filterModalidade">
-                    <option value="todos">Todas</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Unidade</label>
-                <select class="filter-select" id="filterUnidade">
-                    <option value="todos">Todas</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Material</label>
-                <select class="filter-select" id="filterMaterial">
-                    <option value="todos">Todos</option>
-                </select>
-            </div>
-            <button class="btn" id="btnAplicar">Aplicar</button>
-        </div>
-
-        <div class="kpiss">
-            <div class="kpi">
-                <div class="kpi-label">Total de Unidades</div>
-                <div class="kpi-value" id="kpiUnidades">-</div>
-                <div class="kpi-sub">Unidades ativas</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Total de Alunos</div>
-                <div class="kpi-value highlight" id="kpiAlunos">-</div>
-                <div class="kpi-sub">Matrículas ativas</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Valor Total</div>
-                <div class="kpi-value" id="kpiValor">-</div>
-                <div class="kpi-sub">Período selecionado</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Modalidade Principal</div>
-                <div class="kpi-value" id="kpiModalidade">-</div>
-                <div class="kpi-sub">Maior valor</div>
+            <div class="charts" id="mainCharts">
+                <!-- Charts gerados via JS -->
             </div>
         </div>
 
-        <div class="charts">
-            <div class="chart">
-                <h3 class="chart-title">Valor por Modalidade</h3>
-                <div class="chart-canvas"><canvas id="chartModalidade"></canvas></div>
-            </div>
-            <div class="chart">
-                <h3 class="chart-title">Top 10 Unidades</h3>
-                <div class="chart-canvas"><canvas id="chartUnidades"></canvas></div>
-            </div>
-            <div class="chart">
-                <h3 class="chart-title">Distribuição por Material</h3>
-                <div class="chart-canvas"><canvas id="chartMaterial"></canvas></div>
-            </div>
-            <div class="chart">
-                <h3 class="chart-title">Evolução Mensal</h3>
-                <div class="chart-canvas"><canvas id="chartEvolucao"></canvas></div>
+        <!-- CONTEÚDO TABELA -->
+        <div id="tabelaContent" class="tab-content">
+            <div class="table-section">
+                <div class="tabela-search-bar">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="tabelaSearch" placeholder="Busca livre em todas as colunas...">
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;" id="tabelaInfo">Exibindo 0 registros.</div>
+                <table class="data-table">
+                    <thead id="tabelaHead"></thead>
+                    <tbody id="tabelaBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <span id="pageInfo">Página 1 de 1</span>
+                    <div class="pagination-btns">
+                        <button class="page-btn" id="btnPrevPage" disabled>Anterior</button>
+                        <button class="page-btn" id="btnNextPage" disabled>Próxima</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="table-section">
-            <h3 class="table-title">Detalhamento por Material</h3>
-            <table class="data-table">
-                <thead><tr><th>Material</th><th>Quantidade</th><th>Valor</th><th>Custo Médio</th></tr></thead>
-                <tbody id="tableBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aguardando dados...</td></tr></tbody>
-            </table>
+        <!-- CONTEÚDO INSIGHTS -->
+        <div id="insightsContent" class="tab-content">
+            <div class="insights-grid" id="insightsGrid"></div>
+        </div>
+
+        <!-- CONTEÚDO RELATÓRIOS -->
+        <div id="relatoriosContent" class="tab-content">
+            <div class="relatorios-grid" id="relatoriosGrid">
+                <div class="relatorio-card">
+                    <div class="relatorio-header">
+                        <i>📄</i><div class="relatorio-title">Relatório Executivo</div>
+                    </div>
+                    <div class="relatorio-desc">Gera um PDF consolidado com todos os KPIs de alta prioridade e gráficos do módulo atual.</div>
+                    <button class="btn" onclick="alert('Exportação PDF em breve')">Baixar PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DINÂMICO INSIGHTS -->
+        <div id="modalDynamicInsight" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModalInsight()">×</button>
+                <div class="modal-title" id="modalInsightTitle">Detalhes do Insight</div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead id="modalInsightHead"></thead>
+                        <tbody id="modalInsightBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
     <script>
-        var almoxarifadoData = null;
-        var charts = {};
-        var currentTheme = 'green';
+var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null };
+var currentModule = 'compras';
+var currentTab = 'main';
+var charts = {};
+var currentTheme = 'green';
 
-        function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
-        function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v); }
+function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
+function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v||0); }
+function formatPercent(v) { return new Intl.NumberFormat('pt-BR',{style:'percent',minimumFractionDigits:1}).format(v||0); }
 
-        function getColors() {
-            var t = currentTheme;
-            if (t === 'green') return {
-                primary: '#AEF158', primaryLight: '#52B788', secondary: '#06B6D4', tertiary: '#64B5F6',
-                quaternary: '#F97316', quinary: '#E4B434', text: '#E9EEED', textMuted: '#627566',
-                border: '#22342D', success: '#10B981', warning: '#E4B434', danger: '#A73F47'
-            };
-            if (t === 'purple') return {
-                primary: '#A855F7', primaryLight: '#8B5CF6', secondary: '#06B6D4', tertiary: '#6366F1',
-                quaternary: '#F97316', quinary: '#E4B434', text: '#F5F3FF', textMuted: '#8B7BA3',
-                border: '#2D1F4A', success: '#10B981', warning: '#F59E0B', danger: '#EF4444'
-            };
-            return {
-                primary: '#2D6A4F', primaryLight: '#40916C', secondary: '#06B6D4', tertiary: '#6366F1',
-                quaternary: '#F97316', quinary: '#E4B434', text: '#1A1A1A', textMuted: '#7A7A7A',
-                border: '#E0E0E0', success: '#10B981', warning: '#F59E0B', danger: '#EF4444'
-            };
-        }
+function getColors() {
+    var t = currentTheme;
+    if (t === 'green') return { primary: '#AEF158', primaryLight: '#52B788', secondary: '#06B6D4', tertiary: '#64B5F6', textMuted: '#627566', border: '#22342D', bg: 'rgba(174, 241, 88, 0.2)' };
+    if (t === 'purple') return { primary: '#A855F7', primaryLight: '#8B5CF6', secondary: '#06B6D4', tertiary: '#6366F1', textMuted: '#8B7BA3', border: '#2D1F4A', bg: 'rgba(168, 85, 247, 0.2)' };
+    if (t === 'luna') return { primary: '#54ACBF', primaryLight: '#A7EBF2', secondary: '#26658C', tertiary: '#023859', textMuted: '#8AA7B8', border: '#023859', bg: 'rgba(84, 172, 191, 0.2)' };
+    if (t === 'hemo') return { primary: '#2563EB', primaryLight: '#06B6D4', secondary: '#3B82F6', tertiary: '#0EA5E9', textMuted: '#94A3B8', border: '#E2E8F0', bg: 'rgba(37, 99, 235, 0.15)' };
+    return { primary: '#2D6A4F', primaryLight: '#40916C', secondary: '#06B6D4', tertiary: '#6366F1', textMuted: '#7A7A7A', border: '#E0E0E0', bg: 'rgba(45, 106, 79, 0.2)' };
+}
 
-        document.querySelectorAll('.theme-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                currentTheme = this.dataset.theme;
-                document.documentElement.setAttribute('data-theme', currentTheme);
-                document.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
-                this.classList.add('active');
-                if (almoxarifadoData) render();
-            });
-        });
+document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentTheme = this.dataset.theme;
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        refreshView();
+    });
+});
 
-        document.querySelectorAll('.nav-item').forEach(function(item) {
-            item.addEventListener('click', function(e) {
-                console.log('Nav click:', item.dataset.tab);
-                document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-                item.classList.add('active');
-                var tab = item.dataset.tab;
-                if (tab === 'almoxarifado') {
-                    document.getElementById('almoxarifadoContent').classList.remove('hidden');
-                } else if (tab === 'dashboard') {
-                    alert('Dashboard: Em desenvolvimento');
-                } else if (tab === 'tabela') {
-                    alert('Tabela: Em desenvolvimento');
-                } else if (tab === 'insights') {
-                    alert('Insights: Em desenvolvimento');
-                } else if (tab === 'relatorios') {
-                    alert('Relatórios: Em desenvolvimento');
-                } else if (tab === 'configuracoes') {
-                    alert('Configurações: Em desenvolvimento');
+document.querySelectorAll('.nav-module').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-module').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        currentModule = item.dataset.module;
+        refreshView();
+    });
+});
+
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        currentTab = item.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.getElementById(currentTab + 'Content').classList.add('active');
+        refreshView();
+    });
+});
+
+document.getElementById('btnTrocar').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('btnAtualizar').addEventListener('click', () => {
+    var file = document.getElementById('fileInput').files[0];
+    if(file) loadExcel(file);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+    var file = e.target.files[0];
+    if(file) { document.getElementById('fileName').textContent = file.name; loadExcel(file); }
+});
+document.getElementById('btnExportCSV').addEventListener('click', () => {
+    var data = sysData[currentModule];
+    if (!data || !data.rows || !data.rows.length) return alert('Sem dados para exportar');
+    var keys = Object.keys(data.rows[0]);
+    var csv = keys.join(',') + '\n' + data.rows.map(r => keys.map(k => '"'+(r[k]||'')+'"').join(',')).join('\n');
+    var a = document.createElement('a');
+    a.href = window.URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+    a.download = currentModule + '_export.csv';
+    a.click();
+});
+
+function loadExcel(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var data = new Uint8Array(e.target.result);
+            var wb = XLSX.read(data, {type: 'array'});
+            var json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+            if(json.length < 2) return alert('Planilha vazia');
+
+            var headers = json[0].map(h => String(h).toUpperCase().trim());
+            var rows = [];
+
+            for (var i = 1; i < json.length; i++) {
+                var r = json[i];
+                if (!r || r.length===0) continue;
+                var obj = {};
+                
+                if (currentModule === 'almoxarifado') {
+                    obj.material = r[headers.findIndex(h=>h.includes('MATERIAL')||h.includes('ITEM'))] || '';
+                    obj.unidade = r[headers.findIndex(h=>h.includes('UNIDADE')||h.includes('ESCOLA')||h.includes('SETOR'))] || '';
+                    obj.saldo_atual = parseFloat(r[headers.findIndex(h=>h.includes('SALDO'))]) || 0;
+                    obj.estoque_minimo = parseFloat(r[headers.findIndex(h=>h.includes('MÍNIMO')||h.includes('MINIMO'))]) || 0;
+                    obj.requisicoes = parseFloat(r[headers.findIndex(h=>h.includes('REQUISI'))]) || 0;
+                    obj.tempo_atendimento = parseFloat(r[headers.findIndex(h=>h.includes('TEMPO'))]) || 0;
+                    obj.valor_total = parseFloat(r[headers.findIndex(h=>h.includes('VALOR')||h.includes('ESTOCADO'))]) || 0;
+                    obj.perdas = parseFloat(r[headers.findIndex(h=>h.includes('PERDA')||h.includes('AVARIA'))]) || 0;
+                    obj.consumo_mensal = parseFloat(r[headers.findIndex(h=>h.includes('CONSUMO'))]) || 0;
+                    if(!obj.material) continue;
+                } 
+                else if (currentModule === 'compras') {
+                    obj.processo = r[headers.findIndex(h=>h.includes('PROCESSO'))] || '';
+                    obj.solicitante = r[headers.findIndex(h=>h.includes('SOLICITANTE')||h.includes('DEP'))] || '';
+                    obj.objeto = r[headers.findIndex(h=>h.includes('OBJETO'))] || '';
+                    obj.valor_solicitado = parseFloat(r[headers.findIndex(h=>h.includes('SOLICITADO'))]) || 0;
+                    obj.valor_contratado = parseFloat(r[headers.findIndex(h=>h.includes('CONTRATADO')||h.includes('HOMOLOGADO'))]) || 0;
+                    obj.fornecedor = r[headers.findIndex(h=>h.includes('FORNECEDOR')||h.includes('EMPRESA'))] || '';
+                    obj.status = r[headers.findIndex(h=>h.includes('STATUS')||h.includes('SITUA'))] || 'Em Aberto';
+                    obj.prazo_dias = parseFloat(r[headers.findIndex(h=>h.includes('PRAZO')||h.includes('DIAS'))]) || 0;
+                    obj.doc = r[headers.findIndex(h=>h.includes('DOC'))] || '';
+                    if(!obj.processo) continue;
                 }
-            });
-        });
-
-        document.getElementById('btnTrocar').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
-        });
-
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            var file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('fileName').textContent = file.name;
-            loadExcel(file);
-        });
-
-        document.getElementById('btnAtualizar').addEventListener('click', function() {
-            if (document.getElementById('fileInput').files[0]) {
-                loadExcel(document.getElementById('fileInput').files[0]);
+                else if (currentModule === 'financeiro') {
+                    obj.processo = r[headers.findIndex(h=>h.includes('PROCESSO'))] || '';
+                    obj.departamento = r[headers.findIndex(h=>h.includes('DEPARTAMENTO')||h.includes('SETOR'))] || '';
+                    obj.categoria = r[headers.findIndex(h=>h.includes('CATEGORIA')||h.includes('OBJETO'))] || '';
+                    obj.fonte = r[headers.findIndex(h=>h.includes('FONTE')||h.includes('RECURSO'))] || '';
+                    obj.dotacao_inicial = parseFloat(r[headers.findIndex(h=>h.includes('INICIAL')||h.includes('PREVISTO'))]) || 0;
+                    obj.dotacao_atualizada = parseFloat(r[headers.findIndex(h=>h.includes('ATUALIZADA'))]) || obj.dotacao_inicial;
+                    obj.empenhado = parseFloat(r[headers.findIndex(h=>h.includes('EMPENHADO'))]) || 0;
+                    obj.liquidado = parseFloat(r[headers.findIndex(h=>h.includes('LIQUIDADO'))]) || 0;
+                    obj.pago = parseFloat(r[headers.findIndex(h=>h.includes('PAGO'))]) || 0;
+                    obj.status = r[headers.findIndex(h=>h.includes('STATUS'))] || 'Normal';
+                    if(!obj.departamento && !obj.empenhado) continue;
+                }
+                else if (currentModule === 'nutricao') {
+                    obj.unidade = r[headers.findIndex(h=>h.includes('UNIDADE')||h.includes('ESCOLA'))] || '';
+                    obj.atendidos = parseFloat(r[headers.findIndex(h=>h.includes('ATENDIDOS')||h.includes('ALUNOS'))]) || 0;
+                    obj.refeicoes = parseFloat(r[headers.findIndex(h=>h.includes('REFEI'))]) || 0;
+                    obj.custo_total = parseFloat(r[headers.findIndex(h=>h.includes('CUSTO'))]) || 0;
+                    obj.desperdicio = parseFloat(r[headers.findIndex(h=>h.includes('DESPERD'))]) || 0;
+                    obj.planejamento = parseFloat(r[headers.findIndex(h=>h.includes('PLANEJA'))]) || obj.refeicoes;
+                    obj.item_falta = parseFloat(r[headers.findIndex(h=>h.includes('FALTA'))]) || 0;
+                    obj.conformidade = r[headers.findIndex(h=>h.includes('CONFORMIDADE')||h.includes('STATUS'))] || 'Conforme';
+                    if(!obj.unidade) continue;
+                }
+                rows.push(obj);
             }
-        });
 
-        document.getElementById('btnAplicar').addEventListener('click', function() {
-            applyFilters();
-        });
-
-        // Auto-filter on select change
-        document.getElementById('filterMes').addEventListener('change', applyFilters);
-        document.getElementById('filterModalidade').addEventListener('change', applyFilters);
-        document.getElementById('filterUnidade').addEventListener('change', applyFilters);
-        document.getElementById('filterMaterial').addEventListener('change', applyFilters);
-
-        function loadExcel(file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    var data = new Uint8Array(e.target.result);
-                    var wb = XLSX.read(data, {type: 'array'});
-                    var ws = wb.Sheets[wb.SheetNames[0]];
-                    var json = XLSX.utils.sheet_to_json(ws, {header: 1});
-                    if (!json || json.length < 2) { alert('Planilha vazia'); return; }
-
-                    var headers = json[0].map(function(h) { return String(h).toUpperCase().trim(); });
-                    var modIdx = headers.findIndex(function(h) { return h.includes('MODALIDADE'); });
-                    var uniIdx = headers.findIndex(function(h) { return h.includes('UNIDADE'); });
-                    var matIdx = headers.findIndex(function(h) { return h.includes('MATERIAL'); });
-                    var qtdIdx = headers.findIndex(function(h) { return h.includes('QUANTIDADE') || h.includes('QTD'); });
-                    var valIdx = headers.findIndex(function(h) { return h.includes('VALOR') || h.includes('VAL'); });
-
-                    if (matIdx === -1 || qtdIdx === -1 || valIdx === -1) {
-                        alert('Colunas não encontradas. Use: MATERIAL, QUANTIDADE, VALOR'); return;
-                    }
-
-                    var rows = [];
-                    for (var i = 1; i < json.length; i++) {
-                        var r = json[i];
-                        if (!r[matIdx]) continue;
-                        rows.push({
-                            modalidade: modIdx >= 0 ? String(r[modIdx] || '').trim() : '',
-                            unidade: uniIdx >= 0 ? String(r[uniIdx] || '').trim() : '',
-                            material: String(r[matIdx] || '').trim(),
-                            quantidade: parseFloat(r[qtdIdx]) || 0,
-                            valor: parseFloat(r[valIdx]) || 0
-                        });
-                    }
-
-                    almoxarifadoData = { rows: rows };
-                    updateFilters();
-                    render();
-                } catch(err) { alert('Erro: ' + err.message); console.error(err); }
-            };
-            reader.onerror = function() { alert('Erro ao ler arquivo'); };
-            reader.readAsArrayBuffer(file);
-        }
-
-function updateFilters() {
-            if (!almoxarifadoData || !almoxarifadoData.rows) return;
-            var mods = [...new Set(almoxarifadoData.rows.map(function(r) { return r.modalidade; }))].filter(Boolean).sort();
-            var unis = [...new Set(almoxarifadoData.rows.map(function(r) { return r.unidade; }))].filter(Boolean).sort();
-            var mats = [...new Set(almoxarifadoData.rows.map(function(r) { return r.material; }))].filter(Boolean).sort();
-            
-            console.log('updateFilters - rows:', almoxarifadoData.rows.length, 'unidades:', unis);
-
-            var fill = function(id, vals, def) {
-                var el = document.getElementById(id);
-                if (el) el.innerHTML = '<option value="todos">' + def + '</option>' + vals.map(function(v) { return '<option value="'+v+'">'+v+'</option>'; }).join('');
-            };
-            fill('filterModalidade', mods, 'Todas');
-            fill('filterUnidade', unis, 'Todas');
-            fill('filterMaterial', mats, 'Todos');
-        }
-
-        function applyFilters() {
-            if (!almoxarifadoData || !almoxarifadoData.rows) return;
-            var fMod = document.getElementById('filterModalidade').value;
-            var fUni = document.getElementById('filterUnidade').value;
-            var fMat = document.getElementById('filterMaterial').value;
-
-            var filtered = almoxarifadoData.rows.filter(function(r) {
-                if (fMod !== 'todos' && r.modalidade !== fMod) return false;
-                if (fUni !== 'todos' && r.unidade !== fUni) return false;
-                if (fMat !== 'todos' && r.material !== fMat) return false;
-                return true;
-            });
-
-            // Group by material but keep all fields
-            var matMap = {};
-            filtered.forEach(function(r) {
-                var m = r.material || 'N/A';
-                if (!matMap[m]) {
-                    matMap[m] = { 
-                        material: m, 
-                        modalidade: r.modalidade || '',
-                        unidade: r.unidade || '',
-                        quantidade: 0, 
-                        valor: 0 
-                    };
-                }
-                matMap[m].quantidade += r.quantidade;
-                matMap[m].valor += r.valor;
-            });
-
-            almoxarifadoData.filtered = Object.values(matMap);
-            render();
-        }
-
-        function render() {
-            if (!almoxarifadoData) {
-loadDemo();
-        console.log('DashboardBI ready. Theme:', currentTheme);
-                return;
+            var chk = document.getElementById('chkMesclar');
+            if(chk && chk.checked && sysData[currentModule] && !sysData[currentModule].isDemo) {
+                var c = sysData[currentModule].rows.concat(rows);
+                sysData[currentModule] = {rows: c, filtered: c};
+            } else {
+                sysData[currentModule] = {rows: rows, filtered: rows};
             }
-            var data = almoxarifadoData.filtered || (almoxarifadoData.rows ? Object.values(almoxarifadoData.rows.reduce(function(m, r) {
-                var k = r.material || 'N/A';
-                if (!m[k]) m[k] = { material: k, quantidade: 0, valor: 0 };
-                m[k].quantidade += r.quantidade;
-                m[k].valor += r.valor;
-                return m;
-            }, {})).map(function(r) { return r; }) : []);
-            if (!data || data.length === 0) { loadDemo(); return; }
+            refreshView();
+        } catch(e) { alert('Erro: ' + e); }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
-            var c = getColors();
-            var totalQtd = data.reduce(function(s, m) { return s + m.quantidade; }, 0);
-            var totalValor = data.reduce(function(s, m) { return s + m.valor; }, 0);
+function clearCharts() { Object.values(charts).forEach(c => c && c.destroy()); charts = {}; }
 
-            document.getElementById('kpiUnidades').textContent = [...new Set(data.map(function(m) { return m.material; }))].length;
-            document.getElementById('kpiAlunos').textContent = formatNumber(totalQtd);
-            document.getElementById('kpiValor').textContent = formatCurrency(totalValor);
+function refreshView() {
+    var titles = {
+        almoxarifado: ['Almoxarifado', 'Gestão de materiais e distribuição'],
+        compras: ['Compras', 'Gestão de processos e fornecedores'],
+        financeiro: ['Financeiro', 'Orçamento, empenho e execução'],
+        nutricao: ['Nutrição Escolar', 'Alimentação e consumo na rede']
+    };
+    document.getElementById('mainHeaderTitle').textContent = titles[currentModule][0] + (currentTab!=='main' ? ' - '+document.querySelector(`[data-tab="${currentTab}"]`).textContent : '');
+    document.getElementById('mainHeaderSub').textContent = titles[currentModule][1];
+    
+    if(currentTab === 'main') renderMain();
+    else if(currentTab === 'tabela') renderTabela();
+    else if(currentTab === 'insights') renderInsights();
+}
 
-            var byMod = data.reduce(function(m, r) {
-                var k = r.material || 'N/A';
-                m[k] = (m[k] || 0) + r.valor;
-                return m;
-            }, {});
-            var topMod = Object.keys(byMod).reduce(function(a, b) { return byMod[a] > byMod[b] ? a : b; }, '-');
-            document.getElementById('kpiModalidade').textContent = topMod;
+function renderMain() {
+    clearCharts();
+    var data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    var kEl = document.getElementById('mainKpis');
+    var cEl = document.getElementById('mainCharts');
+    var cl = getColors();
+    Chart.defaults.color = cl.textMuted;
+    Chart.defaults.borderColor = cl.border;
 
-            renderCharts(data, c);
-            renderTable(data);
-        }
+    if(data.length === 0) {
+        kEl.innerHTML = `<div class="kpi"><div class="kpi-label">Aviso</div><div class="kpi-value">Sem Dados</div></div>`;
+        cEl.innerHTML = ''; return;
+    }
 
-        function renderCharts(data, c) {
-            Chart.defaults.color = c.textMuted;
-            Chart.defaults.borderColor = c.border;
+    if (currentModule === 'compras') {
+        var reqs = data.length;
+        var dias = data.reduce((s,r)=>s+(r.prazo_dias||0),0) / reqs;
+        var prazoOk = data.filter(r=>r.status!=='Atrasado').length;
+        var vSol = data.reduce((s,r)=>s+(r.valor_solicitado||0),0);
+        var vCon = data.reduce((s,r)=>s+(r.valor_contratado||0),0);
+        var econ = vSol - vCon;
 
-            var ctx1 = document.getElementById('chartModalidade').getContext('2d');
-            if (charts.m) charts.m.destroy();
-            var sorted1 = data.slice().sort(function(a, b) { return b.valor - a.valor; });
-            charts.m = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: sorted1.map(function(m) { return m.material; }),
-                    datasets: [{ data: sorted1.map(function(m) { return m.valor; }), backgroundColor: c.primary, borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: c.border }, ticks: { callback: function(v) { return formatCurrency(v); } } },
-                        y: { grid: { display: false } }
-                    }
-                }
-            });
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Total de Solicitações de Compra</div><div class="kpi-value highlight">${formatNumber(reqs)}</div><div class="kpi-sub">Processos gerados</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio (Solicit. -> Concluída)</div><div class="kpi-value">${formatNumber(dias)} dias</div><div class="kpi-sub">Média global</div></div>
+            <div class="kpi"><div class="kpi-label">% de Processos no Prazo</div><div class="kpi-value ${prazoOk/reqs < 0.8 ? 'badge-danger' : ''}">${formatPercent(reqs?prazoOk/reqs:0)}</div><div class="kpi-sub">Cumprimento de SLA</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Total Solicitado</div><div class="kpi-value">${formatCurrency(vSol)}</div><div class="kpi-sub">Demanda orçamentária</div></div>
+            <div class="kpi"><div class="kpi-label">Economia Obtida na Compra</div><div class="kpi-value" style="color:var(--success)">${formatCurrency(econ)}</div><div class="kpi-sub">Valor retido</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Processos por Status</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Valor Solicitado x Contratado (Top)</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var st = {}; data.forEach(r=>{ st[r.status||'N/A']=(st[r.status||'N/A']||0)+1; });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'doughnut', data:{ labels:Object.keys(st), datasets:[{data:Object.values(st), backgroundColor:[cl.primary, cl.secondary, cl.warning, cl.danger]}] }, options:{responsive:true,maintainAspectRatio:false} });
+        var top = data.slice(0,5);
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:top.map(t=>t.processo), datasets:[{label:'Solicitado', data:top.map(t=>t.valor_solicitado), backgroundColor:cl.textMuted},{label:'Contratado', data:top.map(t=>t.valor_contratado), backgroundColor:cl.primary}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+    else if (currentModule === 'financeiro') {
+        var dAtual = data.reduce((s,r)=>s+(r.dotacao_atualizada||0),0);
+        var empenh = data.reduce((s,r)=>s+(r.empenhado||0),0);
+        var liquid = data.reduce((s,r)=>s+(r.liquidado||0),0);
+        var pago = data.reduce((s,r)=>s+(r.pago||0),0);
 
-            var ctx2 = document.getElementById('chartUnidades').getContext('2d');
-            if (charts.u) charts.u.destroy();
-            charts.u = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: sorted1.slice(0, 10).map(function(m) { return m.material; }),
-                    datasets: [{ data: sorted1.slice(0, 10).map(function(m) { return m.valor; }), backgroundColor: c.primaryLight, borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: c.border }, ticks: { callback: function(v) { return formatCurrency(v); } } },
-                        y: { grid: { display: false } }
-                    }
-                }
-            });
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Dotação Atualizada</div><div class="kpi-value">${formatCurrency(dAtual)}</div><div class="kpi-sub">Orçamento vigente</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Empenhado</div><div class="kpi-value highlight">${formatCurrency(empenh)}</div><div class="kpi-sub">Comprometido</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Liquidado</div><div class="kpi-value">${formatCurrency(liquid)}</div><div class="kpi-sub">Reconhecido</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Pago</div><div class="kpi-value" style="color:var(--success)">${formatCurrency(pago)}</div><div class="kpi-sub">Efetivado</div></div>
+            <div class="kpi"><div class="kpi-label">% de Execução Orçamentária</div><div class="kpi-value">${formatPercent(dAtual?empenh/dAtual:0)}</div><div class="kpi-sub">Do orçamento consumido</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Gasto por Departamento (Empenhado)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Cascata de Execução Global</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var dpt = {}; data.forEach(r=>{ dpt[r.departamento||'N/A']=(dpt[r.departamento||'N/A']||0)+r.empenhado; });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:Object.keys(dpt), datasets:[{data:Object.values(dpt), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:['Empenhado','Liquidado','Pago'], datasets:[{data:[empenh, liquid, pago], backgroundColor:[cl.textMuted, cl.secondary, cl.primary]}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+    }
+    else if (currentModule === 'nutricao') {
+        var alunos = data.reduce((s,r)=>s+(r.atendidos||0),0);
+        var ref = data.reduce((s,r)=>s+(r.refeicoes||0),0);
+        var plan = data.reduce((s,r)=>s+(r.planejamento||r.refeicoes),0);
+        var custo = data.reduce((s,r)=>s+(r.custo_total||0),0);
+        var desp = data.reduce((s,r)=>s+(r.desperdicio||0),0);
 
-            var ctx3 = document.getElementById('chartMaterial').getContext('2d');
-            if (charts.d) charts.d.destroy();
-            var colors = [c.primary, c.secondary, c.tertiary, c.quaternary, c.quinary, c.primaryLight, c.success, c.warning];
-            charts.d = new Chart(ctx3, {
-                type: 'doughnut',
-                data: {
-                    labels: sorted1.slice(0, 8).map(function(m) { return m.material; }),
-                    datasets: [{ data: sorted1.slice(0, 8).map(function(m) { return m.valor; }), backgroundColor: colors, borderWidth: 0 }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 8 } } }
-                }
-            });
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Alunos Atendidos</div><div class="kpi-value highlight">${formatNumber(alunos)}</div><div class="kpi-sub">Na rede</div></div>
+            <div class="kpi"><div class="kpi-label">% de Cobertura Alimentar</div><div class="kpi-value">${formatPercent(0.95)}</div><div class="kpi-sub">Estimado</div></div>
+            <div class="kpi"><div class="kpi-label">% de Execução do Cardápio</div><div class="kpi-value">${formatPercent(plan?ref/plan:1)}</div><div class="kpi-sub">Aderência ao planejado</div></div>
+            <div class="kpi"><div class="kpi-label">Custo por Refeição</div><div class="kpi-value">${formatCurrency(ref?custo/ref:0)}</div><div class="kpi-sub">Custo médio global</div></div>
+            <div class="kpi"><div class="kpi-label">Índice de Desperdício</div><div class="kpi-value" style="color:var(--danger)">${formatPercent(ref?desp/ref:0)}</div><div class="kpi-sub">Sobras/Perdas reportadas</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Refeições Servidas por Unidade</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Planejado x Executado do Cardápio</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var ukeys = data.map(x=>x.unidade).slice(0,10);
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:ukeys, datasets:[{data:data.slice(0,10).map(x=>x.refeicoes), backgroundColor:cl.primary}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:ukeys, datasets:[{label:'Planejado',data:data.slice(0,10).map(x=>x.planejamento), backgroundColor:cl.textMuted}, {label:'Executado',data:data.slice(0,10).map(x=>x.refeicoes), backgroundColor:cl.secondary}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+    else if (currentModule === 'almoxarifado') {
+        var vEstoque = data.reduce((s,r)=>s+(r.valor_total||0),0);
+        var req = data.reduce((s,r)=>s+(r.requisicoes||0),0);
+        var min = data.filter(r=>(r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+        var tempo = data.reduce((s,r)=>s+(r.tempo_atendimento||0),0) / (data.length||1);
+        var perdas = data.reduce((s,r)=>s+(r.perdas||0),0) / (data.length||1);
 
-            var ctx4 = document.getElementById('chartEvolucao').getContext('2d');
-            if (charts.e) charts.e.destroy();
-            charts.e = new Chart(ctx4, {
-                type: 'bar',
-                data: {
-                    labels: ['JAN', 'FEV', 'MAR', 'ABR'],
-                    datasets: [{ data: [25000, 30000, 20000, 25000], backgroundColor: c.primary, borderRadius: 4 }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: c.border }, ticks: { callback: function(v) { return formatCurrency(v); } } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Valor Total Estocado</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
+            <div class="kpi"><div class="kpi-label">Total de Requisições</div><div class="kpi-value">${formatNumber(req)}</div><div class="kpi-sub">Atendimentos no período</div></div>
+            <div class="kpi"><div class="kpi-label">Itens Abaixo do Mínimo</div><div class="kpi-value ${min>0?'badge-warning':''}">${formatNumber(min)}</div><div class="kpi-sub">Risco de ruptura</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo)} dias</div><div class="kpi-sub">Agilidade interna</div></div>
+            <div class="kpi"><div class="kpi-label">Índice de Perdas</div><div class="kpi-value ${perdas>0?'badge-danger':''}">${formatPercent(perdas/100)}</div><div class="kpi-sub">Materiais inutilizados</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Consumo Médio Mensal por Unidade (Top)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Saldo Atual por Item (Top 10)</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var dpt = {}; data.forEach(r=>{ dpt[r.unidade||'N/A']=(dpt[r.unidade||'N/A']||0)+(r.consumo_mensal||0); });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:Object.keys(dpt).slice(0,10), datasets:[{data:Object.values(dpt).slice(0,10), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        var top = data.sort((a,b)=>b.saldo_atual-a.saldo_atual).slice(0,10);
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:top.map(t=>t.material), datasets:[{data:top.map(t=>t.saldo_atual), backgroundColor:cl.secondary}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+    }
+}
 
-        function renderTable(data) {
-            var tbody = document.getElementById('tableBody');
-            var sorted = data.slice().sort(function(a, b) { return b.valor - a.valor; }).slice(0, 15);
-            if (sorted.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Sem dados</td></tr>';
-                return;
-            }
-            tbody.innerHTML = sorted.map(function(m) {
-                var custo = m.quantidade > 0 ? m.valor / m.quantidade : 0;
-                return '<tr><td>' + m.material + '</td><td class="num">' + formatNumber(m.quantidade) + '</td><td class="money">' + formatCurrency(m.valor) + '</td><td class="money">' + formatCurrency(custo) + '</td></tr>';
-            }).join('');
-        }
+var tPage = 1, tSort = '', tDesc = false, tSearch = '';
+document.getElementById('tabelaSearch').addEventListener('input', e => { tSearch = e.target.value.toLowerCase(); tPage=1; renderTabela(); });
+document.getElementById('btnPrevPage').addEventListener('click', () => { if(tPage>1) { tPage--; renderTabela(); } });
+document.getElementById('btnNextPage').addEventListener('click', () => { tPage++; renderTabela(); });
 
-        function loadDemo() {
-            var demo = [
-                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'FRALDA', quantidade: 15000, valor: 12750.00 },
-                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'SABONETE', quantidade: 4500, valor: 6750.00 },
-                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'PAPEL HIG.', quantidade: 4200, valor: 5040.00 },
-                { modalidade: 'CRECHE', unidade: 'CEI SONHO INFANTIL', material: 'FRALDA', quantidade: 8000, valor: 6800.00 },
-                { modalidade: 'CRECHE', unidade: 'CEI SONHO INFANTIL', material: 'GUARDANCHO', quantidade: 3500, valor: 4200.00 },
-                { modalidade: 'EMEI', unidade: 'EMEI JARDIM', material: 'CANETA', quantidade: 1800, valor: 2340.00 },
-                { modalidade: 'EMEI', unidade: 'EMEI JARDIM', material: 'CADERNO', quantidade: 1200, valor: 3600.00 },
-                { modalidade: 'EMEI', unidade: 'EMEI FLOR', material: 'CANETA', quantidade: 1400, valor: 1820.00 },
-                { modalidade: 'EMEI', unidade: 'EMEI FLOR', material: 'EVA', quantidade: 650, valor: 1950.00 },
-                { modalidade: 'EMEIEF', unidade: 'EMEIEF SAO JOSE', material: 'PAPEL HIG.', quantidade: 4000, valor: 4800.00 },
-                { modalidade: 'EMEIEF', unidade: 'EMEIEF SAO JOSE', material: 'LUVA DESC.', quantidade: 2500, valor: 3250.00 },
-                { modalidade: 'EMEIEF', unidade: 'EMEIEF SANTA MARIA', material: 'PAPEL HIG.', quantidade: 3800, valor: 4560.00 }
-            ];
-            almoxarifadoData = { rows: demo, filtered: demo };
-            updateFilters();
-            render();
-        }
+function renderTabela() {
+    var cols = [];
+    if(currentModule==='compras') cols=[{k:'processo',l:'Processo'},{k:'solicitante',l:'Solicitante'},{k:'objeto',l:'Objeto'},{k:'valor_solicitado',l:'V. Solicitado'},{k:'valor_contratado',l:'V. Contratado'},{k:'fornecedor',l:'Fornecedor'},{k:'status',l:'Status'},{k:'prazo_dias',l:'Prazo (d)'},{k:'doc',l:'Doc'}];
+    else if(currentModule==='financeiro') cols=[{k:'processo',l:'Processo'},{k:'departamento',l:'Depto'},{k:'categoria',l:'Categoria'},{k:'fonte',l:'Fonte'},{k:'empenhado',l:'Empenhado'},{k:'liquidado',l:'Liquidado'},{k:'pago',l:'Pago'},{k:'status',l:'Status'}];
+    else if(currentModule==='nutricao') cols=[{k:'unidade',l:'Unidade'},{k:'atendidos',l:'Alunos'},{k:'refeicoes',l:'Refeições'},{k:'custo_total',l:'Custo Total'},{k:'desperdicio',l:'Desperdício'},{k:'item_falta',l:'Itens Falta'},{k:'conformidade',l:'Status'}];
+    else cols=[{k:'material',l:'Material'},{k:'unidade',l:'Unidade'},{k:'saldo_atual',l:'Saldo'},{k:'estoque_minimo',l:'Minimo'},{k:'requisicoes',l:'Req. Atendidas'},{k:'valor_total',l:'V. Estocado'},{k:'consumo_mensal',l:'Consumo Médio'}];
 
-        loadDemo();
+    var data = sysData[currentModule] ? sysData[currentModule].rows.slice() : [];
+    if(tSearch) data = data.filter(r => Object.values(r).some(v=>String(v).toLowerCase().includes(tSearch)));
+    if(tSort) data.sort((a,b)=>{ var va=a[tSort], vb=b[tSort]; if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();} return (va<vb ? -1 : 1)*(tDesc?-1:1); });
+
+    var total = Math.ceil(data.length/10)||1;
+    if(tPage>total) tPage = total;
+    var pageData = data.slice((tPage-1)*10, tPage*10);
+
+    document.getElementById('tabelaHead').innerHTML = '<tr>'+cols.map(c=>`<th class="sortable" onclick="tSort='${c.k}';tDesc=!tDesc;renderTabela()">${c.l}</th>`).join('')+'</tr>';
+    document.getElementById('tabelaBody').innerHTML = pageData.length ? pageData.map(r=>'<tr>'+cols.map(c=>{
+        var v = r[c.k];
+        if(typeof v==='number' && (c.k.includes('valor')||c.k.includes('custo')||c.k==='empenhado'||c.k==='liquidado'||c.k==='pago')) return `<td class="money">${formatCurrency(v)}</td>`;
+        if(typeof v==='number') return `<td class="num">${formatNumber(v)}</td>`;
+        if(c.k==='status'||c.k==='conformidade') return `<td><span class="badge ${v==='Concluído'||v==='Conforme'||v==='Normal'?'badge-success':(v==='Pendente'?'badge-warning':'badge-danger')}">${v}</span></td>`;
+        return `<td>${v||'—'}</td>`;
+    }).join('')+'</tr>').join('') : `<tr><td colspan="${cols.length}" style="text-align:center">Sem dados</td></tr>`;
+    
+    document.getElementById('tabelaInfo').textContent = `Exibindo ${data.length} registros.`;
+    document.getElementById('pageInfo').textContent = `Página ${tPage} de ${total}`;
+    document.getElementById('btnPrevPage').disabled = tPage===1;
+    document.getElementById('btnNextPage').disabled = tPage===total;
+}
+
+function renderInsights() {
+    var data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    var html = '';
+    if(data.length) {
+        if(currentModule==='compras') html = `<div class="insight-card" onclick="showModalInsight('compras')"><div class="insight-icon">💰</div><div class="insight-title">Economia Total</div><div class="insight-value">${formatCurrency(data.reduce((s,r)=>s+(r.valor_solicitado-r.valor_contratado),0))}</div><div class="insight-desc">Economia gerada pelos processos. Clique para ver detalhes.</div></div>`;
+        else if(currentModule==='financeiro') html = `<div class="insight-card" onclick="showModalInsight('financeiro')"><div class="insight-icon">📉</div><div class="insight-title">Restos a Pagar Previstos</div><div class="insight-value">${formatCurrency(data.reduce((s,r)=>s+(r.empenhado-r.pago),0))}</div><div class="insight-desc">Diferença apurada. Clique para ver detalhes.</div></div>`;
+        else if(currentModule==='nutricao') html = `<div class="insight-card" onclick="showModalInsight('nutricao')"><div class="insight-icon">⚠️</div><div class="insight-title">Taxa de Desperdício</div><div class="insight-value">${formatPercent(data.reduce((s,r)=>s+r.desperdicio,0)/data.reduce((s,r)=>s+r.refeicoes,0))}</div><div class="insight-desc">Média global. Clique para ver unidades com desperdício.</div></div>`;
+        else if(currentModule==='almoxarifado') html = `<div class="insight-card" onclick="showModalInsight('almoxarifado')"><div class="insight-icon">📦</div><div class="insight-title">Itens Críticos</div><div class="insight-value">${data.filter(r=>(r.saldo_atual||0) < (r.estoque_minimo||0)).length}</div><div class="insight-desc">Clique para ver os detalhes dos itens com saldo abaixo do mínimo.</div></div>`;
+    }
+    document.getElementById('insightsGrid').innerHTML = html || '<p>Sem insights para exibir no momento.</p>';
+}
+
+function loadDemo() {
+    sysData.almoxarifado = { isDemo: true, rows: [
+        { material: 'Fralda M', unidade: 'CEI NOVA VIDA', saldo_atual: 1500, estoque_minimo: 2000, requisicoes: 150, tempo_atendimento: 2, valor_total: 15000, perdas: 5, consumo_mensal: 500 },
+        { material: 'Sabonete Líquido', unidade: 'CEI NOVA VIDA', saldo_atual: 3000, estoque_minimo: 1000, requisicoes: 80, tempo_atendimento: 1, valor_total: 3000, perdas: 0, consumo_mensal: 1000 },
+        { material: 'Papel Sulfite A4', unidade: 'EMEI JARDIM', saldo_atual: 500, estoque_minimo: 500, requisicoes: 200, tempo_atendimento: 3, valor_total: 10000, perdas: 2, consumo_mensal: 100 },
+        { material: 'Caneta Azul', unidade: 'EMEI JARDIM', saldo_atual: 100, estoque_minimo: 500, requisicoes: 50, tempo_atendimento: 4, valor_total: 100, perdas: 1, consumo_mensal: 200 }
+    ]};
+    sysData.nutricao = { isDemo: true, rows: [
+        { unidade: 'EMEI JARDIM', atendidos: 350, refeicoes: 7000, custo_total: 10500, desperdicio: 350, planejamento: 7200, item_falta: 2, conformidade: 'Conforme' },
+        { unidade: 'CEI NOVA VIDA', atendidos: 200, refeicoes: 4000, custo_total: 8000, desperdicio: 480, planejamento: 4000, item_falta: 5, conformidade: 'Pendente' },
+        { unidade: 'EMEIEF SAO JOSE', atendidos: 500, refeicoes: 10000, custo_total: 16000, desperdicio: 200, planejamento: 10500, item_falta: 0, conformidade: 'Conforme' }
+    ]};
+    sysData.compras = { isDemo: true, rows: [
+        { processo: '001/2026', solicitante: 'Educação', objeto: 'Material Escolar', valor_solicitado: 50000, valor_contratado: 45000, fornecedor: 'Papelaria XYZ', status: 'Concluído', prazo_dias: 15, doc: 'Completa' },
+        { processo: '002/2026', solicitante: 'Saúde', objeto: 'Mobiliário', valor_solicitado: 120000, valor_contratado: 110000, fornecedor: 'Móveis ABC', status: 'Em Aberto', prazo_dias: 45, doc: 'Pendente' },
+        { processo: '003/2026', solicitante: 'TI', objeto: 'Informática', valor_solicitado: 80000, valor_contratado: 78000, fornecedor: 'Tech Corp', status: 'Concluído', prazo_dias: 10, doc: 'Completa' },
+        { processo: '004/2026', solicitante: 'Obras', objeto: 'Cimento', valor_solicitado: 25000, valor_contratado: 25000, fornecedor: 'Construtora Y', status: 'Atrasado', prazo_dias: 60, doc: 'Completa' }
+    ]};
+    sysData.financeiro = { isDemo: true, rows: [
+        { processo: '101', departamento: 'Educação', categoria: 'Material', fonte: 'Fundeb', dotacao_inicial: 200000, dotacao_atualizada: 200000, empenhado: 150000, liquidado: 100000, pago: 80000, status: 'Normal' },
+        { processo: '102', departamento: 'Saúde', categoria: 'Serviços', fonte: 'Saúde 15%', dotacao_inicial: 100000, dotacao_atualizada: 120000, empenhado: 80000, liquidado: 80000, pago: 80000, status: 'Concluído' },
+        { processo: '103', departamento: 'Administração', categoria: 'Equipamentos', fonte: 'Recursos Próprios', dotacao_inicial: 50000, dotacao_atualizada: 50000, empenhado: 50000, liquidado: 20000, pago: 0, status: 'Pendente' },
+        { processo: '104', departamento: 'Educação', categoria: 'Alimentação', fonte: 'PNAE', dotacao_inicial: 300000, dotacao_atualizada: 350000, empenhado: 300000, liquidado: 250000, pago: 200000, status: 'Normal' }
+    ]};
+    refreshView();
+}
+
+function showModalInsight(mod) {
+    var data = sysData[mod] ? sysData[mod].rows : [];
+    var title = document.getElementById('modalInsightTitle');
+    var thead = document.getElementById('modalInsightHead');
+    var tbody = document.getElementById('modalInsightBody');
+    var content = '';
+    
+    if (mod === 'almoxarifado') {
+        title.innerHTML = '📦 Itens Críticos (Abaixo do Mínimo)';
+        thead.innerHTML = '<tr><th>Material</th><th>Unidade</th><th style="text-align:right">Saldo Atual</th><th style="text-align:right">Estoque Mín.</th><th style="text-align:right">Déficit</th></tr>';
+        var criticos = data.filter(r => (r.saldo_atual||0) < (r.estoque_minimo||0));
+        criticos.sort((a,b) => (a.saldo_atual - a.estoque_minimo) - (b.saldo_atual - b.estoque_minimo));
+        if(!criticos.length) content = '<tr><td colspan="5" style="text-align:center">Nenhum item crítico encontrado.</td></tr>';
+        else content = criticos.map(r => `<tr><td>${r.material||'—'}</td><td>${r.unidade||'—'}</td><td class="num" style="color:var(--danger); font-weight:bold;">${formatNumber(r.saldo_atual)}</td><td class="num">${formatNumber(r.estoque_minimo)}</td><td class="num" style="color:var(--warning)">${formatNumber(r.estoque_minimo - r.saldo_atual)}</td></tr>`).join('');
+    }
+    else if (mod === 'compras') {
+        title.innerHTML = '💰 Economia por Processo';
+        thead.innerHTML = '<tr><th>Processo</th><th>Objeto</th><th style="text-align:right">V. Solicitado</th><th style="text-align:right">V. Contratado</th><th style="text-align:right">Economia</th></tr>';
+        var processos = data.filter(r => (r.valor_solicitado||0) > (r.valor_contratado||0));
+        processos.sort((a,b) => (b.valor_solicitado - b.valor_contratado) - (a.valor_solicitado - a.valor_contratado));
+        if(!processos.length) content = '<tr><td colspan="5" style="text-align:center">Nenhuma economia encontrada.</td></tr>';
+        else content = processos.map(r => `<tr><td>${r.processo||'—'}</td><td>${r.objeto||'—'}</td><td class="money">${formatCurrency(r.valor_solicitado)}</td><td class="money">${formatCurrency(r.valor_contratado)}</td><td class="money" style="color:var(--success); font-weight:bold;">${formatCurrency(r.valor_solicitado - r.valor_contratado)}</td></tr>`).join('');
+    }
+    else if (mod === 'financeiro') {
+        title.innerHTML = '📉 Restos a Pagar Previstos';
+        thead.innerHTML = '<tr><th>Processo</th><th>Departamento</th><th style="text-align:right">Empenhado</th><th style="text-align:right">Pago</th><th style="text-align:right">Pendente</th></tr>';
+        var restos = data.filter(r => (r.empenhado||0) > (r.pago||0));
+        restos.sort((a,b) => (b.empenhado - b.pago) - (a.empenhado - a.pago));
+        if(!restos.length) content = '<tr><td colspan="5" style="text-align:center">Nenhum resto a pagar encontrado.</td></tr>';
+        else content = restos.map(r => `<tr><td>${r.processo||'—'}</td><td>${r.departamento||'—'}</td><td class="money">${formatCurrency(r.empenhado)}</td><td class="money">${formatCurrency(r.pago)}</td><td class="money" style="color:var(--warning); font-weight:bold;">${formatCurrency(r.empenhado - r.pago)}</td></tr>`).join('');
+    }
+    else if (mod === 'nutricao') {
+        title.innerHTML = '⚠️ Desperdício por Unidade';
+        thead.innerHTML = '<tr><th>Unidade</th><th style="text-align:right">Refeições Servidas</th><th style="text-align:right">Desperdício</th><th style="text-align:right">Taxa (%)</th></tr>';
+        var desps = data.filter(r => (r.desperdicio||0) > 0);
+        desps.sort((a,b) => (b.desperdicio/(b.refeicoes||1)) - (a.desperdicio/(a.refeicoes||1)));
+        if(!desps.length) content = '<tr><td colspan="4" style="text-align:center">Nenhum desperdício registrado.</td></tr>';
+        else content = desps.map(r => `<tr><td>${r.unidade||'—'}</td><td class="num">${formatNumber(r.refeicoes)}</td><td class="num" style="color:var(--danger)">${formatNumber(r.desperdicio)}</td><td class="num" style="color:var(--danger); font-weight:bold;">${formatPercent(r.desperdicio/r.refeicoes)}</td></tr>`).join('');
+    }
+
+    tbody.innerHTML = content;
+    document.getElementById('modalDynamicInsight').classList.add('active');
+}
+
+function closeModalInsight() {
+    document.getElementById('modalDynamicInsight').classList.remove('active');
+}
+
+window.onload = loadDemo;
     </script>
 </body>
 </html>
