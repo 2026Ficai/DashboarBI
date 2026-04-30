@@ -1,0 +1,3 @@
+Em 'Insights automáticos', ao clicar no 'insight-card' abra-o num modal moderno, grande.  Use com excelência a sua criatividade em UX, interatividade fluida e foco em clareza dos dados — mantendo performance e organização do código.
+
+Poderia escrever este prompt? 'Na aba 'Tabela', ao abrir o modal, e clicar no 'detail-label', dê um auto-zoom ou algo parecido, ao clicar, destacando aquela informação.
