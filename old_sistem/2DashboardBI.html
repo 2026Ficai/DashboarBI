@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="green">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DashboardBI - Almoxarifado Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #011314;
+            --bg-secondary: #0C2321;
+            --bg-tertiary: #142B26;
+            --bg-sidebar: #0A1C19;
+            --accent: #2D6A4F;
+            --accent-light: #AEF158;
+            --accent-dim: #52B788;
+            --accent-glow: rgba(174, 241, 88, 0.15);
+            --text-primary: #E9EEED;
+            --text-secondary: #8BA399;
+            --text-muted: #627566;
+            --success: #10B981;
+            --warning: #E4B434;
+            --danger: #A73F47;
+            --border: #22342D;
+            --border-light: #2D4A41;
+            --card-bg: linear-gradient(145deg, #0C2321 0%, #0A1E1B 100%);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --glass: rgba(12, 35, 33, 0.8);
+        }
+
+        [data-theme="purple"] {
+            --bg-primary: #0D0519;
+            --bg-secondary: #150A28;
+            --bg-tertiary: #1E0F38;
+            --bg-sidebar: #0F0820;
+            --accent: #7C3AED;
+            --accent-light: #A855F7;
+            --accent-dim: #8B5CF6;
+            --accent-glow: rgba(168, 85, 247, 0.2);
+            --text-primary: #F5F3FF;
+            --text-secondary: #C4B5DD;
+            --text-muted: #8B7BA3;
+            --border: #2D1F4A;
+            --border-light: #3D2A5C;
+            --card-bg: linear-gradient(145deg, #150A28 0%, #120520 100%);
+            --glass: rgba(21, 10, 40, 0.8);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #F5F5F5;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #E8E8E8;
+            --bg-sidebar: #FFFFFF;
+            --accent: #2D6A4F;
+            --accent-light: #1B4332;
+            --accent-dim: #40916C;
+            --accent-glow: rgba(45, 106, 79, 0.15);
+            --text-primary: #1A1A1A;
+            --text-secondary: #4A4A4A;
+            --text-muted: #7A7A7A;
+            --border: #E0E0E0;
+            --border-light: #D0D0D0;
+            --card-bg: linear-gradient(145deg, #FFFFFF 0%, #F8F8F8 100%);
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-light);
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            margin-bottom: 0.4rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: var(--accent-light);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        /* Main Layout */
+        .main {
+            flex: 1;
+            margin-left: 240px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .header-sub {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .theme-btns {
+            display: flex;
+            gap: 0.75rem;
+            background: var(--bg-secondary);
+            padding: 0.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .theme-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: transparent;
+            font-size: 1.2rem;
+        }
+
+        .theme-btn.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Components */
+        .filters {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .filter-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .filter-select, .filter-input {
+            padding: 0.6rem 0.8rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            min-width: 150px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .filter-select:focus { border-color: var(--accent-light); }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            background: var(--accent);
+            color: var(--accent-light);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: var(--accent-dim); transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }
+
+        .kpiss {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .kpi-value.highlight { color: var(--accent-light); }
+        .kpi-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; }
+
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            min-height: 320px;
+            transition: all 0.3s;
+        }
+
+        .chart:hover { border-color: var(--accent-dim); }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent-light);
+            border-radius: 2px;
+        }
+
+        .chart-canvas { height: 250px; position: relative; }
+
+        .table-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem 0.5rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 1rem 0.5rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(174, 241, 88, 0.05);
+            color: var(--text-primary);
+        }
+
+        .data-table .money { text-align: right; color: var(--accent-light); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+        /* =========================================================================
+           MODAL SYSTEM (FIXED Z-INDEX)
+           ========================================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9999; /* Acima de tudo */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-container {
+            background: var(--glass);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10000;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover { color: var(--text-primary); }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        /* Detail Label Zoom Effect */
+        .detail-item {
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-light);
+        }
+
+        .detail-item.zoomed {
+            transform: scale(1.05);
+            background: var(--accent);
+            color: var(--accent-light);
+            box-shadow: 0 10px 20px var(--accent-glow);
+            border-color: transparent;
+            z-index: 10;
+        }
+
+        .detail-label { font-weight: 600; }
+        .detail-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalScale { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 1200px) {
+            .kpiss { grid-template-columns: repeat(2, 1fr); }
+            .charts { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">DashboardBI</div>
+        <div class="logo-sub">SaaS Intelligence</div>
+        <div class="nav-item active" data-tab="almoxarifado">📦 Almoxarifado</div>
+        <div class="nav-item" data-tab="dashboard">📊 Dashboard</div>
+        <div class="nav-item" data-tab="tabela">📋 Tabela</div>
+        <div class="nav-item" data-tab="insights">💡 Insights</div>
+        <div class="nav-item" data-tab="relatorios">📄 Relatórios</div>
+        <div class="nav-item" data-tab="configuracoes">⚙️ Configurações</div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main" id="almoxarifadoContent">
+        <div class="header">
+            <div>
+                <h1 class="header-title">Almoxarifado</h1>
+                <p class="header-sub">Análise executiva e controle de suprimentos</p>
+            </div>
+            <div class="theme-btns">
+                <button class="theme-btn active" data-theme="green" title="Green">🟢</button>
+                <button class="theme-btn" data-theme="purple" title="Purple">✦</button>
+                <button class="theme-btn" data-theme="light" title="Light">☀</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Modalidade</label>
+                <select class="filter-select" id="filterModalidade">
+                    <option value="todos">Todas as Modalidades</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Unidade</label>
+                <select class="filter-select" id="filterUnidade">
+                    <option value="todos">Todas as Unidades</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Material</label>
+                <select class="filter-select" id="filterMaterial">
+                    <option value="todos">Todos os Materiais</option>
+                </select>
+            </div>
+            <button class="btn" id="btnAplicar">Aplicar Filtros</button>
+            <button class="btn" id="btnTrocar" style="background: var(--bg-tertiary); color: var(--text-primary);">Trocar Arquivo</button>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+        </div>
+
+        <div class="kpiss">
+            <div class="kpi">
+                <div class="kpi-label">Itens Únicos</div>
+                <div class="kpi-value" id="kpiUnidades">-</div>
+                <div class="kpi-sub">Diversidade de SKU</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Qtd Total</div>
+                <div class="kpi-value highlight" id="kpiAlunos">-</div>
+                <div class="kpi-sub">Volume total de itens</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Investimento</div>
+                <div class="kpi-value" id="kpiValor">-</div>
+                <div class="kpi-sub">Custo total acumulado</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Líder de Gasto</div>
+                <div class="kpi-value" id="kpiModalidade">-</div>
+                <div class="kpi-sub">Categoria mais cara</div>
+            </div>
+        </div>
+
+        <div class="charts">
+            <div class="chart">
+                <h3 class="chart-title">Distribuição por Material</h3>
+                <div class="chart-canvas"><canvas id="chartMaterial"></canvas></div>
+            </div>
+            <div class="chart">
+                <h3 class="chart-title">Top 10 Unidades (Valor)</h3>
+                <div class="chart-canvas"><canvas id="chartUnidades"></canvas></div>
+            </div>
+            <div class="chart">
+                <h3 class="chart-title">Análise de Modalidades</h3>
+                <div class="chart-canvas"><canvas id="chartModalidade"></canvas></div>
+            </div>
+            <div class="chart">
+                <h3 class="chart-title">Evolução de Custo</h3>
+                <div class="chart-canvas"><canvas id="chartEvolucao"></canvas></div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h3 class="chart-title">Detalhamento de Materiais</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Quantidade</th>
+                        <th>Valor Total</th>
+                        <th>Custo Unitário</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aguardando importação de dados...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- MODAL SYSTEM -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">Detalhes do Item</h3>
+                <button class="close-modal" id="btnCloseModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var almoxarifadoData = null;
+        var charts = {};
+        var currentTheme = 'green';
+
+        function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
+        function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v); }
+
+        function getColors() {
+            var t = currentTheme;
+            if (t === 'green') return {
+                primary: '#AEF158', primaryLight: '#52B788', secondary: '#06B6D4', tertiary: '#64B5F6',
+                quaternary: '#F97316', quinary: '#E4B434', text: '#E9EEED', textMuted: '#627566',
+                border: '#22342D', success: '#10B981', warning: '#E4B434', danger: '#A73F47'
+            };
+            if (t === 'purple') return {
+                primary: '#A855F7', primaryLight: '#8B5CF6', secondary: '#06B6D4', tertiary: '#6366F1',
+                quaternary: '#F97316', quinary: '#E4B434', text: '#F5F3FF', textMuted: '#8B7BA3',
+                border: '#2D1F4A', success: '#10B981', warning: '#F59E0B', danger: '#EF4444'
+            };
+            return {
+                primary: '#2D6A4F', primaryLight: '#40916C', secondary: '#06B6D4', tertiary: '#6366F1',
+                quaternary: '#F97316', quinary: '#E4B434', text: '#1A1A1A', textMuted: '#7A7A7A',
+                border: '#E0E0E0', success: '#10B981', warning: '#F59E0B', danger: '#EF4444'
+            };
+        }
+
+        // Modal Logic
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const btnCloseModal = document.getElementById('btnCloseModal');
+
+        function openModal(title, contentHTML) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = contentHTML;
+            modalOverlay.style.display = 'flex';
+            
+            // Add event listeners to the dynamic content for the "Zoom" effect
+            modalBody.querySelectorAll('.detail-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('zoomed');
+                });
+            });
+        }
+
+        btnCloseModal.onclick = () => modalOverlay.style.display = 'none';
+        window.onclick = (e) => { if(e.target == modalOverlay) modalOverlay.style.display = 'none'; }
+
+        // Theme Switcher
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentTheme = this.dataset.theme;
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (almoxarifadoData) render();
+            });
+        });
+
+        // Nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+                if(this.dataset.tab === 'insights') {
+                    openModal('Insights Automáticos', `
+                        <div style="text-align:center; margin-bottom: 2rem">
+                            <div style="font-size: 3rem">💡</div>
+                            <h2>Análise Inteligente</h2>
+                            <p>Baseado nos dados importados, detectamos padrões de consumo.</p>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label"> Pico de Gasto </span>
+                            <span class="detail-value">Março / Materiais de Higiene</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label"> Unidade Eficiente </span>
+                            <span class="detail-value">CEI NOVA VIDA</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label"> Alerta de Estoque </span>
+                            <span class="detail-value" style="color:var(--danger)">Fraldas em queda</span>
+                        </div>
+                    `);
+                } else if(this.dataset.tab !== 'almoxarifado') {
+                    alert('Módulo em desenvolvimento!');
+                }
+            });
+        });
+
+        document.getElementById('btnTrocar').onclick = () => document.getElementById('fileInput').click();
+
+        document.getElementById('fileInput').onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            loadExcel(file);
+        };
+
+        document.getElementById('btnAplicar').onclick = applyFilters;
+
+        function loadExcel(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var data = new Uint8Array(e.target.result);
+                    var wb = XLSX.read(data, {type: 'array'});
+                    var ws = wb.Sheets[wb.SheetNames[0]];
+                    var json = XLSX.utils.sheet_to_json(ws, {header: 1});
+                    
+                    var headers = json[0].map(h => String(h).toUpperCase().trim());
+                    var modIdx = headers.findIndex(h => h.includes('MODALIDADE'));
+                    var uniIdx = headers.findIndex(h => h.includes('UNIDADE'));
+                    var matIdx = headers.findIndex(h => h.includes('MATERIAL'));
+                    var qtdIdx = headers.findIndex(h => h.includes('QUANTIDADE') || h.includes('QTD'));
+                    var valIdx = headers.findIndex(h => h.includes('VALOR') || h.includes('VAL'));
+
+                    var rows = [];
+                    for (var i = 1; i < json.length; i++) {
+                        var r = json[i];
+                        if (!r[matIdx]) continue;
+                        rows.push({
+                            modalidade: modIdx >= 0 ? String(r[modIdx] || '').trim() : 'N/A',
+                            unidade: uniIdx >= 0 ? String(r[uniIdx] || '').trim() : 'N/A',
+                            material: String(r[matIdx] || '').trim(),
+                            quantidade: parseFloat(r[qtdIdx]) || 0,
+                            valor: parseFloat(r[valIdx]) || 0
+                        });
+                    }
+                    almoxarifadoData = { rows: rows, filtered: rows };
+                    updateFilters();
+                    render();
+                } catch(err) { alert('Erro ao processar arquivo'); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateFilters() {
+            const mods = [...new Set(almoxarifadoData.rows.map(r => r.modalidade))].sort();
+            const unis = [...new Set(almoxarifadoData.rows.map(r => r.unidade))].sort();
+            const mats = [...new Set(almoxarifadoData.rows.map(r => r.material))].sort();
+
+            const fill = (id, vals) => {
+                const el = document.getElementById(id);
+                el.innerHTML = `<option value="todos">Todos</option>` + vals.map(v => `<option value="${v}">${v}</option>`).join('');
+            };
+            fill('filterModalidade', mods);
+            fill('filterUnidade', unis);
+            fill('filterMaterial', mats);
+        }
+
+        function applyFilters() {
+            if (!almoxarifadoData) return;
+            var fMod = document.getElementById('filterModalidade').value;
+            var fUni = document.getElementById('filterUnidade').value;
+            var fMat = document.getElementById('filterMaterial').value;
+
+            almoxarifadoData.filtered = almoxarifadoData.rows.filter(r => {
+                return (fMod === 'todos' || r.modalidade === fMod) &&
+                       (fUni === 'todos' || r.unidade === fUni) &&
+                       (fMat === 'todos' || r.material === fMat);
+            });
+            render();
+        }
+
+        function render() {
+            var data = almoxarifadoData.filtered;
+            var c = getColors();
+            
+            // Aggregate for KPI and Charts
+            var agg = data.reduce((acc, r) => {
+                acc[r.material] = acc[r.material] || { material: r.material, qtd: 0, val: 0, mod: r.modalidade, uni: r.unidade };
+                acc[r.material].qtd += r.quantidade;
+                acc[r.material].val += r.valor;
+                return acc;
+            }, {});
+            var finalData = Object.values(agg);
+
+            var totalQtd = finalData.reduce((s, m) => s + m.qtd, 0);
+            var totalVal = finalData.reduce((s, m) => s + m.val, 0);
+
+            document.getElementById('kpiUnidades').textContent = finalData.length;
+            document.getElementById('kpiAlunos').textContent = formatNumber(totalQtd);
+            document.getElementById('kpiValor').textContent = formatCurrency(totalVal);
+
+            var modMap = data.reduce((acc, r) => {
+                acc[r.modalidade] = (acc[r.modalidade] || 0) + r.valor;
+                return acc;
+            }, {});
+            var topMod = Object.keys(modMap).reduce((a, b) => modMap[a] > modMap[b] ? a : b, '-');
+            document.getElementById('kpiModalidade').textContent = topMod;
+
+            renderCharts(finalData, c);
+            renderTable(finalData);
+        }
+
+        function renderCharts(data, c) {
+            Chart.defaults.color = c.textMuted;
+            Chart.defaults.font = { family: 'Inter' };
+
+            // Donut Chart - Material
+            var ctxMat = document.getElementById('chartMaterial').getContext('2d');
+            if (charts.mat) charts.mat.destroy();
+            var sortedMat = data.slice().sort((a,b) => b.val - a.val).slice(0, 6);
+            charts.mat = new Chart(ctxMat, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedMat.map(m => m.material),
+                    datasets: [{
+                        data: sortedMat.map(m => m.val),
+                        backgroundColor: [c.primary, c.secondary, c.tertiary, c.quaternary, c.quinary, c.primaryLight],
+                        borderWidth: 0,
+                        hoverOffset: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.raw)}`
+                            }
+                        }
+                    },
+                    onClick: (evt, elements) => {
+                        if(elements.length > 0) {
+                            const idx = elements[0].index;
+                            const item = sortedMat[idx];
+                            openModal(`Detalhes: ${item.material}`, `
+                                <div class="detail-item">
+                                    <span class="detail-label">Material</span>
+                                    <span class="detail-value">${item.material}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Quantidade Total</span>
+                                    <span class="detail-value">${formatNumber(item.qtd)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Valor Total</span>
+                                    <span class="detail-value">${formatCurrency(item.val)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Modalidade</span>
+                                    <span class="detail-value">${item.mod}</span>
+                                </div>
+                            `);
+                        }
+                    }
+                }
+            });
+
+            // Bar Chart - Unidades
+            var ctxUni = document.getElementById('chartUnidades').getContext('2d');
+            if (charts.uni) charts.uni.destroy();
+            var sortedUni = data.slice().sort((a,b) => b.val - a.val).slice(0, 10);
+            charts.uni = new Chart(ctxUni, {
+                type: 'bar',
+                data: {
+                    labels: sortedUni.map(m => m.material),
+                    datasets: [{
+                        data: sortedUni.map(m => m.val),
+                        backgroundColor: c.primary,
+                        borderRadius: 8,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { grid: { color: c.border }, ticks: { callback: v => formatCurrency(v) } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Bar Chart - Modalidade
+            var ctxMod = document.getElementById('chartModalidade').getContext('2d');
+            if (charts.mod) charts.mod.destroy();
+            var modValues = data.reduce((acc, r) => {
+                acc[r.mod] = (acc[r.mod] || 0) + r.val;
+                return acc;
+            }, {});
+            charts.mod = new Chart(ctxMod, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(modValues),
+                    datasets: [{
+                        data: Object.values(modValues),
+                        backgroundColor: c.primaryLight,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { grid: { color: c.border }, ticks: { callback: v => formatCurrency(v) } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Bar Chart - Evolução (Demo)
+            var ctxEv = document.getElementById('chartEvolucao').getContext('2d');
+            if (charts.ev) charts.ev.destroy();
+            charts.ev = new Chart(ctxEv, {
+                type: 'bar',
+                data: {
+                    labels: ['JAN', 'FEV', 'MAR', 'ABR'],
+                    datasets: [{ data: [25000, 32000, 28000, 41000], backgroundColor: c.primary, borderRadius: 8 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { grid: { color: c.border }, ticks: { callback: v => formatCurrency(v) } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function renderTable(data) {
+            var tbody = document.getElementById('tableBody');
+            var sorted = data.slice().sort((a,b) => b.val - a.val).slice(0, 15);
+            
+            tbody.innerHTML = sorted.map((m, idx) => {
+                var custo = m.qtd > 0 ? m.val / m.qtd : 0;
+                return `
+                    <tr onclick="openItemDetail(${idx})">
+                        <td>${m.material}</td>
+                        <td>${formatNumber(m.qtd)}</td>
+                        <td class="money">${formatCurrency(m.val)}</td>
+                        <td class="money">${formatCurrency(custo)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Store sorted data for detail access
+            window.currentSortedTable = sorted;
+        }
+
+        window.openItemDetail = function(idx) {
+            const item = window.currentSortedTable[idx];
+            openModal(`Detalhamento: ${item.material}`, `
+                <div class="detail-item">
+                    <span class="detail-label">Material</span>
+                    <span class="detail-value">${item.material}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Quantidade</span>
+                    <span class="detail-value">${formatNumber(item.qtd)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Investimento Total</span>
+                    <span class="detail-value">${formatCurrency(item.val)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Custo Unitário Estimado</span>
+                    <span class="detail-value">${formatCurrency(item.val / item.qtd)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Unidade Principal</span>
+                    <span class="detail-value">${item.uni}</span>
+                </div>
+            `);
+        };
+
+        // Initial Demo Load
+        function loadDemo() {
+            var demo = [
+                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'FRALDA', quantidade: 15000, valor: 12750.00 },
+                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'SABONETE', quantidade: 4500, valor: 6750.00 },
+                { modalidade: 'CRECHE', unidade: 'CEI NOVA VIDA', material: 'PAPEL HIG.', quantidade: 4200, valor: 5040.00 },
+                { modalidade: 'CRECHE', unidade: 'CEI SONHO INFANTIL', material: 'FRALDA', quantidade: 8000, valor: 6800.00 },
+                { modalidade: 'CRECHE', unidade: 'CEI SONHO INFANTIL', material: 'GUARDANCHO', quantidade: 3500, valor: 4200.00 },
+                { modalidade: 'EMEI', unidade: 'EMEI JARDIM', material: 'CANETA', quantidade: 1800, valor: 2340.00 },
+                { modalidade: 'EMEI', unidade: 'EMEI JARDIM', material: 'CADERNO', quantidade: 1200, valor: 3600.00 },
+                { modalidade: 'EMEI', unidade: 'EMEI FLOR', material: 'CANETA', quantidade: 1400, valor: 1820.00 },
+                { modalidade: 'EMEI', unidade: 'EMEI FLOR', material: 'EVA', quantidade: 650, valor: 1950.00 },
+                { modalidade: 'EMEIEF', unidade: 'EMEIEF SAO JOSE', material: 'PAPEL HIG.', quantidade: 4000, valor: 4800.00 },
+                { modalidade: 'EMEIEF', unidade: 'EMEIEF SAO JOSE', material: 'LUVA DESC.', quantidade: 2500, valor: 3250.00 },
+                { modalidade: 'EMEIEF', unidade: 'EMEIEF SANTA MARIA', material: 'PAPEL HIG.', quantidade: 3800, valor: 4560.00 }
+            ];
+            almoxarifadoData = { rows: demo, filtered: demo };
+            updateFilters();
+            render();
+        }
+
+        loadDemo();
+    </script>
+</body>
+</html>

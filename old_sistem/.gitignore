@@ -1,0 +1,13 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Excel temp files
+*.xlsx~
+*.xls~
+
+# Ignore node_modules if any
+node_modules/
+
+# Ignore logs
+*.log

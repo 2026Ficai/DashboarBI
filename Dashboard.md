@@ -1,0 +1,1 @@
+Nas informações dos 'Indicadores consolidados', os títulos referente a 'section-subtitle', de cada 'kpi-card info', poderia ser de acordo com as informações da tabela do Excel que foi enviada?
