@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="green">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DashboardBI - Sistema de Gestão</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #011314;
+            --bg-secondary: #0C2321;
+            --bg-tertiary: #142B26;
+            --bg-sidebar: #0A1C19;
+            --accent: #2D6A4F;
+            --accent-light: #AEF158;
+            --accent-dim: #52B788;
+            --accent-glow: rgba(174, 241, 88, 0.15);
+            --text-primary: #E9EEED;
+            --text-secondary: #8BA399;
+            --text-muted: #627566;
+            --success: #10B981;
+            --warning: #E4B434;
+            --danger: #A73F47;
+            --border: #22342D;
+            --border-light: #2D4A41;
+            --card-bg: linear-gradient(145deg, #0C2321 0%, #0A1E1B 100%);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --accent-contrast: var(--accent-light);
+        }
+
+        [data-theme="purple"] {
+            --bg-primary: #0D0519;
+            --bg-secondary: #150A28;
+            --bg-tertiary: #1E0F38;
+            --bg-sidebar: #0F0820;
+            --accent: #7C3AED;
+            --accent-light: #A855F7;
+            --accent-dim: #8B5CF6;
+            --accent-glow: rgba(168, 85, 247, 0.2);
+            --text-primary: #F5F3FF;
+            --text-secondary: #C4B5DD;
+            --text-muted: #8B7BA3;
+            --border: #2D1F4A;
+            --border-light: #3D2A5C;
+            --card-bg: linear-gradient(145deg, #150A28 0%, #120520 100%);
+            --accent-contrast: #FFFFFF;
+        }
+
+        [data-theme="luna"] {
+            --bg-primary: #01122D;
+            --bg-secondary: #011C40;
+            --bg-tertiary: #023859;
+            --bg-sidebar: #011636;
+            --accent: #26658C;
+            --accent-light: #A7EBF2;
+            --accent-dim: #54ACBF;
+            --accent-glow: rgba(167, 235, 242, 0.15);
+            --text-primary: #F0F9FF;
+            --text-secondary: #BBE1FA;
+            --text-muted: #8AA7B8;
+            --border: #023859;
+            --border-light: #26658C;
+            --card-bg: linear-gradient(145deg, #011C40 0%, #011636 100%);
+            --accent-contrast: #000000;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #F5F5F5;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #E8E8E8;
+            --bg-sidebar: #FFFFFF;
+            --accent: #2D6A4F;
+            --accent-light: #1B4332;
+            --accent-dim: #40916C;
+            --accent-glow: rgba(45, 106, 79, 0.15);
+            --text-primary: #1A1A1A;
+            --text-secondary: #4A4A4A;
+            --text-muted: #7A7A7A;
+            --border: #E0E0E0;
+            --border-light: #D0D0D0;
+            --card-bg: linear-gradient(145deg, #FFFFFF 0%, #F8F8F8 100%);
+            --accent-contrast: #FFFFFF;
+        }
+
+        [data-theme="hemo"] {
+            --bg-primary: #F3F6FA;
+            --bg-secondary: #F3F6FA;
+            --bg-tertiary: #E8EEF5;
+            --bg-sidebar: #F3F6FA;
+            --accent: #2563EB;
+            --accent-light: #06B6D4;
+            --accent-dim: #3B82F6;
+            --accent-glow: rgba(37, 99, 235, 0.15);
+            --text-primary: #334155;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --border-light: rgba(255, 255, 255, 0.5);
+            --card-bg: #F3F6FA;
+            --accent-contrast: #FFFFFF;
+            --shadow: 8px 8px 16px #D1D9E6, -8px -8px 16px #FFFFFF;
+            --shadow-lg: 12px 12px 24px #D1D9E6, -12px -12px 24px #FFFFFF;
+        }
+
+        [data-theme="top"] {
+            --bg-primary: transparent;
+            --bg-secondary: #2A3147;
+            --bg-tertiary: #1C2233;
+            --bg-sidebar: rgba(28, 34, 51, 0.4);
+            --accent: #3EC7B7;
+            --accent-light: #5FE0C8;
+            --accent-dim: #268C81;
+            --accent-glow: rgba(62, 199, 183, 0.15);
+            --text-primary: #FFFFFF;
+            --text-secondary: #8AA7B8;
+            --text-muted: #6C7A89;
+            --border: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --card-bg: #2A3147;
+            --accent-contrast: #1C2233;
+            --success: #5FE0C8;
+            --warning: #F4A261;
+            --danger: #E63946;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="top"] body {
+            background: linear-gradient(135deg, #1C2233 0%, #2D233A 40%, #3A1F2B 80%, #5A1F2C 100%);
+            background-attachment: fixed;
+        }
+        
+        [data-theme="top"] .sidebar {
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        .nav-item, .nav-module {
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover, .nav-module:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .nav-module {
+            border-left: 3px solid transparent;
+            padding-left: 0.8rem;
+        }
+        .nav-module.active {
+            border-left-color: var(--accent-light);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .main {
+            flex: 1;
+            margin-left: 220px;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-sub {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .theme-btns {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .theme-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .theme-btn:hover { 
+            transform: translateY(-3px) scale(1.05); 
+            border-color: var(--text-muted);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        
+        .theme-btn.active { 
+            border-color: var(--accent-light); 
+            background: var(--card-bg);
+            box-shadow: 0 0 20px var(--accent-glow), inset 0 0 10px var(--accent-glow);
+            transform: scale(1.15);
+            z-index: 3;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: var(--accent-dim); box-shadow: 0 0 15px var(--accent-glow); }
+
+        .kpiss {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .kpi:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent-light);
+        }
+
+        .kpi-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            height: 2.4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .kpi-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .kpi-value.highlight { color: var(--accent-light); }
+        .kpi-sub { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 1200px) {
+            .charts { grid-template-columns: 1fr; }
+        }
+
+        .chart {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            min-height: 280px;
+        }
+
+        .chart-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: var(--accent-light);
+            border-radius: 2px;
+        }
+
+        .chart-canvas { height: 220px; }
+
+        .table-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            overflow-x: auto;
+        }
+
+        .table-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 0.75rem 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.6875rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 0.75rem 0.5rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(174, 241, 88, 0.03);
+        }
+
+        .data-table .num { text-align: right; font-family: monospace; }
+        .data-table .money { text-align: right; color: var(--accent-light); font-family: monospace; }
+
+        .file-bar {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .file-name {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tabela-search-bar { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .search-input-wrapper { flex: 1; position: relative; min-width: 200px; }
+        .search-input-wrapper input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); font-size: 0.875rem; }
+        .search-input-wrapper input:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 10px var(--accent-glow); }
+        .search-input-wrapper::before { content: '🔍'; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-warning { background: rgba(228, 180, 52, 0.15); color: var(--warning); }
+        .badge-danger { background: rgba(167, 63, 71, 0.15); color: var(--danger); }
+        .badge-info { background: rgba(6, 182, 212, 0.15); color: var(--secondary); }
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }
+        .pagination-btns { display: flex; gap: 0.5rem; }
+        .page-btn { padding: 0.25rem 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); cursor: pointer; transition: all 0.2s; }
+        .page-btn:hover { background: var(--accent); color: var(--accent-contrast); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { color: var(--accent-light); }
+
+        /* Insights */
+        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+        .insight-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-light); }
+        .insight-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-light); }
+        .insight-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .insight-title { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .insight-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .insight-desc { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Relatórios */
+        .relatorios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .relatorio-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .relatorio-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--accent-light); }
+        .relatorio-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--accent-light), var(--accent)); opacity: 0; transition: opacity 0.3s; }
+        .relatorio-card:hover::after { opacity: 1; }
+        .relatorio-header { display: flex; align-items: center; gap: 0.75rem; }
+        .relatorio-header i { font-size: 1.5rem; }
+        .relatorio-title { font-size: 1.125rem; font-weight: 600; }
+        .relatorio-desc { font-size: 0.875rem; color: var(--text-muted); flex: 1; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-content { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; position: relative; box-shadow: var(--shadow-lg); }
+        .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; }
+        .modal-close:hover { color: var(--accent-light); }
+        .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+
+        @media (max-width: 1200px) {
+            .kpiss { grid-template-columns: repeat(3, 1fr); }
+            .charts { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { position: relative; width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+            .main { margin-left: 0; }
+            .kpiss { grid-template-columns: 1fr; }
+            .theme-btns { display: none; }
+            .file-bar { flex-direction: column; align-items: stretch; }
+            #btnExportCSV { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">DashboardBI</div>
+        <div class="logo-sub">Sistema de Gestão</div>
+        
+        <div class="sidebar-section">Módulos</div>
+        <div class="nav-module active" data-module="almoxarifado">Almoxarifado</div>
+        <div class="nav-module" data-module="nutricao">Nutrição Escolar</div>
+        <div class="nav-module" data-module="compras">Compras</div>
+        <div class="nav-module" data-module="financeiro">Financeiro</div>
+        <div class="nav-module" data-module="assistencia">Assistência Rede</div>
+        
+        <div class="sidebar-section" style="margin-top: 1.5rem;">Visões</div>
+        <div class="nav-item active" data-tab="main">Visão Executiva</div>
+        <div class="nav-item" data-tab="tabela">Tabela Analítica</div>
+        <div class="nav-item" data-tab="insights">Insights Automáticos</div>
+        <div class="nav-item" data-tab="kpis">KPI / Métrica</div>
+        <div class="nav-item" data-tab="historico">Histórico e Comparação</div>
+        <div class="nav-item" data-tab="relatorios">Relatórios e Exportação</div>
+    </nav>
+
+    <main class="main">
+        <div class="header">
+            <div>
+                <h1 class="header-title" id="mainHeaderTitle">Dashboard</h1>
+                <p class="header-sub" id="mainHeaderSub">Carregando...</p>
+            </div>
+            <div class="theme-btns">
+                <button class="theme-btn active" data-theme="green" title="Green">🟢</button>
+                <button class="theme-btn" data-theme="purple" title="Purple">✦</button>
+                <button class="theme-btn" data-theme="luna" title="Luna">🌙</button>
+                <button class="theme-btn" data-theme="hemo" title="Hemo">💧</button>
+                <button class="theme-btn" data-theme="light" title="Light">☀</button>
+                <button class="theme-btn" data-theme="top" title="Top">🔝</button>
+            </div>
+        </div>
+
+        <div class="file-bar">
+            <span class="file-name" id="fileName">Nenhum arquivo importado</span>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); cursor: pointer; margin-right: 1rem;">
+                <input type="checkbox" id="chkMesclar" checked style="accent-color: var(--accent-light); width: 16px; height: 16px;">
+                Mesclar dados (Manter anteriores)
+            </label>
+            <button class="btn" id="btnTrocar">Trocar arquivo</button>
+            <button class="btn" id="btnAtualizar">Atualizar</button>
+            <button class="btn" id="btnSalvarPeriodo" style="background: var(--accent); color: var(--text-primary);">💾 Salvar Período</button>
+            <button class="btn" id="btnExportCSV" style="margin-left: auto;">Exportar CSV</button>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL (MAIN) -->
+        <div id="mainContent" class="tab-content active">
+            <div class="kpiss" id="mainKpis">
+                <!-- KPIs gerados via JS -->
+            </div>
+            <div class="charts" id="mainCharts">
+                <!-- Charts gerados via JS -->
+            </div>
+        </div>
+
+        <!-- CONTEÚDO TABELA -->
+        <div id="tabelaContent" class="tab-content">
+            <div class="table-section">
+                <div class="tabela-search-bar">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="tabelaSearch" placeholder="Busca livre em todas as colunas...">
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;" id="tabelaInfo">Exibindo 0 registros.</div>
+                <table class="data-table">
+                    <thead id="tabelaHead"></thead>
+                    <tbody id="tabelaBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <span id="pageInfo">Página 1 de 1</span>
+                    <div class="pagination-btns">
+                        <button class="page-btn" id="btnPrevPage" disabled>Anterior</button>
+                        <button class="page-btn" id="btnNextPage" disabled>Próxima</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO INSIGHTS -->
+        <div id="insightsContent" class="tab-content">
+            <div class="insights-grid" id="insightsGrid"></div>
+        </div>
+
+        <!-- CONTEÚDO KPI / METRICA -->
+        <div id="kpisContent" class="tab-content">
+            <div id="kpisCategoryGrid" style="display: flex; flex-direction: column; gap: 2rem;"></div>
+            <div id="kpisChartsGrid" class="charts" style="margin-top: 2rem;"></div>
+        </div>
+
+        <!-- CONTEÚDO RELATÓRIOS -->
+        <div id="relatoriosContent" class="tab-content">
+            <div class="relatorios-grid" id="relatoriosGrid">
+                <div class="relatorio-card">
+                    <div class="relatorio-header">
+                        <i style="color:var(--accent-light)">📋</i><div class="relatorio-title">Relatório Analítico</div>
+                    </div>
+                    <div class="relatorio-desc">Gera um PDF detalhado com foco nos dados brutos e na Tabela Analítica (Top 10).</div>
+                    <button class="btn" onclick="gerarRelatorioExecutivo()">Baixar PDF Analítico</button>
+                </div>
+                <div class="relatorio-card">
+                    <div class="relatorio-header">
+                        <i style="color:var(--secondary)">📊</i><div class="relatorio-title">Visão Executiva</div>
+                    </div>
+                    <div class="relatorio-desc">Gera um PDF focado nos indicadores globais de alto nível (KPIs principais).</div>
+                    <button class="btn" onclick="gerarRelatorioVisaoExecutiva()" style="background:var(--bg-tertiary); color:var(--text-primary); border: 1px solid var(--border)">Baixar PDF Executivo</button>
+                </div>
+                <div class="relatorio-card">
+                    <div class="relatorio-header">
+                        <i style="color:var(--warning)">🎯</i><div class="relatorio-title">KPIs e Métricas</div>
+                    </div>
+                    <div class="relatorio-desc">Gera um PDF profundo com métricas detalhadas (Somente Almoxarifado e Assistência).</div>
+                    <button class="btn" onclick="gerarRelatorioKPIs()" style="background:var(--bg-tertiary); color:var(--text-primary); border: 1px solid var(--border)">Baixar PDF de KPIs</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO HISTÓRICO E COMPARAÇÃO -->
+        <div id="historicoContent" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card" style="padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-size: 1rem; color: var(--accent-light);">📂 Períodos Salvos</h3>
+                        <select id="historicoModuleFilter" onchange="renderHistorico()" style="background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 6px; font-size: 0.875rem;">
+                            <option value="all">Todos os Módulos</option>
+                            <option value="almoxarifado">Almoxarifado</option>
+                            <option value="nutricao">Nutrição</option>
+                            <option value="compras">Compras</option>
+                            <option value="financeiro">Financeiro</option>
+                            <option value="assistencia">Assistência</option>
+                        </select>
+                    </div>
+                    <div id="historicoListaPeriodos" style="max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhum período salvo ainda.</div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-size: 1rem; color: var(--accent-light);">⚖️ Comparar Períodos</h3>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Período 1 (Referência)</label>
+                        <select id="comparePeriod1" onchange="renderComparacao()" style="width: 100%; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 6px;">
+                            <option value="">Selecione um período...</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Período 2 (Comparar)</label>
+                        <select id="comparePeriod2" onchange="renderComparacao()" style="width: 100%; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 6px;">
+                            <option value="">Selecione um período...</option>
+                        </select>
+                    </div>
+                    <div id="historicoComparacao" style="margin-top: 1rem;">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem;">Selecione dois períodos para comparar</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="padding: 1.25rem;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--accent-light);">📈 Evolução entre Quinzenas</h3>
+                <div id="historicoEvolucao" style="height: 300px;">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Salve ao menos 2 períodos para ver a evolução</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DINÂMICO DE INSIGHTS -->
+        <div id="modalDynamicInsight" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModalInsight()">×</button>
+                <div class="modal-title" id="modalInsightTitle">📦 Título Dinâmico</div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead id="modalInsightHead"></thead>
+                        <tbody id="modalInsightBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null };
+var currentModule = 'compras';
+var currentTab = 'main';
+var charts = {};
+var currentTheme = 'green';
+
+function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
+function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v||0); }
+function formatPercent(v) { return new Intl.NumberFormat('pt-BR',{style:'percent',minimumFractionDigits:1}).format(v||0); }
+
+function getColors() {
+    var t = currentTheme;
+    if (t === 'green') return { primary: '#AEF158', primaryLight: '#52B788', secondary: '#06B6D4', tertiary: '#64B5F6', textMuted: '#627566', border: '#22342D', bg: 'rgba(174, 241, 88, 0.2)' };
+    if (t === 'purple') return { primary: '#A855F7', primaryLight: '#8B5CF6', secondary: '#06B6D4', tertiary: '#6366F1', textMuted: '#8B7BA3', border: '#2D1F4A', bg: 'rgba(168, 85, 247, 0.2)' };
+    if (t === 'luna') return { primary: '#54ACBF', primaryLight: '#A7EBF2', secondary: '#26658C', tertiary: '#023859', textMuted: '#8AA7B8', border: '#023859', bg: 'rgba(84, 172, 191, 0.2)' };
+    if (t === 'hemo') return { primary: '#2563EB', primaryLight: '#06B6D4', secondary: '#3B82F6', tertiary: '#0EA5E9', textMuted: '#94A3B8', border: '#E2E8F0', bg: 'rgba(37, 99, 235, 0.15)' };
+    if (t === 'top') return { primary: '#3EC7B7', primaryLight: '#5FE0C8', secondary: '#F4A261', tertiary: '#E76F51', textMuted: '#6C7A89', border: 'rgba(255, 255, 255, 0.05)', bg: 'rgba(62, 199, 183, 0.15)' };
+    return { primary: '#2D6A4F', primaryLight: '#40916C', secondary: '#06B6D4', tertiary: '#6366F1', textMuted: '#7A7A7A', border: '#E0E0E0', bg: 'rgba(45, 106, 79, 0.2)' };
+}
+
+document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentTheme = this.dataset.theme;
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        refreshView();
+    });
+});
+
+document.querySelectorAll('.nav-module').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-module').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        currentModule = item.dataset.module;
+        refreshView();
+    });
+});
+
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        currentTab = item.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.getElementById(currentTab + 'Content').classList.add('active');
+        refreshView();
+    });
+});
+
+document.getElementById('btnTrocar').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('btnAtualizar').addEventListener('click', () => {
+    var file = document.getElementById('fileInput').files[0];
+    if(file) loadExcel(file);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+    var file = e.target.files[0];
+    if(file) { document.getElementById('fileName').textContent = file.name; loadExcel(file); }
+});
+document.getElementById('btnExportCSV').addEventListener('click', () => {
+    var data = sysData[currentModule];
+    if (!data || !data.rows || !data.rows.length) return alert('Sem dados para exportar');
+    var keys = Object.keys(data.rows[0]);
+    var csv = keys.join(',') + '\n' + data.rows.map(r => keys.map(k => '"'+(r[k]||'')+'"').join(',')).join('\n');
+    var a = document.createElement('a');
+    a.href = window.URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+    a.download = currentModule + '_export.csv';
+    a.click();
+});
+
+function loadExcel(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var data = new Uint8Array(e.target.result);
+            var wb = XLSX.read(data, {type: 'array'});
+            var json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+            if(json.length < 2) return alert('Planilha vazia');
+
+            var headers = json[0].map(h => String(h).toUpperCase().trim());
+            var rows = [];
+
+            for (var i = 1; i < json.length; i++) {
+                var r = json[i];
+                if (!r || r.length===0) continue;
+                var obj = {};
+                
+                if (currentModule === 'almoxarifado') {
+                    obj.material = r[headers.findIndex(h=>h.includes('MATERIAL')||h.includes('ITEM'))] || '';
+                    obj.unidade = r[headers.findIndex(h=>h.includes('UNIDADE')||h.includes('ESCOLA')||h.includes('SETOR'))] || '';
+                    obj.saldo_atual = parseFloat(r[headers.findIndex(h=>h.includes('SALDO'))]) || 0;
+                    obj.estoque_minimo = parseFloat(r[headers.findIndex(h=>h.includes('MÍNIMO')||h.includes('MINIMO'))]) || 0;
+                    obj.requisicoes = parseFloat(r[headers.findIndex(h=>h.includes('REQUISI'))]) || 0;
+                    obj.tempo_atendimento = parseFloat(r[headers.findIndex(h=>h.includes('TEMPO'))]) || 0;
+                    obj.valor_total = parseFloat(r[headers.findIndex(h=>h.includes('VALOR')||h.includes('ESTOCADO'))]) || 0;
+                    obj.perdas = parseFloat(r[headers.findIndex(h=>h.includes('PERDA')||h.includes('AVARIA'))]) || 0;
+                    obj.consumo_mensal = parseFloat(r[headers.findIndex(h=>h.includes('CONSUMO'))]) || 0;
+                    
+                    var reqIntIdx = headers.findIndex(h=>h.includes('INTEGRAL'));
+                    if (reqIntIdx !== -1) {
+                        var val = String(r[reqIntIdx]).toLowerCase();
+                        obj.req_integral = (val.includes('sim') || parseFloat(r[reqIntIdx]) > 0) ? 1 : 0;
+                    } else {
+                        obj.req_integral = 1; // Default
+                    }
+                    if(!obj.material) continue;
+                } 
+                else if (currentModule === 'compras') {
+                    obj.processo = r[headers.findIndex(h=>h.includes('PROCESSO'))] || '';
+                    obj.solicitante = r[headers.findIndex(h=>h.includes('SOLICITANTE')||h.includes('DEP'))] || '';
+                    obj.objeto = r[headers.findIndex(h=>h.includes('OBJETO'))] || '';
+                    obj.valor_solicitado = parseFloat(r[headers.findIndex(h=>h.includes('SOLICITADO'))]) || 0;
+                    obj.valor_contratado = parseFloat(r[headers.findIndex(h=>h.includes('CONTRATADO')||h.includes('HOMOLOGADO'))]) || 0;
+                    obj.fornecedor = r[headers.findIndex(h=>h.includes('FORNECEDOR')||h.includes('EMPRESA'))] || '';
+                    obj.status = r[headers.findIndex(h=>h.includes('STATUS')||h.includes('SITUA'))] || 'Em Aberto';
+                    obj.prazo_dias = parseFloat(r[headers.findIndex(h=>h.includes('PRAZO')||h.includes('DIAS'))]) || 0;
+                    obj.doc = r[headers.findIndex(h=>h.includes('DOC'))] || '';
+                    if(!obj.processo) continue;
+                }
+                else if (currentModule === 'financeiro') {
+                    obj.processo = r[headers.findIndex(h=>h.includes('PROCESSO'))] || '';
+                    obj.departamento = r[headers.findIndex(h=>h.includes('DEPARTAMENTO')||h.includes('SETOR'))] || '';
+                    obj.categoria = r[headers.findIndex(h=>h.includes('CATEGORIA')||h.includes('OBJETO'))] || '';
+                    obj.fonte = r[headers.findIndex(h=>h.includes('FONTE')||h.includes('RECURSO'))] || '';
+                    obj.dotacao_inicial = parseFloat(r[headers.findIndex(h=>h.includes('INICIAL')||h.includes('PREVISTO'))]) || 0;
+                    obj.dotacao_atualizada = parseFloat(r[headers.findIndex(h=>h.includes('ATUALIZADA'))]) || obj.dotacao_inicial;
+                    obj.empenhado = parseFloat(r[headers.findIndex(h=>h.includes('EMPENHADO'))]) || 0;
+                    obj.liquidado = parseFloat(r[headers.findIndex(h=>h.includes('LIQUIDADO'))]) || 0;
+                    obj.pago = parseFloat(r[headers.findIndex(h=>h.includes('PAGO'))]) || 0;
+                    obj.status = r[headers.findIndex(h=>h.includes('STATUS'))] || 'Normal';
+                    if(!obj.departamento && !obj.empenhado) continue;
+                }
+                else if (currentModule === 'nutricao') {
+                    obj.unidade = r[headers.findIndex(h=>h.includes('UNIDADE')||h.includes('ESCOLA'))] || '';
+                    obj.atendidos = parseFloat(r[headers.findIndex(h=>h.includes('ATENDIDOS')||h.includes('ALUNOS'))]) || 0;
+                    obj.refeicoes = parseFloat(r[headers.findIndex(h=>h.includes('REFEI'))]) || 0;
+                    obj.custo_total = parseFloat(r[headers.findIndex(h=>h.includes('CUSTO'))]) || 0;
+                    obj.desperdicio = parseFloat(r[headers.findIndex(h=>h.includes('DESPERD'))]) || 0;
+                    obj.planejamento = parseFloat(r[headers.findIndex(h=>h.includes('PLANEJA'))]) || obj.refeicoes;
+                    obj.item_falta = parseFloat(r[headers.findIndex(h=>h.includes('FALTA'))]) || 0;
+                    obj.conformidade = r[headers.findIndex(h=>h.includes('CONFORMIDADE')||h.includes('STATUS'))] || 'Conforme';
+                    if(!obj.unidade) continue;
+                }
+                else if (currentModule === 'assistencia') {
+                    obj.chamado = r[headers.findIndex(h=>h.includes('CHAMADO')||h.includes('ID'))] || '';
+                    obj.unidade = r[headers.findIndex(h=>h.includes('UNIDADE')||h.includes('ESCOLA'))] || '';
+                    obj.tipo = r[headers.findIndex(h=>h.includes('TIPO')||h.includes('CATEGORIA'))] || 'Suporte';
+                    obj.data_abertura = r[headers.findIndex(h=>h.includes('ABERTURA')||h.includes('DATA'))] || '';
+                    obj.prazo = parseFloat(r[headers.findIndex(h=>h.includes('PRAZO'))]) || 0;
+                    obj.status = r[headers.findIndex(h=>h.includes('STATUS')||h.includes('SITUA'))] || 'Aberto';
+                    obj.tempo_resposta = parseFloat(r[headers.findIndex(h=>h.includes('RESPOSTA'))]) || 0;
+                    obj.tempo_resolucao = parseFloat(r[headers.findIndex(h=>h.includes('RESOLU'))]) || 0;
+                    obj.prioridade = r[headers.findIndex(h=>h.includes('PRIORIDADE')||h.includes('GRAVIDADE'))] || 'Média';
+                    obj.reincidente = parseFloat(r[headers.findIndex(h=>h.includes('REINCIDENTE'))]) || 0;
+                    obj.custo = parseFloat(r[headers.findIndex(h=>h.includes('CUSTO')||h.includes('VALOR'))]) || 0;
+                    if(!obj.chamado) continue;
+                }
+                rows.push(obj);
+            }
+
+            var chk = document.getElementById('chkMesclar');
+            if(chk && chk.checked && sysData[currentModule] && !sysData[currentModule].isDemo) {
+                var c = sysData[currentModule].rows.concat(rows);
+                sysData[currentModule] = {rows: c, filtered: c};
+            } else {
+                sysData[currentModule] = {rows: rows, filtered: rows};
+            }
+            refreshView();
+        } catch(e) { alert('Erro: ' + e); }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function clearCharts() { Object.values(charts).forEach(c => c && c.destroy()); charts = {}; }
+
+function refreshView() {
+    var titles = {
+        almoxarifado: ['Almoxarifado', 'Gestão de materiais e distribuição'],
+        compras: ['Compras', 'Gestão de processos e fornecedores'],
+        financeiro: ['Financeiro', 'Orçamento, empenho e execução'],
+        nutricao: ['Nutrição Escolar', 'Alimentação e consumo na rede'],
+        assistencia: ['Assistência à Rede Escolar', 'Gestão de chamados e suporte técnico']
+    };
+    document.getElementById('mainHeaderTitle').textContent = titles[currentModule][0] + (currentTab!=='main' ? ' - '+document.querySelector(`[data-tab="${currentTab}"]`).textContent : '');
+    document.getElementById('mainHeaderSub').textContent = titles[currentModule][1];
+    
+    if(currentTab === 'main') renderMain();
+    else if(currentTab === 'tabela') renderTabela();
+    else if(currentTab === 'insights') renderInsights();
+    else if(currentTab === 'kpis') renderKpisTab();
+    else if(currentTab === 'historico') renderHistorico();
+}
+
+function renderMain() {
+    clearCharts();
+    var data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    var kEl = document.getElementById('mainKpis');
+    var cEl = document.getElementById('mainCharts');
+    var cl = getColors();
+    Chart.defaults.color = cl.textMuted;
+    Chart.defaults.borderColor = cl.border;
+
+    if(data.length === 0) {
+        kEl.innerHTML = `<div class="kpi"><div class="kpi-label">Aviso</div><div class="kpi-value">Sem Dados</div></div>`;
+        cEl.innerHTML = ''; return;
+    }
+
+    if (currentModule === 'almoxarifado') {
+        var vEstoque = data.reduce((s,r)=>s+(r.valor_total||0),0);
+        var req = data.reduce((s,r)=>s+(r.requisicoes||0),0);
+        var min = data.filter(r=>(r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+        var tempo = data.reduce((s,r)=>s+(r.tempo_atendimento||0),0) / (data.length||1);
+        var perdas = data.reduce((s,r)=>s+(r.perdas||0),0) / (data.length||1);
+
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Valor Total Estocado</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
+            <div class="kpi"><div class="kpi-label">Total de Requisições</div><div class="kpi-value">${formatNumber(req)}</div><div class="kpi-sub">Atendimentos no período</div></div>
+            <div class="kpi"><div class="kpi-label">Itens Abaixo do Mínimo</div><div class="kpi-value ${min>0?'badge-warning':''}">${formatNumber(min)}</div><div class="kpi-sub">Risco de ruptura</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo)} dias</div><div class="kpi-sub">Agilidade interna</div></div>
+            <div class="kpi"><div class="kpi-label">Índice de Perdas</div><div class="kpi-value ${perdas>0?'badge-danger':''}">${formatPercent(perdas/100)}</div><div class="kpi-sub">Materiais inutilizados</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Consumo Médio Mensal por Unidade (Top)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Saldo Atual por Item (Top 10)</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Valor Estocado por Unidade</h3><div class="chart-canvas"><canvas id="c3"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Itens Críticos (Abaixo do Mínimo)</h3><div class="chart-canvas"><canvas id="c4"></canvas></div></div>
+        `;
+        var dpt = {}; data.forEach(r=>{ dpt[r.unidade||'N/A']=(dpt[r.unidade||'N/A']||0)+(r.consumo_mensal||0); });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:Object.keys(dpt).slice(0,10), datasets:[{data:Object.values(dpt).slice(0,10), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        var top = data.sort((a,b)=>b.saldo_atual-a.saldo_atual).slice(0,10);
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:top.map(t=>t.material), datasets:[{data:top.map(t=>t.saldo_atual), backgroundColor:cl.secondary}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        var valUnid = {}; data.forEach(r=>{ valUnid[r.unidade||'N/A']=(valUnid[r.unidade||'N/A']||0)+(r.valor_total||0); });
+        charts.c3 = new Chart(document.getElementById('c3'), { type:'polarArea', data:{ labels:Object.keys(valUnid).slice(0,8), datasets:[{data:Object.values(valUnid).slice(0,8), backgroundColor:[cl.primary,cl.secondary,cl.tertiary,cl.textMuted,'#A73F47','#E4B434','#06B6D4','#6366F1']}] }, options:{responsive:true,maintainAspectRatio:false} });
+        var criticos = data.filter(r=>(r.saldo_atual||0)<(r.estoque_minimo||0)).slice(0,8);
+        charts.c4 = new Chart(document.getElementById('c4'), { type:'bar', data:{ labels:criticos.map(t=>t.material), datasets:[{label:'Saldo',data:criticos.map(t=>t.saldo_atual),backgroundColor:cl.danger},{label:'Mínimo',data:criticos.map(t=>t.estoque_minimo),backgroundColor:cl.warning}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+    else if (currentModule === 'compras') {
+        var vSol = data.reduce((s,r)=>s+(r.valor_solicitado||0),0);
+        var vCon = data.reduce((s,r)=>s+(r.valor_contratado||0),0);
+        var econ = vSol - vCon;
+        var atrasos = data.filter(r=>r.status==='Atrasado').length;
+        var concluido = data.filter(r=>r.status==='Concluído').length;
+
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Valor Solicitado</div><div class="kpi-value highlight">${formatCurrency(vSol)}</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Contratado</div><div class="kpi-value">${formatCurrency(vCon)}</div></div>
+            <div class="kpi"><div class="kpi-label">Economia Total</div><div class="kpi-value badge-success">${formatCurrency(econ)}</div></div>
+            <div class="kpi"><div class="kpi-label">Processos Atrasados</div><div class="kpi-value badge-danger">${atrasos}</div></div>
+            <div class="kpi"><div class="kpi-label">Processos Concluídos</div><div class="kpi-value">${concluido}</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Status dos Processos</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Top 10 Fornecedores</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var st = {}; data.forEach(r=>{ st[r.status||'N/A']=(st[r.status||'N/A']||0)+1; });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'doughnut', data:{ labels:Object.keys(st), datasets:[{data:Object.values(st), backgroundColor:[cl.primary, cl.secondary, cl.warning, cl.danger]}] }, options:{responsive:true,maintainAspectRatio:false} });
+        var forns = {}; data.forEach(r=>{ if(r.fornecedor) forns[r.fornecedor]=(forns[r.fornecedor]||0)+r.valor_contratado; });
+        var topF = Object.keys(forns).sort((a,b)=>forns[b]-forns[a]).slice(0,10);
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:topF, datasets:[{data:topF.map(f=>forns[f]), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+    }
+    else if (currentModule === 'financeiro') {
+        var emp = data.reduce((s,r)=>s+(r.empenhado||0),0);
+        var liq = data.reduce((s,r)=>s+(r.liquidado||0),0);
+        var pago = data.reduce((s,r)=>s+(r.pago||0),0);
+        var dAtual = data.reduce((s,r)=>s+(r.dotacao_atualizada||0),0);
+        var saldo = dAtual - emp;
+
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Empenhado</div><div class="kpi-value highlight">${formatCurrency(emp)}</div></div>
+            <div class="kpi"><div class="kpi-label">Liquidado</div><div class="kpi-value">${formatCurrency(liq)}</div></div>
+            <div class="kpi"><div class="kpi-label">Pago</div><div class="kpi-value">${formatCurrency(pago)}</div></div>
+            <div class="kpi"><div class="kpi-label">Dotação Atualizada</div><div class="kpi-value">${formatCurrency(dAtual)}</div></div>
+            <div class="kpi"><div class="kpi-label">Saldo Disponível</div><div class="kpi-value badge-success">${formatCurrency(saldo)}</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Execução por Departamento</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Status da Execução Orçamentária</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var dpts = {}; data.forEach(r=>{ dpts[r.departamento||'N/A']=(dpts[r.departamento||'N/A']||0)+r.pago; });
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:Object.keys(dpts).slice(0,10), datasets:[{data:Object.values(dpts).slice(0,10), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'pie', data:{ labels:['Pago', 'Empenhado (Saldo)', 'Disponível'], datasets:[{data:[pago, emp-pago, saldo], backgroundColor:[cl.primary, cl.secondary, cl.bg]}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+    else if (currentModule === 'nutricao') {
+        var alunos = data.reduce((s,r)=>s+(r.atendidos||0),0);
+        var ref = data.reduce((s,r)=>s+(r.refeicoes||0),0);
+        var custo = data.reduce((s,r)=>s+(r.custo_total||0),0);
+        var desp = data.reduce((s,r)=>s+(r.desperdicio||0),0);
+        var conformes = data.filter(r=>r.conformidade==='Conforme').length;
+
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Alunos Atendidos</div><div class="kpi-value highlight">${formatNumber(alunos)}</div></div>
+            <div class="kpi"><div class="kpi-label">Refeições Servidas</div><div class="kpi-value">${formatNumber(ref)}</div></div>
+            <div class="kpi"><div class="kpi-label">Custo Total</div><div class="kpi-value">${formatCurrency(custo)}</div></div>
+            <div class="kpi"><div class="kpi-label">Desperdício</div><div class="kpi-value badge-danger">${formatNumber(desp)}</div></div>
+            <div class="kpi"><div class="kpi-label">Unidades Conformes</div><div class="kpi-value">${conformes} / ${data.length}</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Desperdício por Unidade (Top 10)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Conformidade das Unidades</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+        `;
+        var des = {}; data.forEach(r=>{ des[r.unidade||'N/A']=(des[r.unidade||'N/A']||0)+r.desperdicio; });
+        var topD = Object.keys(des).sort((a,b)=>des[b]-des[a]).slice(0,10);
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:topD, datasets:[{data:topD.map(d=>des[d]), backgroundColor:cl.danger}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        var conf = {}; data.forEach(r=>{ conf[r.conformidade||'N/A']=(conf[r.conformidade||'N/A']||0)+1; });
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'doughnut', data:{ labels:Object.keys(conf), datasets:[{data:Object.values(conf), backgroundColor:[cl.primary, cl.warning, cl.danger]}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+    else if (currentModule === 'assistencia') {
+        var totalCh = data.length;
+        var resolvidos = data.filter(r=>r.status==='Concluído').length;
+        var percRes = totalCh > 0 ? resolvidos / totalCh : 0;
+        var tResolucoes = data.filter(r=>r.tempo_resolucao > 0);
+        var mediaRes = tResolucoes.length ? tResolucoes.reduce((s,r)=>s+r.tempo_resolucao,0) / tResolucoes.length : 0;
+        var noPrazo = data.filter(r=>r.status==='Concluído' && r.tempo_resolucao <= r.prazo).length;
+        var percPrazo = resolvidos > 0 ? noPrazo / resolvidos : 0;
+        var criticosNaoRes = data.filter(r=>r.prioridade==='Crítica' && r.status!=='Concluído').length;
+
+        kEl.innerHTML = `
+            <div class="kpi"><div class="kpi-label">Total de Chamados</div><div class="kpi-value highlight">${formatNumber(totalCh)}</div><div class="kpi-sub">Demandas registradas</div></div>
+            <div class="kpi"><div class="kpi-label">% de Chamados Resolvidos</div><div class="kpi-value ${percRes<0.7?'badge-warning':''}">${formatPercent(percRes)}</div><div class="kpi-sub">Eficiência de fechamento</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio de Resolução</div><div class="kpi-value">${formatNumber(mediaRes.toFixed(1))} dias</div><div class="kpi-sub">Ciclo completo</div></div>
+            <div class="kpi"><div class="kpi-label">% Atendimentos no Prazo</div><div class="kpi-value ${percPrazo<0.8?'badge-danger':''}">${formatPercent(percPrazo)}</div><div class="kpi-sub">Cumprimento de SLA</div></div>
+            <div class="kpi"><div class="kpi-label">Demandas Críticas Pendentes</div><div class="kpi-value" style="color:var(--danger)">${formatNumber(criticosNaoRes)}</div><div class="kpi-sub">Risco estrutural</div></div>
+        `;
+        cEl.innerHTML = `
+            <div class="chart"><h3 class="chart-title">Chamados por Escola (Top 10)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Chamados por Tipo</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">Status dos Chamados</h3><div class="chart-canvas"><canvas id="c3"></canvas></div></div>
+            <div class="chart"><h3 class="chart-title">SLA: No Prazo x Fora do Prazo</h3><div class="chart-canvas"><canvas id="c4"></canvas></div></div>
+        `;
+        
+        var esc = {}; data.forEach(r=>{ esc[r.unidade||'N/A']=(esc[r.unidade||'N/A']||0)+1; });
+        var escList = Object.keys(esc).sort((a,b)=>esc[b]-esc[a]).slice(0,10);
+        charts.c1 = new Chart(document.getElementById('c1'), { type:'bar', data:{ labels:escList, datasets:[{data:escList.map(k=>esc[k]), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        
+        var tipos = {}; data.forEach(r=>{ tipos[r.tipo||'N/A']=(tipos[r.tipo||'N/A']||0)+1; });
+        charts.c2 = new Chart(document.getElementById('c2'), { type:'bar', data:{ labels:Object.keys(tipos), datasets:[{data:Object.values(tipos), backgroundColor:cl.secondary}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+        
+        var stat = {}; data.forEach(r=>{ stat[r.status||'N/A']=(stat[r.status||'N/A']||0)+1; });
+        charts.c3 = new Chart(document.getElementById('c3'), { type:'doughnut', data:{ labels:Object.keys(stat), datasets:[{data:Object.values(stat), backgroundColor:[cl.primary, cl.warning, cl.danger, cl.secondary]}] }, options:{responsive:true,maintainAspectRatio:false} });
+        
+        var foraPrazo = resolvidos - noPrazo;
+        charts.c4 = new Chart(document.getElementById('c4'), { type:'pie', data:{ labels:['No Prazo', 'Fora do Prazo'], datasets:[{data:[noPrazo, foraPrazo], backgroundColor:[cl.primary, cl.danger]}] }, options:{responsive:true,maintainAspectRatio:false} });
+    }
+}
+
+var tPage = 1, tSort = '', tDesc = false, tSearch = '';
+document.getElementById('tabelaSearch').addEventListener('input', e => { tSearch = e.target.value.toLowerCase(); tPage=1; renderTabela(); });
+document.getElementById('btnPrevPage').addEventListener('click', () => { if(tPage>1) { tPage--; renderTabela(); } });
+document.getElementById('btnNextPage').addEventListener('click', () => { tPage++; renderTabela(); });
+
+function renderTabela() {
+    var cols = [];
+    if(currentModule==='compras') cols=[{k:'processo',l:'Processo'},{k:'solicitante',l:'Solicitante'},{k:'objeto',l:'Objeto'},{k:'valor_solicitado',l:'V. Solicitado'},{k:'valor_contratado',l:'V. Contratado'},{k:'fornecedor',l:'Fornecedor'},{k:'status',l:'Status'},{k:'prazo_dias',l:'Prazo (d)'},{k:'doc',l:'Doc'}];
+    else if(currentModule==='financeiro') cols=[{k:'processo',l:'Processo'},{k:'departamento',l:'Depto'},{k:'categoria',l:'Categoria'},{k:'fonte',l:'Fonte'},{k:'empenhado',l:'Empenhado'},{k:'liquidado',l:'Liquidado'},{k:'pago',l:'Pago'},{k:'status',l:'Status'}];
+    else if(currentModule==='nutricao') cols=[{k:'unidade',l:'Unidade'},{k:'atendidos',l:'Alunos'},{k:'refeicoes',l:'Refeições'},{k:'custo_total',l:'Custo Total'},{k:'desperdicio',l:'Desperdício'},{k:'item_falta',l:'Itens Falta'},{k:'conformidade',l:'Status'}];
+    else if(currentModule==='assistencia') cols=[{k:'chamado',l:'Chamado'},{k:'unidade',l:'Escola'},{k:'tipo',l:'Tipo'},{k:'data_abertura',l:'Abertura'},{k:'prazo',l:'Prazo(d)'},{k:'status',l:'Status'},{k:'tempo_resposta',l:'T. Resposta'},{k:'tempo_resolucao',l:'T. Resolução'},{k:'prioridade',l:'Prioridade'}];
+    else cols=[{k:'material',l:'Material'},{k:'unidade',l:'Unidade'},{k:'saldo_atual',l:'Saldo'},{k:'estoque_minimo',l:'Minimo'},{k:'requisicoes',l:'Req. Atendidas'},{k:'valor_total',l:'V. Estocado'},{k:'consumo_mensal',l:'Consumo Médio'}];
+
+    var data = sysData[currentModule] ? sysData[currentModule].rows.slice() : [];
+    if(tSearch) data = data.filter(r => Object.values(r).some(v=>String(v).toLowerCase().includes(tSearch)));
+    if(tSort) data.sort((a,b)=>{ var va=a[tSort], vb=b[tSort]; if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();} return (va<vb ? -1 : 1)*(tDesc?-1:1); });
+
+    var total = Math.ceil(data.length/10)||1;
+    if(tPage>total) tPage = total;
+    var pageData = data.slice((tPage-1)*10, tPage*10);
+    window.currentPageData = pageData;
+
+    document.getElementById('tabelaHead').innerHTML = '<tr>'+cols.map(c=>`<th class="sortable" onclick="tSort='${c.k}';tDesc=!tDesc;renderTabela()">${c.l}</th>`).join('')+'</tr>';
+    document.getElementById('tabelaBody').innerHTML = pageData.length ? pageData.map((r, i)=>`<tr onclick="showRowDetails(${i})" style="cursor:pointer" title="Clique para ver detalhes">`+cols.map(c=>{
+        var v = r[c.k];
+        if(typeof v==='number' && (c.k.includes('valor')||c.k.includes('custo')||c.k==='empenhado'||c.k==='liquidado'||c.k==='pago')) return `<td class="money">${formatCurrency(v)}</td>`;
+        if(typeof v==='number') return `<td class="num">${formatNumber(v)}</td>`;
+        if(c.k==='status'||c.k==='conformidade') return `<td><span class="badge ${v==='Concluído'||v==='Conforme'||v==='Normal'?'badge-success':(v==='Pendente'?'badge-warning':'badge-danger')}">${v}</span></td>`;
+        return `<td>${v||'—'}</td>`;
+    }).join('')+'</tr>').join('') : `<tr><td colspan="${cols.length}" style="text-align:center">Sem dados</td></tr>`;
+    
+    document.getElementById('tabelaInfo').textContent = `Exibindo ${data.length} registros.`;
+    document.getElementById('pageInfo').textContent = `Página ${tPage} de ${total}`;
+    document.getElementById('btnPrevPage').disabled = tPage===1;
+    document.getElementById('btnNextPage').disabled = tPage===total;
+}
+
+function showRowDetails(index) {
+    var row = window.currentPageData[index];
+    if(!row) return;
+    
+    var title = '📄 Detalhes do Registro';
+    var thead = '<tr><th style="width:40%">Campo</th><th>Valor</th></tr>';
+    var tbody = Object.keys(row).map(k => {
+        var val = row[k];
+        var formatVal = val;
+        var label = k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ');
+        if(typeof val === 'number') {
+            if(k.includes('valor') || k.includes('custo') || k === 'empenhado' || k === 'liquidado' || k === 'pago') formatVal = formatCurrency(val);
+            else formatVal = formatNumber(val);
+        }
+        if(k === 'status' || k === 'conformidade') {
+            formatVal = `<span class="badge ${val==='Concluído'||val==='Conforme'||val==='Normal'?'badge-success':(val==='Pendente'?'badge-warning':'badge-danger')}">${val}</span>`;
+        }
+        return `<tr><td style="font-weight:600; color:var(--text-secondary);">${label}</td><td>${formatVal || '—'}</td></tr>`;
+    }).join('');
+    
+    document.getElementById('modalInsightTitle').textContent = title;
+    document.getElementById('modalInsightHead').innerHTML = thead;
+    document.getElementById('modalInsightBody').innerHTML = tbody;
+    document.getElementById('modalDynamicInsight').classList.add('active');
+}
+
+function renderKpisTab() {
+    var cont = document.getElementById('kpisCategoryGrid');
+    var chartsCont = document.getElementById('kpisChartsGrid');
+    var data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    
+    if (currentModule !== 'almoxarifado' && currentModule !== 'assistencia') {
+        cont.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-muted);">Esta visão detalhada de KPIs está disponível para os módulos Almoxarifado e Assistência Rede.</div>';
+        chartsCont.innerHTML = '';
+        return;
+    }
+    
+    if (!data.length) {
+        cont.innerHTML = '<p>Sem dados para exibir.</p>';
+        chartsCont.innerHTML = '';
+        return;
+    }
+
+    if (currentModule === 'assistencia') {
+        renderKpisAssistencia(cont, chartsCont, data);
+        return;
+    }
+
+    // Cálculos Almoxarifado
+    var total_itens = data.length;
+    var abaixo_min = data.filter(r => (r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+    var sem_mov = data.filter(r => (r.consumo_mensal||0) === 0).length;
+    
+    var soma_consumo = data.reduce((s,r) => s + (r.consumo_mensal||0), 0);
+    var soma_saldo = data.reduce((s,r) => s + (r.saldo_atual||0), 0);
+    var giro = soma_saldo > 0 ? (soma_consumo / soma_saldo) : 0;
+    var cobertura_dias = soma_consumo > 0 ? (soma_saldo / (soma_consumo / 30)) : 0;
+    
+    var req_atendidas = data.reduce((s,r) => s + (r.requisicoes||0), 0);
+    var req_integrais = data.filter(r => r.req_integral === 1).length;
+    var perc_integral = total_itens > 0 ? (req_integrais / total_itens) : 0;
+    var tempo_medio = total_itens > 0 ? (data.reduce((s,r) => s + (r.tempo_atendimento||0), 0) / total_itens) : 0;
+    
+    var valor_estocado = data.reduce((s,r) => s + (r.valor_total||0), 0);
+    var valor_consumido = data.reduce((s,r) => s + ((r.consumo_mensal||0) * (r.saldo_atual>0 ? (r.valor_total/r.saldo_atual) : 0)), 0);
+    
+    var perdas_total = data.reduce((s,r) => s + (r.perdas||0), 0);
+    var indice_perdas = soma_saldo > 0 ? (perdas_total / soma_saldo) : 0;
+
+    cont.innerHTML = `
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Estoque</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Saldo Atual</div><div class="kpi-value highlight">${formatNumber(soma_saldo)}</div></div>
+            <div class="kpi"><div class="kpi-label">Abaixo do Mínimo</div><div class="kpi-value" style="color:var(--danger)">${abaixo_min}</div></div>
+            <div class="kpi"><div class="kpi-label">Sem Movimentação</div><div class="kpi-value">${sem_mov}</div></div>
+            <div class="kpi"><div class="kpi-label">Giro de Estoque</div><div class="kpi-value">${formatPercent(giro)}</div></div>
+            <div class="kpi"><div class="kpi-label">Cobertura (Dias)</div><div class="kpi-value">${formatNumber(Math.round(cobertura_dias))}</div></div>
+        </div>
+        
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Consumo e Atendimento</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Consumo Mensal</div><div class="kpi-value">${formatNumber(soma_consumo)}</div></div>
+            <div class="kpi"><div class="kpi-label">Requisições Atendidas</div><div class="kpi-value">${formatNumber(req_atendidas)}</div></div>
+            <div class="kpi"><div class="kpi-label">% Atendimento Integral</div><div class="kpi-value">${formatPercent(perc_integral)}</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio (Dias)</div><div class="kpi-value">${formatNumber(tempo_medio.toFixed(1))}</div></div>
+        </div>
+        
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Financeiro e Perdas</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Valor Estocado</div><div class="kpi-value highlight">${formatCurrency(valor_estocado)}</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Consumido</div><div class="kpi-value">${formatCurrency(valor_consumido)}</div></div>
+            <div class="kpi"><div class="kpi-label">Índice de Perdas</div><div class="kpi-value" style="color:var(--danger)">${formatPercent(indice_perdas)}</div></div>
+        </div>
+    `;
+    
+    chartsCont.innerHTML = `
+        <div class="chart"><h3 class="chart-title">Consumo por Escola/Setor</h3><div class="chart-canvas"><canvas id="kChart1"></canvas></div></div>
+        <div class="chart"><h3 class="chart-title">Distribuição Financeira</h3><div class="chart-canvas"><canvas id="kChart2"></canvas></div></div>
+    `;
+    
+    var dpt = {}; data.forEach(r=>{ dpt[r.unidade||'N/A']=(dpt[r.unidade||'N/A']||0)+(r.consumo_mensal||0); });
+    var cl = getColors();
+    charts.k1 = new Chart(document.getElementById('kChart1'), { type:'bar', data:{ labels:Object.keys(dpt).slice(0,10), datasets:[{data:Object.values(dpt).slice(0,10), backgroundColor:cl.primary}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+    
+    var valor_perdas = data.reduce((s,r) => s + ((r.perdas||0) * (r.saldo_atual>0 ? (r.valor_total/r.saldo_atual) : 0)), 0);
+    charts.k2 = new Chart(document.getElementById('kChart2'), { type:'doughnut', data:{ labels:['Estocado', 'Consumido', 'Perdas'], datasets:[{data:[valor_estocado, valor_consumido, valor_perdas], backgroundColor:[cl.primary, cl.secondary, '#A73F47']}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:cl.textMuted}}}} });
+}
+
+function renderKpisAssistencia(cont, chartsCont, data) {
+    var totalCh = data.length;
+    var resolvidos = data.filter(r=>r.status==='Concluído').length;
+    var emAberto = data.filter(r=>r.status!=='Concluído').length;
+    var atrasados = data.filter(r=>r.status!=='Concluído' && r.prazo < r.tempo_resolucao).length;
+    
+    var tResposta = data.filter(r=>r.tempo_resposta > 0);
+    var medResposta = tResposta.length ? tResposta.reduce((s,r)=>s+r.tempo_resposta,0)/tResposta.length : 0;
+    var tResolucoes = data.filter(r=>r.tempo_resolucao > 0);
+    var medResolucoes = tResolucoes.length ? tResolucoes.reduce((s,r)=>s+r.tempo_resolucao,0)/tResolucoes.length : 0;
+    
+    var noPrazo = data.filter(r=>r.status==='Concluído' && r.tempo_resolucao <= r.prazo).length;
+    var percPrazo = resolvidos > 0 ? noPrazo / resolvidos : 0;
+    var criticosNaoRes = data.filter(r=>r.prioridade==='Crítica' && r.status!=='Concluído').length;
+    
+    var escSet = new Set(data.map(r=>r.unidade));
+    var visitas = data.filter(r=>r.tipo==='Visita Técnica').length;
+    var estruturais = data.filter(r=>r.tipo==='Infraestrutura');
+    
+    var reincidentes = data.filter(r=>r.reincidente === 1).length;
+    var percReincidencia = totalCh > 0 ? reincidentes / totalCh : 0;
+    var custoGeral = data.reduce((s,r)=>s+(r.custo||0),0);
+    
+    cont.innerHTML = `
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Atendimento e SLA</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Total de Chamados</div><div class="kpi-value highlight">${formatNumber(totalCh)}</div></div>
+            <div class="kpi"><div class="kpi-label">% Resolvidos</div><div class="kpi-value">${formatPercent(resolvidos/totalCh||0)}</div></div>
+            <div class="kpi"><div class="kpi-label">% no Prazo</div><div class="kpi-value ${percPrazo<0.8?'badge-danger':''}">${formatPercent(percPrazo)}</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Resposta</div><div class="kpi-value">${formatNumber(medResposta.toFixed(1))} d</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Resolução</div><div class="kpi-value">${formatNumber(medResolucoes.toFixed(1))} d</div></div>
+        </div>
+        
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Pendências e Qualidade</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Em Aberto</div><div class="kpi-value">${formatNumber(emAberto)}</div></div>
+            <div class="kpi"><div class="kpi-label">Atrasados</div><div class="kpi-value" style="color:var(--danger)">${formatNumber(atrasados)}</div></div>
+            <div class="kpi"><div class="kpi-label">Críticos Não Resolvidos</div><div class="kpi-value" style="color:var(--danger)">${formatNumber(criticosNaoRes)}</div></div>
+            <div class="kpi"><div class="kpi-label">Índice de Reincidência</div><div class="kpi-value">${formatPercent(percReincidencia)}</div></div>
+        </div>
+        
+        <h2 style="font-size:1.25rem; margin-bottom:-1rem; color:var(--accent-light);">Cobertura e Custos</h2>
+        <div class="kpiss">
+            <div class="kpi"><div class="kpi-label">Escolas Atendidas</div><div class="kpi-value">${formatNumber(escSet.size)}</div></div>
+            <div class="kpi"><div class="kpi-label">Visitas Técnicas</div><div class="kpi-value">${formatNumber(visitas)}</div></div>
+            <div class="kpi"><div class="kpi-label">Demandas Estruturais</div><div class="kpi-value">${formatNumber(estruturais.length)}</div></div>
+            <div class="kpi"><div class="kpi-label">Custo Médio / Atendimento</div><div class="kpi-value highlight">${formatCurrency(totalCh?custoGeral/totalCh:0)}</div></div>
+        </div>
+    `;
+    
+    chartsCont.innerHTML = `
+        <div class="chart"><h3 class="chart-title">Chamados Críticos por Escola</h3><div class="chart-canvas"><canvas id="kChart1"></canvas></div></div>
+        <div class="chart"><h3 class="chart-title">Status Estrutural</h3><div class="chart-canvas"><canvas id="kChart2"></canvas></div></div>
+    `;
+    
+    var critEsc = {}; data.filter(r=>r.prioridade==='Crítica').forEach(r=>{ critEsc[r.unidade||'N/A']=(critEsc[r.unidade||'N/A']||0)+1; });
+    var cl = getColors();
+    charts.k1 = new Chart(document.getElementById('kChart1'), { type:'bar', data:{ labels:Object.keys(critEsc), datasets:[{data:Object.values(critEsc), backgroundColor:cl.danger}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+    
+    var stEstr = {}; estruturais.forEach(r=>{ stEstr[r.status||'N/A']=(stEstr[r.status||'N/A']||0)+1; });
+    charts.k2 = new Chart(document.getElementById('kChart2'), { type:'pie', data:{ labels:Object.keys(stEstr), datasets:[{data:Object.values(stEstr), backgroundColor:[cl.warning, cl.primary, cl.secondary]}] }, options:{responsive:true,maintainAspectRatio:false} });
+}
+
+function renderInsights() {
+    var data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    var html = '';
+    if(data.length) {
+        if(currentModule==='compras') {
+            var economia = data.reduce((s,r)=>s+(r.valor_solicitado-r.valor_contratado),0);
+            var atrasados = data.filter(r=>r.status==='Atrasado').length;
+            var emAberto = data.filter(r=>r.status==='Em Aberto');
+            var capAberto = emAberto.reduce((s,r)=>s+r.valor_solicitado,0);
+            var fornecedores = {}; data.forEach(r=>{ fornecedores[r.fornecedor] = (fornecedores[r.fornecedor]||0)+r.valor_contratado; });
+            var prinFornecedor = Object.keys(fornecedores).sort((a,b)=>fornecedores[b]-fornecedores[a])[0] || '-';
+            var medDias = data.reduce((s,r)=>s+(r.prazo_dias||0),0) / (data.length||1);
+
+            html += `<div class="insight-card" onclick="showModalInsight('compras', 'economia')"><div class="insight-icon">💰</div><div class="insight-title">Economia Total</div><div class="insight-value">${formatCurrency(economia)}</div><div class="insight-desc">Clique para ver os processos com maior economia gerada.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('compras', 'atrasos')"><div class="insight-icon" style="color:var(--danger)">⚠️</div><div class="insight-title">Processos Atrasados</div><div class="insight-value" style="color:var(--danger)">${atrasados}</div><div class="insight-desc">Clique para detalhes dos processos com status Atrasado.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('compras', 'fornecedor')"><div class="insight-icon">🏆</div><div class="insight-title">Principal Fornecedor</div><div class="insight-value" style="font-size:1.25rem;">${prinFornecedor}</div><div class="insight-desc">Fornecedor com maior montante financeiro contratado.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('compras', 'aberto')"><div class="insight-icon" style="color:var(--warning)">⏳</div><div class="insight-title">Capital em Licitação</div><div class="insight-value">${formatCurrency(capAberto)}</div><div class="insight-desc">Valor total de processos atualmente em aberto.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('compras', 'prazo')"><div class="insight-icon">⏱️</div><div class="insight-title">Prazo Médio de Compras</div><div class="insight-value">${formatNumber(Math.round(medDias))} dias</div><div class="insight-desc">Média de dias para concluir os processos da base.</div></div>`;
+        }
+        else if(currentModule==='financeiro') {
+            var rp = data.reduce((s,r)=>s+(r.empenhado-r.pago),0);
+            var totEmpenhado = data.reduce((s,r)=>s+r.empenhado,0);
+            var totDotacao = data.reduce((s,r)=>s+r.dotacao_atualizada,0);
+            var execucao = totDotacao > 0 ? (totEmpenhado/totDotacao) : 0;
+            var liquidadoNaoPago = data.filter(r=>r.liquidado>r.pago);
+            var valorLiqNP = liquidadoNaoPago.reduce((s,r)=>s+(r.liquidado-r.pago),0);
+            var fundosOciosos = totDotacao - totEmpenhado;
+            var dpts = {}; data.forEach(r=>{ dpts[r.departamento] = (dpts[r.departamento]||0)+r.pago; });
+            var maiorDpt = Object.keys(dpts).sort((a,b)=>dpts[b]-dpts[a])[0] || '-';
+
+            html += `<div class="insight-card" onclick="showModalInsight('financeiro', 'rp')"><div class="insight-icon" style="color:var(--warning)">📉</div><div class="insight-title">Restos a Pagar Previstos</div><div class="insight-value">${formatCurrency(rp)}</div><div class="insight-desc">Clique para ver os processos com maiores saldos a pagar.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('financeiro', 'execucao')"><div class="insight-icon">📊</div><div class="insight-title">Execução Orçamentária</div><div class="insight-value">${formatPercent(execucao)}</div><div class="insight-desc">Percentual do orçamento já comprometido com empenhos.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('financeiro', 'fila')"><div class="insight-icon" style="color:var(--danger)">⚠️</div><div class="insight-title">Fila de Pagamentos</div><div class="insight-value">${formatCurrency(valorLiqNP)}</div><div class="insight-desc">Valor já liquidado aguardando transferência financeira.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('financeiro', 'dpt')"><div class="insight-icon">🏢</div><div class="insight-title">Maior Despesa</div><div class="insight-value" style="font-size:1.25rem;">${maiorDpt}</div><div class="insight-desc">Departamento com maior volume de recursos pagos.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('financeiro', 'ocioso')"><div class="insight-icon">💼</div><div class="insight-title">Fundos Livres</div><div class="insight-value">${formatCurrency(fundosOciosos)}</div><div class="insight-desc">Diferença entre dotação atualizada e valor empenhado.</div></div>`;
+        }
+        else if(currentModule==='nutricao') {
+            var totDesp = data.reduce((s,r)=>s+r.desperdicio,0);
+            var totRef = data.reduce((s,r)=>s+r.refeicoes,0);
+            var totCusto = data.reduce((s,r)=>s+r.custo_total,0);
+            var riscoDesabast = data.filter(r=>r.item_falta>0).length;
+            var unis = data.map(r=>({unidade:r.unidade, tx: r.refeicoes>0? r.desperdicio/r.refeicoes : 0})).sort((a,b)=>a.tx-b.tx);
+            var maisEficiente = unis.length ? unis[0].unidade : '-';
+            var totNaoPlan = data.reduce((s,r)=>s+Math.abs(r.planejamento-r.refeicoes),0);
+
+            html += `<div class="insight-card" onclick="showModalInsight('nutricao', 'desperdicio')"><div class="insight-icon" style="color:var(--danger)">⚠️</div><div class="insight-title">Taxa de Desperdício</div><div class="insight-value">${formatPercent(totDesp/totRef)}</div><div class="insight-desc">Média global. Clique para ver unidades com pior taxa.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('nutricao', 'risco')"><div class="insight-icon" style="color:var(--warning)">🔔</div><div class="insight-title">Risco Desabastecimento</div><div class="insight-value">${riscoDesabast} unidades</div><div class="insight-desc">Escolas relatando falta de itens no cardápio.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('nutricao', 'eficiente')"><div class="insight-icon">🏆</div><div class="insight-title">Unidade Mais Eficiente</div><div class="insight-value" style="font-size:1.25rem;">${maisEficiente}</div><div class="insight-desc">Escola com a menor taxa de desperdício registrada.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('nutricao', 'custo')"><div class="insight-icon">💰</div><div class="insight-title">Custo Médio / Refeição</div><div class="insight-value">${formatCurrency(totCusto/totRef)}</div><div class="insight-desc">Custo financeiro médio por prato servido na rede.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('nutricao', 'naoplan')"><div class="insight-icon">📉</div><div class="insight-title">Refeições Não Planejadas</div><div class="insight-value">${formatNumber(totNaoPlan)}</div><div class="insight-desc">Divergência entre o planejamento e o efetivamente servido.</div></div>`;
+        }
+        else if(currentModule==='almoxarifado') {
+            var criticos = data.filter(r=>(r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+            var semGiro = data.filter(r=>(r.consumo_mensal||0) === 0);
+            var capitalImob = semGiro.reduce((s,r)=>s+r.valor_total,0);
+            var valorPerdas = data.reduce((s,r)=>s + ((r.perdas||0) * (r.saldo_atual>0 ? (r.valor_total/r.saldo_atual) : 0)), 0);
+            var unids = {}; data.forEach(r=>{ unids[r.unidade] = (unids[r.unidade]||0)+(r.consumo_mensal||0); });
+            var campeaoConsumo = Object.keys(unids).sort((a,b)=>unids[b]-unids[a])[0] || '-';
+            var gargaloLog = [...data].sort((a,b)=>(b.tempo_atendimento||0)-(a.tempo_atendimento||0))[0];
+
+            html += `<div class="insight-card" onclick="showModalInsight('almoxarifado', 'criticos')"><div class="insight-icon" style="color:var(--danger)">📦</div><div class="insight-title">Itens Críticos</div><div class="insight-value" style="color:var(--danger)">${criticos}</div><div class="insight-desc">Clique para ver itens com saldo abaixo do mínimo exigido.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('almoxarifado', 'capital')"><div class="insight-icon" style="color:var(--warning)">❄️</div><div class="insight-title">Capital Imobilizado</div><div class="insight-value">${formatCurrency(capitalImob)}</div><div class="insight-desc">Valor em reais travado em itens com consumo mensal ZERADO.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('almoxarifado', 'perdas')"><div class="insight-icon" style="color:var(--danger)">🗑️</div><div class="insight-title">Alerta de Perdas</div><div class="insight-value">${formatCurrency(valorPerdas)}</div><div class="insight-desc">Valor estimado perdido em avarias ou vencimento.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('almoxarifado', 'campeao')"><div class="insight-icon">🏆</div><div class="insight-title">Campeão de Consumo</div><div class="insight-value" style="font-size:1.25rem;">${campeaoConsumo}</div><div class="insight-desc">Unidade escolar com maior volume de requisições.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('almoxarifado', 'gargalo')"><div class="insight-icon">⏱️</div><div class="insight-title">Gargalo Logístico</div><div class="insight-value" style="font-size:1.1rem; line-height:1.2;">${gargaloLog ? gargaloLog.material : '-'}</div><div class="insight-desc">Material com maior tempo médio de atendimento (${gargaloLog ? gargaloLog.tempo_atendimento : 0} dias).</div></div>`;
+        }
+        else if(currentModule==='assistencia') {
+            var atrasados = data.filter(r=>r.status!=='Concluído' && r.prazo < r.tempo_resolucao);
+            var qtdAtrasos = atrasados.length;
+            
+            var tResTipos = {}; data.filter(r=>r.tempo_resolucao>0).forEach(r=>{ if(!tResTipos[r.tipo]) tResTipos[r.tipo]={s:0,c:0}; tResTipos[r.tipo].s+=r.tempo_resolucao; tResTipos[r.tipo].c++; });
+            var piorTipo = Object.keys(tResTipos).sort((a,b)=>(tResTipos[b].s/tResTipos[b].c)-(tResTipos[a].s/tResTipos[a].c))[0] || '-';
+            
+            var criticosNaoRes = data.filter(r=>r.prioridade==='Crítica' && r.status!=='Concluído').length;
+            
+            var reinc = data.filter(r=>r.reincidente === 1).length;
+            
+            html += `<div class="insight-card" onclick="showModalInsight('assistencia', 'risco_atraso')"><div class="insight-icon" style="color:var(--warning)">⏳</div><div class="insight-title">Risco de Atraso</div><div class="insight-value" style="color:var(--warning)">${qtdAtrasos}</div><div class="insight-desc">Chamados em aberto prestes a vencer o SLA ou já vencidos.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('assistencia', 'gargalo_res')"><div class="insight-icon">🐌</div><div class="insight-title">Gargalo de Resolução</div><div class="insight-value" style="font-size:1.25rem;">${piorTipo}</div><div class="insight-desc">Tipo de serviço com maior tempo médio para fechamento.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('assistencia', 'foco_critico')"><div class="insight-icon" style="color:var(--danger)">🚨</div><div class="insight-title">Foco Crítico</div><div class="insight-value" style="color:var(--danger)">${criticosNaoRes}</div><div class="insight-desc">Demandas de alta prioridade aguardando intervenção.</div></div>`;
+            html += `<div class="insight-card" onclick="showModalInsight('assistencia', 'reincidencia')"><div class="insight-icon">🔄</div><div class="insight-title">Reincidência de Falhas</div><div class="insight-value">${reinc}</div><div class="insight-desc">Volume de chamados marcados como problemas recorrentes.</div></div>`;
+        }
+    }
+    document.getElementById('insightsGrid').innerHTML = html || '<p>Sem insights para exibir no momento.</p>';
+}
+
+function loadDemo() {
+    sysData.almoxarifado = { isDemo: true, rows: [
+        { material: 'Fralda M', unidade: 'CEI NOVA VIDA', saldo_atual: 1500, estoque_minimo: 2000, requisicoes: 150, req_integral: 1, tempo_atendimento: 2, valor_total: 15000, perdas: 5, consumo_mensal: 500 },
+        { material: 'Sabonete Líquido', unidade: 'CEI NOVA VIDA', saldo_atual: 3000, estoque_minimo: 1000, requisicoes: 80, req_integral: 1, tempo_atendimento: 1, valor_total: 3000, perdas: 0, consumo_mensal: 1000 },
+        { material: 'Papel Sulfite A4', unidade: 'EMEI JARDIM', saldo_atual: 500, estoque_minimo: 500, requisicoes: 200, req_integral: 0, tempo_atendimento: 3, valor_total: 10000, perdas: 2, consumo_mensal: 100 },
+        { material: 'Caneta Azul', unidade: 'EMEI JARDIM', saldo_atual: 100, estoque_minimo: 500, requisicoes: 50, req_integral: 1, tempo_atendimento: 4, valor_total: 100, perdas: 1, consumo_mensal: 200 },
+        { material: 'Lápis de Cor', unidade: 'EMEI JARDIM', saldo_atual: 800, estoque_minimo: 300, requisicoes: 0, req_integral: 1, tempo_atendimento: 0, valor_total: 800, perdas: 0, consumo_mensal: 0 }
+    ]};
+    sysData.nutricao = { isDemo: true, rows: [
+        { unidade: 'EMEI JARDIM', atendidos: 350, refeicoes: 7000, custo_total: 10500, desperdicio: 350, planejamento: 7200, item_falta: 2, conformidade: 'Conforme' },
+        { unidade: 'CEI NOVA VIDA', atendidos: 200, refeicoes: 4000, custo_total: 8000, desperdicio: 480, planejamento: 4000, item_falta: 5, conformidade: 'Pendente' },
+        { unidade: 'EMEIEF SAO JOSE', atendidos: 500, refeicoes: 10000, custo_total: 16000, desperdicio: 200, planejamento: 10500, item_falta: 0, conformidade: 'Conforme' }
+    ]};
+    sysData.compras = { isDemo: true, rows: [
+        { processo: '001/2026', solicitante: 'Educação', objeto: 'Material Escolar', valor_solicitado: 50000, valor_contratado: 45000, fornecedor: 'Papelaria XYZ', status: 'Concluído', prazo_dias: 15, doc: 'Completa' },
+        { processo: '002/2026', solicitante: 'Saúde', objeto: 'Mobiliário', valor_solicitado: 120000, valor_contratado: 110000, fornecedor: 'Móveis ABC', status: 'Em Aberto', prazo_dias: 45, doc: 'Pendente' },
+        { processo: '003/2026', solicitante: 'TI', objeto: 'Informática', valor_solicitado: 80000, valor_contratado: 78000, fornecedor: 'Tech Corp', status: 'Concluído', prazo_dias: 10, doc: 'Completa' },
+        { processo: '004/2026', solicitante: 'Obras', objeto: 'Cimento', valor_solicitado: 25000, valor_contratado: 25000, fornecedor: 'Construtora Y', status: 'Atrasado', prazo_dias: 60, doc: 'Completa' }
+    ]};
+    sysData.financeiro = { isDemo: true, rows: [
+        { processo: '101', departamento: 'Educação', categoria: 'Material', fonte: 'Fundeb', dotacao_inicial: 200000, dotacao_atualizada: 200000, empenhado: 150000, liquidado: 100000, pago: 80000, status: 'Normal' },
+        { processo: '102', departamento: 'Saúde', categoria: 'Serviços', fonte: 'Saúde 15%', dotacao_inicial: 100000, dotacao_atualizada: 120000, empenhado: 80000, liquidado: 80000, pago: 80000, status: 'Concluído' },
+        { processo: '103', departamento: 'Administração', categoria: 'Equipamentos', fonte: 'Recursos Próprios', dotacao_inicial: 50000, dotacao_atualizada: 50000, empenhado: 50000, liquidado: 20000, pago: 0, status: 'Pendente' },
+        { processo: '104', departamento: 'Educação', categoria: 'Alimentação', fonte: 'PNAE', dotacao_inicial: 300000, dotacao_atualizada: 350000, empenhado: 300000, liquidado: 250000, pago: 200000, status: 'Normal' }
+    ]};
+    sysData.assistencia = { isDemo: true, rows: [
+        { chamado: 'CHM-101', unidade: 'EMEI JARDIM', tipo: 'Infraestrutura', data_abertura: '2026-04-10', prazo: 5, status: 'Aberto', tempo_resposta: 1, tempo_resolucao: 8, prioridade: 'Alta', reincidente: 0, custo: 0 },
+        { chamado: 'CHM-102', unidade: 'CEI NOVA VIDA', tipo: 'Manutenção', data_abertura: '2026-04-15', prazo: 2, status: 'Concluído', tempo_resposta: 0.5, tempo_resolucao: 2, prioridade: 'Média', reincidente: 1, custo: 1500 },
+        { chamado: 'CHM-103', unidade: 'EMEIEF SAO JOSE', tipo: 'Suporte', data_abertura: '2026-04-20', prazo: 1, status: 'Em Andamento', tempo_resposta: 0.2, tempo_resolucao: 0, prioridade: 'Crítica', reincidente: 0, custo: 0 },
+        { chamado: 'CHM-104', unidade: 'EMEI JARDIM', tipo: 'Visita Técnica', data_abertura: '2026-04-22', prazo: 7, status: 'Concluído', tempo_resposta: 1, tempo_resolucao: 5, prioridade: 'Baixa', reincidente: 0, custo: 300 },
+        { chamado: 'CHM-105', unidade: 'CEI NOVA VIDA', tipo: 'Infraestrutura', data_abertura: '2026-04-05', prazo: 15, status: 'Aberto', tempo_resposta: 3, tempo_resolucao: 20, prioridade: 'Crítica', reincidente: 1, custo: 0 }
+    ]};
+    refreshView();
+}
+
+function showModalInsight(mod, insightId) {
+    var data = sysData[mod] ? sysData[mod].rows : [];
+    var title = '', thead = '', tbody = '';
+    
+    if (mod === 'almoxarifado') {
+        if (insightId === 'criticos') {
+            title = '📦 Itens Críticos (Abaixo do Mínimo)';
+            var list = data.filter(r => (r.saldo_atual||0) < (r.estoque_minimo||0)).sort((a,b) => (a.saldo_atual - a.estoque_minimo) - (b.saldo_atual - b.estoque_minimo));
+            thead = `<tr><th>Material</th><th>Unidade</th><th style="text-align:right">Saldo Atual</th><th style="text-align:right">Estoque Mín.</th><th style="text-align:right">Déficit</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.material}</td><td>${r.unidade}</td><td class="num" style="color:var(--danger); font-weight:bold;">${formatNumber(r.saldo_atual)}</td><td class="num">${formatNumber(r.estoque_minimo)}</td><td class="num" style="color:var(--warning)">${formatNumber(r.estoque_minimo - r.saldo_atual)}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">Nenhum item crítico.</td></tr>`;
+        } else if (insightId === 'capital') {
+            title = '❄️ Capital Imobilizado (Consumo Zero)';
+            var list = data.filter(r => (r.consumo_mensal||0) === 0 && r.valor_total > 0).sort((a,b) => b.valor_total - a.valor_total);
+            thead = `<tr><th>Material</th><th>Unidade</th><th style="text-align:right">Saldo Atual</th><th style="text-align:right">Valor Parado</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.material}</td><td>${r.unidade}</td><td class="num">${formatNumber(r.saldo_atual)}</td><td class="money">${formatCurrency(r.valor_total)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhum capital imobilizado.</td></tr>`;
+        } else if (insightId === 'perdas') {
+            title = '🗑️ Alerta de Perdas';
+            var list = data.filter(r => r.perdas > 0).map(r => { return {...r, valor_perda: r.perdas * (r.saldo_atual>0?r.valor_total/r.saldo_atual:0)}; }).sort((a,b) => b.valor_perda - a.valor_perda);
+            thead = `<tr><th>Material</th><th>Unidade</th><th style="text-align:right">Qtd Perda</th><th style="text-align:right">Custo da Perda</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.material}</td><td>${r.unidade}</td><td class="num" style="color:var(--danger)">${formatNumber(r.perdas)}</td><td class="money" style="color:var(--danger)">${formatCurrency(r.valor_perda)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhuma perda registrada.</td></tr>`;
+        } else if (insightId === 'campeao') {
+            title = '🏆 Campeão de Consumo (Por Unidade)';
+            var unids = {}; data.forEach(r => { if(r.unidade){ unids[r.unidade] = (unids[r.unidade]||0)+(r.consumo_mensal||0); } });
+            var list = Object.keys(unids).map(k => ({unidade: k, consumo: unids[k]})).sort((a,b) => b.consumo - a.consumo);
+            thead = `<tr><th>Unidade / Escola</th><th style="text-align:right">Consumo Total (Un)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td class="num">${formatNumber(r.consumo)}</td></tr>`).join('') : `<tr><td colspan="2" style="text-align:center">Nenhum consumo.</td></tr>`;
+        } else if (insightId === 'gargalo') {
+            title = '⏱️ Gargalo Logístico (Maior Tempo de Atendimento)';
+            var list = data.filter(r => r.tempo_atendimento > 0).sort((a,b) => b.tempo_atendimento - a.tempo_atendimento);
+            thead = `<tr><th>Material</th><th>Unidade</th><th style="text-align:right">Tempo Médio (Dias)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.material}</td><td>${r.unidade}</td><td class="num" style="color:var(--warning)">${formatNumber(r.tempo_atendimento)} dias</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Nenhum gargalo logístico.</td></tr>`;
+        }
+    } else if (mod === 'compras') {
+        if (insightId === 'economia') {
+            title = '💰 Economia Gerada nos Processos';
+            var list = data.filter(r => r.valor_solicitado > r.valor_contratado).map(r => ({...r, econ: r.valor_solicitado - r.valor_contratado})).sort((a,b) => b.econ - a.econ);
+            thead = `<tr><th>Processo</th><th>Fornecedor</th><th style="text-align:right">Economia Gerada</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.fornecedor}</td><td class="money" style="color:var(--success)">${formatCurrency(r.econ)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem economias.</td></tr>`;
+        } else if (insightId === 'atrasos') {
+            title = '⚠️ Processos Atrasados';
+            var list = data.filter(r => r.status === 'Atrasado').sort((a,b) => b.valor_solicitado - a.valor_solicitado);
+            thead = `<tr><th>Processo</th><th>Objeto</th><th style="text-align:right">Dias de Prazo</th><th style="text-align:right">Valor</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.objeto}</td><td class="num" style="color:var(--danger)">${r.prazo_dias}</td><td class="money">${formatCurrency(r.valor_solicitado)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhum processo atrasado.</td></tr>`;
+        } else if (insightId === 'fornecedor') {
+            title = '🏆 Principais Fornecedores (Por Montante)';
+            var forns = {}; data.forEach(r => { if(r.fornecedor){ forns[r.fornecedor] = (forns[r.fornecedor]||0)+r.valor_contratado; } });
+            var list = Object.keys(forns).map(k => ({fornecedor: k, valor: forns[k]})).sort((a,b) => b.valor - a.valor);
+            thead = `<tr><th>Fornecedor</th><th style="text-align:right">Valor Contratado</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.fornecedor}</td><td class="money">${formatCurrency(r.valor)}</td></tr>`).join('') : `<tr><td colspan="2" style="text-align:center">Sem fornecedores.</td></tr>`;
+        } else if (insightId === 'aberto') {
+            title = '⏳ Processos em Aberto (Capital em Licitação)';
+            var list = data.filter(r => r.status === 'Em Aberto').sort((a,b) => b.valor_solicitado - a.valor_solicitado);
+            thead = `<tr><th>Processo</th><th>Objeto</th><th>Solicitante</th><th style="text-align:right">Valor Solicitado</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.objeto}</td><td>${r.solicitante}</td><td class="money">${formatCurrency(r.valor_solicitado)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhum processo em aberto.</td></tr>`;
+        } else if (insightId === 'prazo') {
+            title = '⏱️ Análise de Prazos';
+            var list = data.filter(r => r.prazo_dias > 0).sort((a,b) => b.prazo_dias - a.prazo_dias);
+            thead = `<tr><th>Processo</th><th>Objeto</th><th>Status</th><th style="text-align:right">Prazo (Dias)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.objeto}</td><td>${r.status}</td><td class="num">${r.prazo_dias}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Sem prazos.</td></tr>`;
+        }
+    } else if (mod === 'financeiro') {
+        if (insightId === 'rp') {
+            title = '📉 Restos a Pagar Previstos';
+            var list = data.filter(r => r.empenhado > r.pago).map(r => ({...r, rp: r.empenhado - r.pago})).sort((a,b) => b.rp - a.rp);
+            thead = `<tr><th>Processo</th><th>Departamento</th><th style="text-align:right">Restos a Pagar</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.departamento}</td><td class="money">${formatCurrency(r.rp)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem saldos pendentes.</td></tr>`;
+        } else if (insightId === 'execucao') {
+            title = '📊 Execução Orçamentária por Processo';
+            var list = data.filter(r => r.dotacao_atualizada > 0).map(r => ({...r, exec: r.empenhado / r.dotacao_atualizada})).sort((a,b) => b.exec - a.exec);
+            thead = `<tr><th>Processo</th><th>Departamento</th><th style="text-align:right">% Executado</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.departamento}</td><td class="num">${formatPercent(r.exec)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem dotações.</td></tr>`;
+        } else if (insightId === 'fila') {
+            title = '⚠️ Fila de Pagamentos (Liquidado não Pago)';
+            var list = data.filter(r => r.liquidado > r.pago).map(r => ({...r, fila: r.liquidado - r.pago})).sort((a,b) => b.fila - a.fila);
+            thead = `<tr><th>Processo</th><th>Fonte</th><th style="text-align:right">Valor na Fila</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.fonte}</td><td class="money" style="color:var(--danger)">${formatCurrency(r.fila)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem fila.</td></tr>`;
+        } else if (insightId === 'dpt') {
+            title = '🏢 Maior Despesa por Departamento';
+            var dpts = {}; data.forEach(r => { if(r.departamento){ dpts[r.departamento] = (dpts[r.departamento]||0)+r.pago; } });
+            var list = Object.keys(dpts).map(k => ({departamento: k, pago: dpts[k]})).sort((a,b) => b.pago - a.pago);
+            thead = `<tr><th>Departamento</th><th style="text-align:right">Total Pago</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.departamento}</td><td class="money">${formatCurrency(r.pago)}</td></tr>`).join('') : `<tr><td colspan="2" style="text-align:center">Sem pagamentos.</td></tr>`;
+        } else if (insightId === 'ocioso') {
+            title = '💼 Fundos Livres (Dotação não Empenhada)';
+            var list = data.filter(r => r.dotacao_atualizada > r.empenhado).map(r => ({...r, livre: r.dotacao_atualizada - r.empenhado})).sort((a,b) => b.livre - a.livre);
+            thead = `<tr><th>Processo</th><th>Departamento</th><th style="text-align:right">Valor Livre</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.processo}</td><td>${r.departamento}</td><td class="money" style="color:var(--success)">${formatCurrency(r.livre)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem fundos livres.</td></tr>`;
+        }
+    } else if (mod === 'nutricao') {
+        if (insightId === 'desperdicio') {
+            title = '⚠️ Escolas com Pior Taxa de Desperdício';
+            var list = data.filter(r => r.refeicoes > 0).map(r => ({...r, tx: r.desperdicio / r.refeicoes})).sort((a,b) => b.tx - a.tx);
+            thead = `<tr><th>Unidade</th><th style="text-align:right">Refeições</th><th style="text-align:right">Desperdício</th><th style="text-align:right">Taxa (%)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td class="num">${formatNumber(r.refeicoes)}</td><td class="num" style="color:var(--danger)">${formatNumber(r.desperdicio)}</td><td class="num" style="color:var(--danger); font-weight:bold;">${formatPercent(r.tx)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Sem desperdício.</td></tr>`;
+        } else if (insightId === 'risco') {
+            title = '🔔 Unidades com Risco de Desabastecimento';
+            var list = data.filter(r => r.item_falta > 0).sort((a,b) => b.item_falta - a.item_falta);
+            thead = `<tr><th>Unidade</th><th>Conformidade</th><th style="text-align:right">Itens em Falta</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td><span class="badge badge-warning">${r.conformidade}</span></td><td class="num" style="color:var(--warning)">${formatNumber(r.item_falta)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Nenhum risco.</td></tr>`;
+        } else if (insightId === 'eficiente') {
+            title = '🏆 Unidades Mais Eficientes';
+            var list = data.filter(r => r.refeicoes > 0).map(r => ({...r, tx: r.desperdicio / r.refeicoes})).sort((a,b) => a.tx - b.tx);
+            thead = `<tr><th>Unidade</th><th style="text-align:right">Refeições</th><th style="text-align:right">Taxa (%)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td class="num">${formatNumber(r.refeicoes)}</td><td class="num" style="color:var(--success)">${formatPercent(r.tx)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem dados.</td></tr>`;
+        } else if (insightId === 'custo') {
+            title = '💰 Custo por Refeição nas Unidades';
+            var list = data.filter(r => r.refeicoes > 0).map(r => ({...r, custo_ref: r.custo_total / r.refeicoes})).sort((a,b) => b.custo_ref - a.custo_ref);
+            thead = `<tr><th>Unidade</th><th style="text-align:right">Refeições</th><th style="text-align:right">Custo / Refeição</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td class="num">${formatNumber(r.refeicoes)}</td><td class="money">${formatCurrency(r.custo_ref)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">Sem custos.</td></tr>`;
+        } else if (insightId === 'naoplan') {
+            title = 'Divergência de Planejamento';
+            var list = data.filter(r => Math.abs(r.planejamento - r.refeicoes) > 0).map(r => ({...r, div: Math.abs(r.planejamento - r.refeicoes)})).sort((a,b) => b.div - a.div);
+            thead = `<tr><th>Unidade</th><th style="text-align:right">Planejado</th><th style="text-align:right">Efetivo</th><th style="text-align:right">Divergência</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.unidade}</td><td class="num">${formatNumber(r.planejamento)}</td><td class="num">${formatNumber(r.refeicoes)}</td><td class="num" style="color:var(--warning)">${formatNumber(r.div)}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Sem divergências.</td></tr>`;
+        }
+    } else if (mod === 'assistencia') {
+        if (insightId === 'risco_atraso') {
+            title = '⏳ Risco de Atraso / SLA Vencido';
+            var list = data.filter(r => r.status !== 'Concluído' && r.prazo < r.tempo_resolucao).sort((a,b) => b.tempo_resolucao - a.tempo_resolucao);
+            thead = `<tr><th>Chamado</th><th>Escola</th><th>Prazo Previsto (d)</th><th style="text-align:right">Tempo Aberto (d)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.chamado}</td><td>${r.unidade}</td><td class="num">${r.prazo}</td><td class="num" style="color:var(--danger)">${r.tempo_resolucao}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhum chamado em risco.</td></tr>`;
+        } else if (insightId === 'gargalo_res') {
+            title = '🐌 Gargalo de Resolução (Por Tipo)';
+            var tResTipos = {}; data.filter(r=>r.tempo_resolucao>0).forEach(r=>{ if(!tResTipos[r.tipo]) tResTipos[r.tipo]={s:0,c:0}; tResTipos[r.tipo].s+=r.tempo_resolucao; tResTipos[r.tipo].c++; });
+            var list = Object.keys(tResTipos).map(k => ({tipo: k, media: tResTipos[k].s / tResTipos[k].c})).sort((a,b) => b.media - a.media);
+            thead = `<tr><th>Tipo de Demanda</th><th style="text-align:right">Tempo Médio Resolução (dias)</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.tipo}</td><td class="num">${formatNumber(r.media.toFixed(1))}</td></tr>`).join('') : `<tr><td colspan="2" style="text-align:center">Sem gargalos mapeados.</td></tr>`;
+        } else if (insightId === 'foco_critico') {
+            title = '🚨 Foco Crítico (Demandas Prioritárias)';
+            var list = data.filter(r => r.prioridade === 'Crítica' && r.status !== 'Concluído').sort((a,b) => b.tempo_resolucao - a.tempo_resolucao);
+            thead = `<tr><th>Chamado</th><th>Escola</th><th>Tipo</th><th style="text-align:right">Dias Aberto</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.chamado}</td><td>${r.unidade}</td><td>${r.tipo}</td><td class="num" style="color:var(--danger)">${r.tempo_resolucao}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Nenhuma demanda crítica pendente.</td></tr>`;
+        } else if (insightId === 'reincidencia') {
+            title = '🔄 Reincidência de Falhas';
+            var list = data.filter(r => r.reincidente === 1);
+            thead = `<tr><th>Chamado</th><th>Escola</th><th>Tipo</th><th>Status Atual</th></tr>`;
+            tbody = list.length ? list.map(r => `<tr><td>${r.chamado}</td><td>${r.unidade}</td><td>${r.tipo}</td><td><span class="badge ${r.status==='Concluído'?'badge-success':'badge-warning'}">${r.status}</span></td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center">Sem reincidências registradas.</td></tr>`;
+        }
+    }
+    
+    document.getElementById('modalInsightTitle').textContent = title;
+    document.getElementById('modalInsightHead').innerHTML = thead;
+    document.getElementById('modalInsightBody').innerHTML = tbody;
+    document.getElementById('modalDynamicInsight').classList.add('active');
+}
+
+function closeModalInsight() {
+    document.getElementById('modalDynamicInsight').classList.remove('active');
+}
+
+function gerarRelatorioExecutivo() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    const moduleNames = { almoxarifado: 'Almoxarifado', nutricao: 'Nutrição Escolar', compras: 'Compras', financeiro: 'Financeiro', assistencia: 'Assistência Rede' };
+    const modName = moduleNames[currentModule] || currentModule;
+    
+    const primaryColor = [45, 106, 79];
+    const textColor = [30, 30, 30];
+    const mutedColor = [100, 100, 100];
+    
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DashboardBI', 15, 12);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(modName + ' - Relatório Executivo', 15, 20);
+    doc.setFontSize(9);
+    doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), 150, 20);
+    
+    doc.setTextColor(...textColor);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumo Executivo', 15, 38);
+    
+    doc.setDrawColor(...primaryColor);
+    doc.line(15, 42, 195, 42);
+    
+    let yPos = 52;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    
+    if (data.length === 0) {
+        doc.text('Sem dados disponíveis para este módulo.', 15, yPos);
+    } else {
+        if (currentModule === 'compras') {
+            const reqs = data.length;
+            const vSol = data.reduce((s,r)=>s+(r.valor_solicitado||0),0);
+            const vCon = data.reduce((s,r)=>s+(r.valor_contratado||0),0);
+            const econ = vSol - vCon;
+            const st = {}; data.forEach(r=>{ st[r.status||'N/A']=(st[r.status||'N/A']||0)+1; });
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Indicadores Principais:', 15, yPos);
+            yPos += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Total de Solicitações: ${formatNumber(reqs)}`, 20, yPos); yPos += 7;
+            doc.text(`Valor Total Solicitado: ${formatCurrency(vSol)}`, 20, yPos); yPos += 7;
+            doc.text(`Valor Contratado: ${formatCurrency(vCon)}`, 20, yPos); yPos += 7;
+            doc.text(`Economia Obtida: ${formatCurrency(econ)}`, 20, yPos); yPos += 7;
+            doc.text(`Processos por Status:`, 20, yPos); yPos += 7;
+            Object.entries(st).forEach(([k,v]) => { doc.text(`  - ${k}: ${v}`, 25, yPos); yPos += 6; });
+        }
+        else if (currentModule === 'financeiro') {
+            const dAtual = data.reduce((s,r)=>s+(r.dotacao_atualizada||0),0);
+            const enemph = data.reduce((s,r)=>s+(r.empenhado||0),0);
+            const liquid = data.reduce((s,r)=>s+(r.liquidado||0),0);
+            const pago = data.reduce((s,r)=>s+(r.pago||0),0);
+            const exec = dAtual ? (enemph/dAtual*100).toFixed(1) + '%' : '0%';
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Indicadores Principais:', 15, yPos);
+            yPos += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Dotação Atualizada: ${formatCurrency(dAtual)}`, 20, yPos); yPos += 7;
+            doc.text(`Valor Empenhado: ${formatCurrency(enemph)}`, 20, yPos); yPos += 7;
+            doc.text(`Valor Liquidado: ${formatCurrency(liquid)}`, 20, yPos); yPos += 7;
+            doc.text(`Valor Pago: ${formatCurrency(pago)}`, 20, yPos); yPos += 7;
+            doc.text(`% de Execução Orçamentária: ${exec}`, 20, yPos); yPos += 7;
+        }
+        else if (currentModule === 'nutricao') {
+            const alunos = data.reduce((s,r)=>s+(r.atendidos||0),0);
+            const ref = data.reduce((s,r)=>s+(r.refeicoes||0),0);
+            const custo = data.reduce((s,r)=>s+(r.custo_total||0),0);
+            const desp = data.reduce((s,r)=>s+(r.desperdicio||0),0);
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Indicadores Principais:', 15, yPos);
+            yPos += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Alunos Atendidos: ${formatNumber(alunos)}`, 20, yPos); yPos += 7;
+            doc.text(`Total de Refeições: ${formatNumber(ref)}`, 20, yPos); yPos += 7;
+            doc.text(`Custo Total: ${formatCurrency(custo)}`, 20, yPos); yPos += 7;
+            doc.text(`Custo por Refeição: ${formatCurrency(ref ? custo/ref : 0)}`, 20, yPos); yPos += 7;
+            doc.text(`Índice de Desperdício: ${formatPercent(ref ? desp/ref : 0)}`, 20, yPos); yPos += 7;
+        }
+        else if (currentModule === 'almoxarifado') {
+            const vEstoque = data.reduce((s,r)=>s+(r.valor_total||0),0);
+            const req = data.reduce((s,r)=>s+(r.requisicoes||0),0);
+            const min = data.filter(r=>(r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+            const tempo = data.reduce((s,r)=>s+(r.tempo_atendimento||0),0) / (data.length||1);
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Indicadores Principais:', 15, yPos);
+            yPos += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Valor Total Estocado: ${formatCurrency(vEstoque)}`, 20, yPos); yPos += 7;
+            doc.text(`Total de Requisições: ${formatNumber(req)}`, 20, yPos); yPos += 7;
+            doc.text(`Itens Abaixo do Mínimo: ${formatNumber(min)}`, 20, yPos); yPos += 7;
+            doc.text(`Tempo Médio de Atendimento: ${formatNumber(tempo)} dias`, 20, yPos); yPos += 7;
+        }
+        else if (currentModule === 'assistencia') {
+            const totalCh = data.length;
+            const resolvidos = data.filter(r=>r.status==='Concluído').length;
+            const pendentes = totalCh - resolvidos;
+            const reinc = data.filter(r=>r.reincidente===1).length;
+            const tResolucoes = data.filter(r=>r.tempo_resolucao > 0);
+            const mediaRes = tResolucoes.length ? tResolucoes.reduce((s,r)=>s+r.tempo_resolucao,0) / tResolucoes.length : 0;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Indicadores Principais:', 15, yPos);
+            yPos += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Total de Chamados: ${formatNumber(totalCh)}`, 20, yPos); yPos += 7;
+            doc.text(`Chamados Pendentes: ${formatNumber(pendentes)}`, 20, yPos); yPos += 7;
+            doc.text(`Chamados Resolvidos: ${formatNumber(resolvidos)}`, 20, yPos); yPos += 7;
+            doc.text(`Problemas Reincidentes: ${formatNumber(reinc)}`, 20, yPos); yPos += 7;
+            doc.text(`Tempo Médio de Resolução: ${formatNumber(mediaRes.toFixed(1))} dias`, 20, yPos); yPos += 7;
+        }
+    }
+    
+    yPos += 10;
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    if (data.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Top 10 Registros', 15, yPos);
+        yPos += 8;
+        
+        doc.setFillColor(...primaryColor);
+        doc.rect(15, yPos, 180, 8, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        
+        let headers = [];
+        if (currentModule === 'compras') headers = ['Processo', 'Valor Solicitado', 'Valor Contratado', 'Status'];
+        else if (currentModule === 'financeiro') headers = ['Depto', 'Empenhado', 'Liquidado', 'Pago'];
+        else if (currentModule === 'nutricao') headers = ['Unidade', 'Alunos', 'Refeições', 'Custo'];
+        else if (currentModule === 'assistencia') headers = ['Chamado', 'Escola', 'Status', 'T. Resolução'];
+        else headers = ['Material', 'Saldo', 'Mínimo', 'Consumo'];
+        
+        let c = 18;
+        headers.forEach(h => { doc.text(h, c, yPos + 5); c += 45; });
+        
+        doc.setTextColor(...textColor);
+        doc.setFont('helvetica', 'normal');
+        yPos += 10;
+        
+        const top10 = data.slice(0, 10);
+        top10.forEach((r, i) => {
+            if (yPos > 280) { doc.addPage(); yPos = 20; }
+            doc.setFillColor(i % 2 === 0 ? 245 : 255, i % 2 === 0 ? 245 : 255, i % 2 === 0 ? 245 : 255);
+            doc.rect(15, yPos, 180, 8, 'F');
+            
+            c = 18;
+            if (currentModule === 'compras') {
+                let vals = [r.processo || '-', formatCurrency(r.valor_solicitado), formatCurrency(r.valor_contratado), r.status || '-'];
+                vals.forEach(v => { doc.text(String(v).substring(0, 20), c, yPos + 5); c += 45; });
+            }
+            else if (currentModule === 'financeiro') {
+                let vals = [String(r.departamento || '-').substring(0, 15), formatCurrency(r.empenhado), formatCurrency(r.liquidado), formatCurrency(r.pago)];
+                vals.forEach(v => { doc.text(String(v).substring(0, 20), c, yPos + 5); c += 45; });
+            }
+            else if (currentModule === 'nutricao') {
+                let vals = [String(r.unidade || '-').substring(0, 15), formatNumber(r.atendidos), formatNumber(r.refeicoes), formatCurrency(r.custo_total)];
+                vals.forEach(v => { doc.text(String(v).substring(0, 15), c, yPos + 5); c += 45; });
+            }
+            else if (currentModule === 'assistencia') {
+                let vals = [String(r.chamado || '-').substring(0, 15), String(r.unidade || '-').substring(0, 15), r.status || '-', formatNumber(r.tempo_resolucao) + ' d'];
+                vals.forEach(v => { doc.text(String(v).substring(0, 15), c, yPos + 5); c += 45; });
+            }
+            else {
+                let vals = [String(r.material || '-').substring(0, 15), formatNumber(r.saldo_atual), formatNumber(r.estoque_minimo), formatNumber(r.consumo_mensal)];
+                vals.forEach(v => { doc.text(String(v).substring(0, 15), c, yPos + 5); c += 45; });
+            }
+            yPos += 8;
+        });
+    }
+    
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(...mutedColor);
+        doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+        doc.text('DashboardBI - Sistema de Gestão', 15, 290);
+    }
+    
+    doc.save(modName + '_relatorio_executivo_' + new Date().toISOString().split('T')[0] + '.pdf');
+}
+
+function gerarRelatorioVisaoExecutiva() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    if(!data.length) return alert('Sem dados para exportar.');
+    
+    const moduleNames = { almoxarifado: 'Almoxarifado', nutricao: 'Nutrição Escolar', compras: 'Compras', financeiro: 'Financeiro', assistencia: 'Assistência Rede' };
+    const modName = moduleNames[currentModule] || currentModule;
+    const primaryColor = [45, 106, 79];
+    const textColor = [30, 30, 30];
+    
+    // Header
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+    doc.text('DashboardBI', 15, 12);
+    doc.setFontSize(12); doc.setFont('helvetica', 'normal');
+    doc.text(modName + ' - Visão Executiva', 15, 20);
+    doc.setFontSize(9); doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), 150, 20);
+    
+    doc.setTextColor(...textColor);
+    let yPos = 35;
+    
+    doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+    doc.text('Resumo de Indicadores Principais (KPIs)', 15, yPos);
+    doc.setDrawColor(...primaryColor);
+    doc.line(15, yPos+2, 195, yPos+2);
+    yPos += 12;
+    
+    doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+    
+    if (currentModule === 'compras') {
+        const vSol = data.reduce((s,r)=>s+(r.valor_solicitado||0),0);
+        const vCon = data.reduce((s,r)=>s+(r.valor_contratado||0),0);
+        doc.text(`Solicitações Registradas: ${data.length}`, 15, yPos); yPos+=7;
+        doc.text(`Valor Total Solicitado: ${formatCurrency(vSol)}`, 15, yPos); yPos+=7;
+        doc.text(`Valor Contratado: ${formatCurrency(vCon)}`, 15, yPos); yPos+=7;
+        doc.text(`Economia Acumulada: ${formatCurrency(vSol-vCon)}`, 15, yPos); yPos+=15;
+    } else if (currentModule === 'financeiro') {
+        const emp = data.reduce((s,r)=>s+(r.empenhado||0),0);
+        const liq = data.reduce((s,r)=>s+(r.liquidado||0),0);
+        const pago = data.reduce((s,r)=>s+(r.pago||0),0);
+        doc.text(`Total Empenhado no Período: ${formatCurrency(emp)}`, 15, yPos); yPos+=7;
+        doc.text(`Total Liquidado: ${formatCurrency(liq)}`, 15, yPos); yPos+=7;
+        doc.text(`Total Pago: ${formatCurrency(pago)}`, 15, yPos); yPos+=15;
+    } else if (currentModule === 'nutricao') {
+        const alunos = data.reduce((s,r)=>s+(r.atendidos||0),0);
+        const ref = data.reduce((s,r)=>s+(r.refeicoes||0),0);
+        const custo = data.reduce((s,r)=>s+(r.custo_total||0),0);
+        doc.text(`Alunos Atendidos: ${formatNumber(alunos)}`, 15, yPos); yPos+=7;
+        doc.text(`Refeições Servidas: ${formatNumber(ref)}`, 15, yPos); yPos+=7;
+        doc.text(`Custo Total de Operação: ${formatCurrency(custo)}`, 15, yPos); yPos+=15;
+    } else if (currentModule === 'almoxarifado') {
+        const saldo = data.reduce((s,r)=>s+(r.valor_total||0),0);
+        const reqs = data.reduce((s,r)=>s+(r.requisicoes||0),0);
+        doc.text(`Valor Total Estocado (Patrimônio): ${formatCurrency(saldo)}`, 15, yPos); yPos+=7;
+        doc.text(`Total de Requisições Atendidas: ${formatNumber(reqs)}`, 15, yPos); yPos+=15;
+    } else if (currentModule === 'assistencia') {
+        const res = data.filter(r=>r.status==='Concluído').length;
+        doc.text(`Total de Chamados: ${data.length}`, 15, yPos); yPos+=7;
+        doc.text(`Chamados Resolvidos: ${res} (${((res/data.length)*100).toFixed(1)}%)`, 15, yPos); yPos+=15;
+    }
+    
+    // Gráfico de barras simples
+    doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+    doc.text('Distribuição de Dados - Top 5', 15, yPos);
+    doc.line(15, yPos+2, 195, yPos+2);
+    yPos += 12;
+    
+    let chartData = [];
+    if(currentModule==='almoxarifado') {
+        let unids = {}; data.forEach(r=>{ if(r.unidade) unids[r.unidade]=(unids[r.unidade]||0)+r.consumo_mensal; });
+        chartData = Object.keys(unids).map(k=>({label: k, val: unids[k]})).sort((a,b)=>unids[b]-unids[a]).slice(0, 5);
+        doc.setFontSize(10); doc.text('Top 5 Unidades por Consumo Mensal (em itens):', 15, yPos); yPos+=8;
+    } else if(currentModule==='assistencia') {
+        let esc = {}; data.forEach(r=>{ if(r.unidade) esc[r.unidade]=(esc[r.unidade]||0)+1; });
+        chartData = Object.keys(esc).map(k=>({label: k, val: esc[k]})).sort((a,b)=>esc[b]-esc[a]).slice(0, 5);
+        doc.setFontSize(10); doc.text('Top 5 Unidades com mais Chamados:', 15, yPos); yPos+=8;
+    } else if(currentModule==='compras') {
+        let forn = {}; data.forEach(r=>{ if(r.fornecedor) forn[r.fornecedor]=(forn[r.fornecedor]||0)+r.valor_contratado; });
+        chartData = Object.keys(forn).map(k=>({label: k, val: forn[k]})).sort((a,b)=>forn[b]-forn[a]).slice(0, 5);
+        doc.setFontSize(10); doc.text('Top 5 Fornecedores por Valor Contratado:', 15, yPos); yPos+=8;
+    } else if(currentModule==='financeiro') {
+        let dpt = {}; data.forEach(r=>{ if(r.departamento) dpt[r.departamento]=(dpt[r.departamento]||0)+r.pago; });
+        chartData = Object.keys(dpt).map(k=>({label: k, val: dpt[k]})).sort((a,b)=>dpt[b]-dpt[a]).slice(0, 5);
+        doc.setFontSize(10); doc.text('Top 5 Departamentos por Valor Pago:', 15, yPos); yPos+=8;
+    } else if(currentModule==='nutricao') {
+        let un = {}; data.forEach(r=>{ if(r.unidade) un[r.unidade]=(un[r.unidade]||0)+r.refeicoes; });
+        chartData = Object.keys(un).map(k=>({label: k, val: un[k]})).sort((a,b)=>un[b]-un[a]).slice(0, 5);
+        doc.setFontSize(10); doc.text('Top 5 Unidades por Refeições Servidas:', 15, yPos); yPos+=8;
+    }
+    
+    if(chartData.length) {
+        const maxVal = Math.max(...chartData.map(d=>d.val));
+        const maxWidth = 100;
+        chartData.forEach(d => {
+            const w = maxVal > 0 ? (d.val / maxVal) * maxWidth : 0;
+            doc.setFont('helvetica', 'normal');
+            doc.text(d.label.substring(0, 25), 15, yPos+4);
+            doc.setFillColor(...primaryColor);
+            doc.rect(75, yPos, w, 6, 'F');
+            doc.text((currentModule==='financeiro'||currentModule==='compras'?formatCurrency(d.val):formatNumber(d.val)), 75 + w + 3, yPos+4);
+            yPos += 10;
+        });
+    } else {
+        doc.text('Sem dados suficientes.', 15, yPos);
+    }
+    
+    doc.save(modName + '_Visao_Executiva_' + new Date().toISOString().split('T')[0] + '.pdf');
+}
+
+function gerarRelatorioKPIs() {
+    if (currentModule !== 'almoxarifado' && currentModule !== 'assistencia') {
+        return alert('O Relatório de KPIs e Métricas aprofundado está disponível apenas para os módulos Almoxarifado e Assistência Rede.');
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const data = sysData[currentModule] ? sysData[currentModule].rows : [];
+    if(!data.length) return alert('Sem dados.');
+    
+    const modName = currentModule === 'almoxarifado' ? 'Almoxarifado' : 'Assistência Rede';
+    const primaryColor = [38, 101, 140]; // Azul para diferenciar
+    
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+    doc.text('DashboardBI - ' + modName, 15, 12);
+    doc.setFontSize(12); doc.setFont('helvetica', 'normal');
+    doc.text('Relatório Profundo: KPIs e Métricas', 15, 20);
+    
+    doc.setTextColor(30, 30, 30);
+    let yPos = 35;
+    
+    if (currentModule === 'almoxarifado') {
+        var total_itens = data.length;
+        var abaixo_min = data.filter(r => (r.saldo_atual||0) < (r.estoque_minimo||0)).length;
+        var sem_mov = data.filter(r => (r.consumo_mensal||0) === 0).length;
+        var soma_consumo = data.reduce((s,r) => s + (r.consumo_mensal||0), 0);
+        var soma_saldo = data.reduce((s,r) => s + (r.saldo_atual||0), 0);
+        var giro = soma_saldo > 0 ? (soma_consumo / soma_saldo) : 0;
+        var cobertura_dias = soma_consumo > 0 ? (soma_saldo / (soma_consumo / 30)) : 0;
+        var req_atendidas = data.reduce((s,r) => s + (r.requisicoes||0), 0);
+        var req_integrais = data.filter(r => r.req_integral === 1).length;
+        var perc_integral = total_itens > 0 ? (req_integrais / total_itens) : 0;
+        var tempo_medio = total_itens > 0 ? (data.reduce((s,r) => s + (r.tempo_atendimento||0), 0) / total_itens) : 0;
+        var valor_estocado = data.reduce((s,r) => s + (r.valor_total||0), 0);
+        var valor_consumido = data.reduce((s,r) => s + ((r.consumo_mensal||0) * (r.saldo_atual>0 ? (r.valor_total/r.saldo_atual) : 0)), 0);
+        var perdas_total = data.reduce((s,r) => s + (r.perdas||0), 0);
+        var indice_perdas = soma_saldo > 0 ? (perdas_total / soma_saldo) : 0;
+
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Estoque', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Saldo Atual: ${formatNumber(soma_saldo)}`, 15, yPos); 
+        doc.text(`Abaixo do Mínimo: ${abaixo_min}`, 75, yPos);
+        doc.text(`Sem Movimentação: ${sem_mov}`, 135, yPos); yPos+=6;
+        doc.text(`Giro de Estoque: ${formatPercent(giro)}`, 15, yPos);
+        doc.text(`Cobertura (Dias): ${formatNumber(Math.round(cobertura_dias))}`, 75, yPos); yPos+=12;
+        
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Consumo e Atendimento', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Consumo Mensal: ${formatNumber(soma_consumo)}`, 15, yPos);
+        doc.text(`Requisições Atendidas: ${formatNumber(req_atendidas)}`, 75, yPos); yPos+=6;
+        doc.text(`% Atend. Integral: ${formatPercent(perc_integral)}`, 15, yPos);
+        doc.text(`Tempo Médio: ${formatNumber(tempo_medio.toFixed(1))} dias`, 75, yPos); yPos+=12;
+
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Financeiro e Perdas', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Valor Estocado: ${formatCurrency(valor_estocado)}`, 15, yPos);
+        doc.text(`Valor Consumido: ${formatCurrency(valor_consumido)}`, 75, yPos);
+        doc.text(`Índice de Perdas: ${formatPercent(indice_perdas)}`, 145, yPos); yPos+=15;
+        
+        // Gráficos (Barras Horizontais)
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Gráficos Detalhados', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=10;
+        
+        var dpt = {}; data.forEach(r=>{ dpt[r.unidade||'N/A']=(dpt[r.unidade||'N/A']||0)+(r.consumo_mensal||0); });
+        let chartData1 = Object.keys(dpt).map(k=>({label: k, val: dpt[k]})).sort((a,b)=>b.val-a.val).slice(0, 5);
+        doc.setFontSize(10); doc.text('Consumo por Escola/Setor (Top 5):', 15, yPos); yPos+=8;
+        
+        if(chartData1.length) {
+            const maxVal = Math.max(...chartData1.map(d=>d.val));
+            const maxWidth = 100;
+            chartData1.forEach(d => {
+                const w = maxVal > 0 ? (d.val / maxVal) * maxWidth : 0;
+                doc.setFont('helvetica', 'normal'); doc.text(d.label.substring(0, 25), 15, yPos+4);
+                doc.setFillColor(174, 241, 88); doc.rect(75, yPos, w, 5, 'F');
+                doc.text(formatNumber(d.val), 75 + w + 3, yPos+4); yPos += 8;
+            });
+        }
+        yPos += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Distribuição Financeira (em Valores R$):', 15, yPos); yPos+=8;
+        var valor_perdas = data.reduce((s,r) => s + ((r.perdas||0) * (r.saldo_atual>0 ? (r.valor_total/r.saldo_atual) : 0)), 0);
+        let chartData2 = [
+            {label: 'Estocado', val: valor_estocado, color: [174, 241, 88]},
+            {label: 'Consumido', val: valor_consumido, color: [6, 182, 212]},
+            {label: 'Perdas', val: valor_perdas, color: [167, 63, 71]}
+        ];
+        const maxVal2 = Math.max(...chartData2.map(d=>d.val));
+        chartData2.forEach(d => {
+            const w = maxVal2 > 0 ? (d.val / maxVal2) * 100 : 0;
+            doc.setFont('helvetica', 'normal'); doc.text(d.label, 15, yPos+4);
+            doc.setFillColor(...d.color); doc.rect(75, yPos, w, 5, 'F');
+            doc.text(formatCurrency(d.val), 75 + w + 3, yPos+4); yPos += 8;
+        });
+        
+    } else {
+        // Assistência
+        var totalCh = data.length;
+        var resolvidos = data.filter(r=>r.status==='Concluído').length;
+        var emAberto = data.filter(r=>r.status!=='Concluído').length;
+        var atrasados = data.filter(r=>r.status!=='Concluído' && r.prazo < r.tempo_resolucao).length;
+        
+        var tResposta = data.filter(r=>r.tempo_resposta > 0);
+        var medResposta = tResposta.length ? tResposta.reduce((s,r)=>s+r.tempo_resposta,0)/tResposta.length : 0;
+        var tResolucoes = data.filter(r=>r.tempo_resolucao > 0);
+        var medResolucoes = tResolucoes.length ? tResolucoes.reduce((s,r)=>s+r.tempo_resolucao,0)/tResolucoes.length : 0;
+        
+        var noPrazo = data.filter(r=>r.status==='Concluído' && r.tempo_resolucao <= r.prazo).length;
+        var percPrazo = resolvidos > 0 ? noPrazo / resolvidos : 0;
+        var criticosNaoRes = data.filter(r=>r.prioridade==='Crítica' && r.status!=='Concluído').length;
+        
+        var escSet = new Set(data.map(r=>r.unidade));
+        var visitas = data.filter(r=>r.tipo==='Visita Técnica').length;
+        var estruturais = data.filter(r=>r.tipo==='Infraestrutura').length;
+        
+        var reincidentes = data.filter(r=>r.reincidente === 1).length;
+        var percReincidencia = totalCh > 0 ? reincidentes / totalCh : 0;
+        var custoGeral = data.reduce((s,r)=>s+(r.custo||0),0);
+        
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Atendimento e SLA', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Total Chamados: ${formatNumber(totalCh)}`, 15, yPos);
+        doc.text(`% Resolvidos: ${formatPercent(resolvidos/totalCh||0)}`, 75, yPos);
+        doc.text(`% no Prazo: ${formatPercent(percPrazo)}`, 135, yPos); yPos+=6;
+        doc.text(`Tempo Médio Resposta: ${formatNumber(medResposta.toFixed(1))} d`, 15, yPos);
+        doc.text(`Tempo Médio Resolução: ${formatNumber(medResolucoes.toFixed(1))} d`, 75, yPos); yPos+=12;
+
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Pendências e Qualidade', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Em Aberto: ${formatNumber(emAberto)}`, 15, yPos);
+        doc.text(`Atrasados: ${formatNumber(atrasados)}`, 75, yPos); yPos+=6;
+        doc.text(`Críticos Não Resolvidos: ${formatNumber(criticosNaoRes)}`, 15, yPos);
+        doc.text(`Índice de Reincidência: ${formatPercent(percReincidencia)}`, 75, yPos); yPos+=12;
+
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Cobertura e Custos', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=8;
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(`Escolas Atendidas: ${formatNumber(escSet.size)}`, 15, yPos);
+        doc.text(`Visitas Técnicas: ${formatNumber(visitas)}`, 75, yPos); yPos+=6;
+        doc.text(`Demandas Estruturais: ${formatNumber(estruturais)}`, 15, yPos);
+        doc.text(`Custo Médio / Atendimento: ${formatCurrency(totalCh?custoGeral/totalCh:0)}`, 75, yPos); yPos+=15;
+
+        // Gráficos (Barras Horizontais)
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+        doc.text('Gráficos Detalhados', 15, yPos); doc.line(15, yPos+2, 195, yPos+2); yPos+=10;
+        
+        var critEsc = {}; data.filter(r=>r.prioridade==='Crítica').forEach(r=>{ critEsc[r.unidade||'N/A']=(critEsc[r.unidade||'N/A']||0)+1; });
+        let chartData1 = Object.keys(critEsc).map(k=>({label: k, val: critEsc[k]})).sort((a,b)=>b.val-a.val).slice(0, 5);
+        doc.setFontSize(10); doc.text('Chamados Críticos por Escola (Top 5):', 15, yPos); yPos+=8;
+        if(chartData1.length) {
+            const maxVal = Math.max(...chartData1.map(d=>d.val));
+            const maxWidth = 100;
+            chartData1.forEach(d => {
+                const w = maxVal > 0 ? (d.val / maxVal) * maxWidth : 0;
+                doc.setFont('helvetica', 'normal'); doc.text(d.label.substring(0, 25), 15, yPos+4);
+                doc.setFillColor(167, 63, 71); doc.rect(75, yPos, w, 5, 'F');
+                doc.text(formatNumber(d.val), 75 + w + 3, yPos+4); yPos += 8;
+            });
+        } else {
+            doc.setFont('helvetica', 'normal'); doc.text('Sem dados críticos', 15, yPos+4); yPos+=8;
+        }
+        yPos += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Status Estrutural (Quantidade):', 15, yPos); yPos+=8;
+        var stEstr = {}; data.filter(r=>r.tipo==='Infraestrutura').forEach(r=>{ stEstr[r.status||'N/A']=(stEstr[r.status||'N/A']||0)+1; });
+        let chartData2 = Object.keys(stEstr).map(k=>({label: k, val: stEstr[k]}));
+        if(chartData2.length) {
+            const maxVal2 = Math.max(...chartData2.map(d=>d.val));
+            chartData2.forEach(d => {
+                const w = maxVal2 > 0 ? (d.val / maxVal2) * 100 : 0;
+                doc.setFont('helvetica', 'normal'); doc.text(d.label, 15, yPos+4);
+                doc.setFillColor(228, 180, 52); doc.rect(75, yPos, w, 5, 'F');
+                doc.text(formatNumber(d.val), 75 + w + 3, yPos+4); yPos += 8;
+            });
+        } else {
+            doc.setFont('helvetica', 'normal'); doc.text('Sem demandas estruturais', 15, yPos+4); yPos+=8;
+        }
+    }
+    
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.text('Relatório detalhado gerado automaticamente pelo DashboardBI.', 15, 290);
+    doc.save(modName + '_KPIs_Metricas_' + new Date().toISOString().split('T')[0] + '.pdf');
+}
+
+// ==================== SISTEMA DE HISTÓRICO ====================
+function getHistoricoData() {
+    try {
+        var stored = localStorage.getItem('dashboardbi_historico');
+        return stored ? JSON.parse(stored) : [];
+    } catch(e) { return []; }
+}
+
+function saveHistoricoData(data) {
+    localStorage.setItem('dashboardbi_historico', JSON.stringify(data));
+}
+
+function generatePeriodId() {
+    return 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function getKPIsForModule(rows, module) {
+    var kpis = {};
+    if (module === 'almoxarifado') {
+        kpis = {
+            valorTotal: rows.reduce((s,r)=>s+(r.valor_total||0),0),
+            totalRequisicoes: rows.reduce((s,r)=>s+(r.requisicoes||0),0),
+            itensAbaixoMinimo: rows.filter(r=>(r.saldo_atual||0)<(r.estoque_minimo||0)).length,
+            avgTempoAtendimento: rows.length ? rows.reduce((s,r)=>s+(r.tempo_atendimento||0),0)/rows.length : 0,
+            totalPerdas: rows.reduce((s,r)=>s+(r.perdas||0),0),
+            totalItens: rows.length
+        };
+    } else if (module === 'compras') {
+        kpis = {
+            valorSolicitado: rows.reduce((s,r)=>s+(r.valor_solicitado||0),0),
+            valorContratado: rows.reduce((s,r)=>s+(r.valor_contratado||0),0),
+            totalProcessos: rows.length,
+            processosAbertos: rows.filter(r=!r.status||r.status.toLowerCase().includes('aberto')).length,
+            processosConcluidos: rows.filter(r=>r.status&&r.status.toLowerCase().includes('conclu')).length,
+            avgPrazoDias: rows.length ? rows.reduce((s,r)=>s+(r.prazo_dias||0),0)/rows.length : 0
+        };
+    } else if (module === 'financeiro') {
+        kpis = {
+            dotacaoInicial: rows.reduce((s,r)=>s+(r.dotacao_inicial||0),0),
+            dotacaoAtualizada: rows.reduce((s,r)=>s+(r.dotacao_atualizada||0),0),
+            totalEmpenhado: rows.reduce((s,r)=>s+(r.empenhado||0),0),
+            totalLiquidado: rows.reduce((s,r)=>s+(r.liquidado||0),0),
+            totalPago: rows.reduce((s,r)=>s+(r.pago||0),0),
+            indiceExecucao: rows.length ? (rows.reduce((s,r)=>s+(r.pago||0),0) / rows.reduce((s,r)=>s+(r.dotacao_inicial||1),0) * 100) : 0
+        };
+    } else if (module === 'nutricao') {
+        kpis = {
+            totalAtendidos: rows.reduce((s,r)=>s+(r.atendidos||0),0),
+            totalRefeicoes: rows.reduce((s,r)=>s+(r.refeicoes||0),0),
+            custoTotal: rows.reduce((s,r)=>s+(r.custo_total||0),0),
+            mediaDesperdicio: rows.length ? rows.reduce((s,r)=>s+(r.desperdicio||0),0)/rows.length : 0,
+            unidades: rows.length,
+            conforme: rows.filter(r=>r.conformidade&&r.conformidade.toLowerCase().includes('conforme')).length
+        };
+    } else if (module === 'assistencia') {
+        kpis = {
+            totalChamados: rows.length,
+            abertos: rows.filter(r=>r.status&&r.status.toLowerCase().includes('aberto')).length,
+            concluidos: rows.filter(r=>r.status&&r.status.toLowerCase().includes('conclu')).length,
+            avgTempoResposta: rows.length ? rows.reduce((s,r)=>s+(r.tempo_resposta||0),0)/rows.length : 0,
+            avgTempoResolucao: rows.length ? rows.reduce((s,r)=>s+(r.tempo_resolucao||0),0)/rows.length : 0,
+            reincidentes: rows.reduce((s,r)=>s+(r.reincidente||0),0),
+            custoTotal: rows.reduce((s,r)=>s+(r.custo||0),0)
+        };
+    }
+    return kpis;
+}
+
+document.getElementById('btnSalvarPeriodo').addEventListener('click', function() {
+    var data = sysData[currentModule];
+    if (!data || !data.rows || !data.rows.length) {
+        alert('Nenhum dado carregado para salvar. Importe um arquivo primeiro.');
+        return;
+    }
+    
+    var periodName = prompt('Digite o nome do período (ex: 1ª Quinzena Abril/2026):', 
+        'Quinzena ' + (new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })));
+    
+    if (!periodName || !periodName.trim()) return;
+    
+    var historico = getHistoricoData();
+    var kpis = getKPIsForModule(data.rows, currentModule);
+    
+    var novoPeriodo = {
+        id: generatePeriodId(),
+        module: currentModule,
+        periodName: periodName.trim(),
+        filename: document.getElementById('fileName').textContent || 'Importado',
+        createdAt: new Date().toISOString(),
+        rowCount: data.rows.length,
+        kpis: kpis,
+        data: data.rows
+    };
+    
+    historico.push(novoPeriodo);
+    saveHistoricoData(historico);
+    
+    alert('Período "' + periodName + '" salvo com sucesso!');
+    if (currentTab === 'historico') renderHistorico();
+});
+
+function renderHistorico() {
+    var historico = getHistoricoData();
+    var filter = document.getElementById('historicoModuleFilter').value;
+    var modFilter = filter === 'all' ? null : filter;
+    
+    var filtered = modFilter ? historico.filter(h => h.module === modFilter) : historico;
+    
+    var listaEl = document.getElementById('historicoListaPeriodos');
+    var compare1 = document.getElementById('comparePeriod1');
+    var compare2 = document.getElementById('comparePeriod2');
+    
+    if (!filtered.length) {
+        listaEl.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhum período salvo ainda.<br><small style="color: var(--text-muted);">Importe dados e clique em "Salvar Período"</small></div>';
+        compare1.innerHTML = '<option value="">Selecione um período...</option>';
+        compare2.innerHTML = '<option value="">Selecione um período...</option>';
+        document.getElementById('historicoComparacao').innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem;">Selecione dois períodos para comparar</div>';
+        document.getElementById('historicoEvolucao').innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Salve ao menos 2 períodos para ver a evolução</div>';
+        return;
+    }
+    
+    var moduleNames = { almoxarifado: 'Almoxarifado', nutricao: 'Nutrição', compras: 'Compras', financeiro: 'Financeiro', assistencia: 'Assistência' };
+    var moduleColors = { almoxarifado: '#AEF158', nutricao: '#06B6D4', compras: '#E4B434', financeiro: '#8B5CF6', assistencia: '#2563EB' };
+    
+    var cardsHtml = filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(h => {
+        var dt = new Date(h.createdAt);
+        var color = moduleColors[h.module] || '#AEF158';
+        return `
+            <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; border-left: 3px solid ${color};">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">${h.periodName}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${moduleNames[h.module] || h.module} • ${h.rowCount} registros</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">${dt.toLocaleDateString('pt-BR')}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">${dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn" style="flex: 1; font-size: 0.75rem; padding: 0.4rem;" onclick="loadPeriodo('${h.id}')">📂 Carregar</button>
+                    <button class="btn" style="flex: 1; font-size: 0.75rem; padding: 0.4rem; background: var(--danger); color: white;" onclick="deletePeriodo('${h.id}')">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    listaEl.innerHTML = cardsHtml;
+    
+    var options = filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(h => 
+        '<option value="' + h.id + '">' + h.periodName + ' (' + moduleNames[h.module] + ')</option>'
+    ).join('');
+    
+    compare1.innerHTML = '<option value="">Selecione um período...</option>' + options;
+    compare2.innerHTML = '<option value="">Selecione um período...</option>' + options;
+    
+    renderEvolucao();
+}
+
+function loadPeriodo(id) {
+    var historico = getHistoricoData();
+    var periodo = historico.find(h => h.id === id);
+    if (!periodo) return;
+    
+    currentModule = periodo.module;
+    sysData[currentModule] = { rows: periodo.data, filtered: periodo.data };
+    
+    document.querySelectorAll('.nav-module').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-module="' + currentModule + '"]').classList.add('active');
+    
+    currentTab = 'main';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-tab="main"]').classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.getElementById('mainContent').classList.add('active');
+    
+    refreshView();
+    alert('Período "' + periodo.periodName + '" carregado!');
+}
+
+function deletePeriodo(id) {
+    if (!confirm('Tem certeza que deseja excluir este período? Esta ação não pode ser desfeita.')) return;
+    
+    var historico = getHistoricoData();
+    historico = historico.filter(h => h.id !== id);
+    saveHistoricoData(historico);
+    renderHistorico();
+    alert('Período excluído.');
+}
+
+function renderComparacao() {
+    var p1Id = document.getElementById('comparePeriod1').value;
+    var p2Id = document.getElementById('comparePeriod2').value;
+    var container = document.getElementById('historicoComparacao');
+    
+    if (!p1Id || !p2Id) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem;">Selecione dois períodos para comparar</div>';
+        return;
+    }
+    
+    var historico = getHistoricoData();
+    var p1 = historico.find(h => h.id === p1Id);
+    var p2 = historico.find(h => h.id === p2Id);
+    
+    if (!p1 || !p2) return;
+    if (p1.module !== p2.module) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--warning); font-size: 0.875rem;">⚠️ Selecione períodos do mesmo módulo para comparar</div>';
+        return;
+    }
+    
+    var k1 = p1.kpis || {};
+    var k2 = p2.kpis || {};
+    var labels = [];
+    var v1 = [];
+    var v2 = [];
+    
+    if (p1.module === 'almoxarifado') {
+        labels = ['Valor Total (R$)', 'Requisições', 'Itens Abaixo Mín.', 'Tempo Médio (dias)', 'Perdas', 'Total Itens'];
+        v1 = [k1.valorTotal||0, k1.totalRequisicoes||0, k1.itensAbaixoMinimo||0, k1.avgTempoAtendimento||0, k1.totalPerdas||0, k1.totalItens||0];
+        v2 = [k2.valorTotal||0, k2.totalRequisicoes||0, k2.itensAbaixoMinimo||0, k2.avgTempoAtendimento||0, k2.totalPerdas||0, k2.totalItens||0];
+    } else if (p1.module === 'compras') {
+        labels = ['Valor Solicitado (R$)', 'Valor Contratado (R$)', 'Processos', 'Abertos', 'Concluídos', 'Prazo Médio'];
+        v1 = [k1.valorSolicitado||0, k1.valorContratado||0, k1.totalProcessos||0, k1.processosAbertos||0, k1.processosConcluidos||0, k1.avgPrazoDias||0];
+        v2 = [k2.valorSolicitado||0, k2.valorContratado||0, k2.totalProcessos||0, k2.processosAbertos||0, k2.processosConcluidos||0, k2.avgPrazoDias||0];
+    } else if (p1.module === 'financeiro') {
+        labels = ['Dotação Inicial', 'Dotação Atualizada', 'Empenhado', 'Liquidado', 'Pago', 'Execução %'];
+        v1 = [k1.dotacaoInicial||0, k1.dotacaoAtualizada||0, k1.totalEmpenhado||0, k1.totalLiquidado||0, k1.totalPago||0, k1.indiceExecucao||0];
+        v2 = [k2.dotacaoInicial||0, k2.dotacaoAtualizada||0, k2.totalEmpenhado||0, k2.totalLiquidado||0, k2.totalPago||0, k2.indiceExecucao||0];
+    } else if (p1.module === 'nutricao') {
+        labels = ['Atendidos', 'Refeições', 'Custo Total', 'Desperdício %', 'Unidades', 'Conforme'];
+        v1 = [k1.totalAtendidos||0, k1.totalRefeicoes||0, k1.custoTotal||0, k1.mediaDesperdicio||0, k1.unidades||0, k1.conforme||0];
+        v2 = [k2.totalAtendidos||0, k2.totalRefeicoes||0, k2.custoTotal||0, k2.mediaDesperdicio||0, k2.unidades||0, k2.conforme||0];
+    } else if (p1.module === 'assistencia') {
+        labels = ['Chamados', 'Abertos', 'Concluídos', 'Tempo Resposta', 'Tempo Resolução', 'Reincidentes'];
+        v1 = [k1.totalChamados||0, k1.abertos||0, k1.concluidos||0, k1.avgTempoResposta||0, k1.avgTempoResolucao||0, k1.reincidentes||0];
+        v2 = [k2.totalChamados||0, k2.abertos||0, k2.concluidos||0, k2.avgTempoResposta||0, k2.avgTempoResolucao||0, k2.reincidentes||0];
+    }
+    
+    var html = '<table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;"><thead><tr style="background: var(--bg-tertiary);"><th style="padding: 0.5rem; text-align: left;">Métrica</th><th style="padding: 0.5rem; text-align: right;">' + p1.periodName + '</th><th style="padding: 0.5rem; text-align: right;">' + p2.periodName + '</th><th style="padding: 0.5rem; text-align: center;">Variação</th></tr></thead><tbody>';
+    
+    for (var i = 0; i < labels.length; i++) {
+        var val1 = v1[i];
+        var val2 = v2[i];
+        var diff = val2 - val1;
+        var pct = val1 !== 0 ? (diff / Math.abs(val1)) * 100 : 0;
+        var isGood = diff >= 0;
+        
+        var displayVal1 = typeof val1 === 'number' ? (val1 > 1000 ? formatCurrency(val1) : formatNumber(val1)) : val1;
+        var displayVal2 = typeof val2 === 'number' ? (val2 > 1000 ? formatCurrency(val2) : formatNumber(val2)) : val2;
+        
+        var diffStr = '';
+        var color = 'var(--text-muted)';
+        if (Math.abs(pct) > 0.01) {
+            var arrow = pct > 0 ? '↑' : '↓';
+            color = pct > 0 ? 'var(--success)' : 'var(--danger)';
+            diffStr = '<span style="color: ' + color + ';">' + arrow + ' ' + formatPercent(Math.abs(pct)/100) + '</span>';
+        }
+        
+        html += '<tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.5rem;">' + labels[i] + '</td><td style="padding: 0.5rem; text-align: right; font-family: monospace;">' + displayVal1 + '</td><td style="padding: 0.5rem; text-align: right; font-family: monospace;">' + displayVal2 + '</td><td style="padding: 0.5rem; text-align: center;">' + diffStr + '</td></tr>';
+    }
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function renderEvolucao() {
+    var container = document.getElementById('historicoEvolucao');
+    var historico = getHistoricoData();
+    
+    if (historico.length < 2) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Salve ao menos 2 períodos para ver a evolução</div>';
+        return;
+    }
+    
+    var moduleNames = { almoxarifado: 'Valor Total', nutricao: 'Atendidos', compras: 'Processos', financeiro: 'Pago', assistencia: 'Chamados' };
+    var moduleKeys = { almoxarifado: 'valorTotal', nutricao: 'totalAtendidos', compras: 'totalProcessos', financeiro: 'totalPago', assistencia: 'totalChamados' };
+    
+    var sorted = historico.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+    
+    var datasets = {};
+    sorted.forEach(h => {
+        if (!datasets[h.module]) datasets[h.module] = [];
+        var key = moduleKeys[h.module];
+        datasets[h.module].push({ label: h.periodName.substring(0,15), value: h.kpis ? (h.kpis[key] || 0) : 0, date: new Date(h.createdAt) });
+    });
+    
+    var colors = { almoxarifado: '#AEF158', nutricao: '#06B6D4', compras: '#E4B434', financeiro: '#8B5CF6', assistencia: '#2563EB' };
+    
+    var chartExists = window.historicoChart;
+    if (chartExists) { chartExists.destroy(); }
+    
+    var ctx = document.createElement('canvas');
+    container.innerHTML = '';
+    container.appendChild(ctx);
+    
+    var labels = sorted.filter(h => h.module === currentModule).map(h => h.periodName.substring(0,15));
+    var datasetsChart = [];
+    
+    Object.keys(datasets).forEach(mod => {
+        var data = datasets[mod].map(d => d.value);
+        datasetsChart.push({
+            label: moduleNames[mod],
+            data: data,
+            borderColor: colors[mod],
+            backgroundColor: colors[mod] + '33',
+            fill: true,
+            tension: 0.3
+        });
+    });
+    
+    window.historicoChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: datasetsChart },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { color: '#8BA399' } } },
+            scales: {
+                y: { grid: { color: '#22342D' }, ticks: { color: '#8BA399' } },
+                x: { grid: { color: '#22342D' }, ticks: { color: '#8BA399' } }
+            }
+        }
+    });
+}
+
+window.onload = loadDemo;
+    </script>
+</body>
+</html>

@@ -8,10 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --bg-primary: #011314;
@@ -311,7 +307,7 @@
 
         .kpiss {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -913,96 +909,10 @@
             border-color: var(--accent-light);
             box-shadow: 0 0 10px var(--accent-glow);
         }
-
-        /* TOAST NOTIFICATION */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            background: var(--accent);
-            color: var(--text-primary);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg);
-            animation: slideInToast 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            min-width: 250px;
-        }
-
-        .toast.error {
-            background: var(--danger);
-        }
-
-        .toast.warning {
-            background: var(--warning);
-            color: #000;
-        }
-
-        @keyframes slideInToast {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOutToast {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(120%); opacity: 0; }
-        }
-
-        /* SKELETON LOADING */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-light) 50%, var(--bg-tertiary) 75%);
-            background-size: 200% 100%;
-            animation: skeletonLoading 1.5s infinite;
-            border-radius: 4px;
-        }
-
-        @keyframes skeletonLoading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .kpi-skeleton {
-            height: 100px;
-            border-radius: var(--radius);
-        }
-
-        .chart-skeleton {
-            height: 280px;
-            border-radius: var(--radius);
-        }
-
-        /* LEAFLET MAP CONTAINER */
-        #mapContainer {
-            height: 350px;
-            width: 100%;
-            border-radius: var(--radius);
-            margin-top: 1.5rem;
-            z-index: 1;
-            display: none;
-            border: 1px solid var(--border);
-        }
-        
-        /* FILTRO ATIVO HIGHLIGHT */
-        .filter-highlight {
-            border: 2px solid var(--warning) !important;
-            box-shadow: 0 0 10px rgba(228, 180, 52, 0.4) !important;
-        }
     </style>
 </head>
 
 <body>
-    <div id="toastContainer" class="toast-container"></div>
     <nav class="sidebar">
         <div class="logo">DashboardBI</div>
         <div class="logo-sub">Sistema de Gestão</div>
@@ -1013,8 +923,6 @@
         <div class="nav-module" data-module="compras">Compras</div>
         <div class="nav-module" data-module="financeiro">Financeiro</div>
         <div class="nav-module" data-module="assistencia">Assistência Rede</div>
-        <div class="nav-module" data-module="transportes">Transportes</div>
-        <div class="nav-module" data-module="desenvolvimento">Dir. Desenvolvimento</div>
 
         <div class="sidebar-section" style="margin-top: 1.5rem;">Visões</div>
         <div class="nav-item active" data-tab="main">Visão Executiva</div>
@@ -1032,12 +940,12 @@
                 <p class="header-sub" id="mainHeaderSub">Carregando...</p>
             </div>
             <div class="theme-btns">
-                <button class="theme-btn active" data-theme="green" title="Green" aria-label="Ativar tema verde">🟢</button>
-                <button class="theme-btn" data-theme="purple" title="Purple" aria-label="Ativar tema roxo">✦</button>
-                <button class="theme-btn" data-theme="luna" title="Luna" aria-label="Ativar tema escuro lunar">🌙</button>
-                <button class="theme-btn" data-theme="hemo" title="Hemo" aria-label="Ativar tema azul hemo">💧</button>
-                <button class="theme-btn" data-theme="light" title="Light" aria-label="Ativar tema claro">☀</button>
-                <button class="theme-btn" data-theme="top" title="Top" aria-label="Ativar tema contraste">🔝</button>
+                <button class="theme-btn active" data-theme="green" title="Green">🟢</button>
+                <button class="theme-btn" data-theme="purple" title="Purple">✦</button>
+                <button class="theme-btn" data-theme="luna" title="Luna">🌙</button>
+                <button class="theme-btn" data-theme="hemo" title="Hemo">💧</button>
+                <button class="theme-btn" data-theme="light" title="Light">☀</button>
+                <button class="theme-btn" data-theme="top" title="Top">🔝</button>
             </div>
         </div>
 
@@ -1054,7 +962,6 @@
             <button class="btn" id="btnAtualizar">Atualizar</button>
             <button class="btn" id="btnSalvarPeriodo" style="background: var(--accent); color: var(--text-primary);">💾
                 Salvar Período</button>
-            <button class="btn" id="btnSalvarSupabase" style="background: var(--accent-light); color: var(--bg-primary);">☁️ Nuvem</button>
             <button class="btn" id="btnExportCSV" style="margin-left: auto;">Exportar CSV</button>
         </div>
 
@@ -1103,7 +1010,6 @@
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;" id="tabelaInfo">Exibindo
                     0 registros.</div>
-                <div id="tabelaSummary" style="display: none; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;"></div>
                 <table class="data-table">
                     <thead id="tabelaHead"></thead>
                     <tbody id="tabelaBody"></tbody>
@@ -1118,34 +1024,9 @@
             </div>
         </div>
 
+        <!-- CONTEÚDO INSIGHTS -->
         <div id="insightsContent" class="tab-content">
             <div class="insights-grid" id="insightsGrid"></div>
-
-            <div style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                <h3 style="margin-bottom: 1.5rem; color: var(--accent-light); font-size: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 1.5rem;">🚀</span> Propostas de Novos Insights Inteligentes
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                    <div class="insight-card" style="cursor: default; border-style: dashed; background: rgba(255,255,255,0.02); filter: grayscale(0.5);">
-                        <div class="insight-icon" style="color:var(--secondary)">📈</div>
-                        <div class="insight-title">Sazonalidade de Demanda</div>
-                        <div class="insight-desc">Análise preditiva de picos de consumo baseada no calendário escolar e histórico anual para antecipar compras estratégicas.</div>
-                    </div>
-                    <div class="insight-card" style="cursor: default; border-style: dashed; background: rgba(255,255,255,0.02); filter: grayscale(0.5);">
-                        <div class="insight-icon" style="color:var(--primary)">🤝</div>
-                        <div class="insight-title">Rating de Fornecedores</div>
-                        <div class="insight-desc">Pontuação automática de fornecedores baseada no cruzamento de prazos de entrega, conformidade dos itens e variação de preços.</div>
-                    </div>
-                    <div class="insight-card" style="cursor: default; border-style: dashed; background: rgba(255,255,255,0.02); filter: grayscale(0.5);">
-                        <div class="insight-icon" style="color:var(--tertiary)">🚚</div>
-                        <div class="insight-title">Otimização Logística</div>
-                        <div class="insight-desc">Sugestão de agrupamento de entregas por cluster geográfico (zonas escolares) para redução de custos operacionais e tempo de rota.</div>
-                    </div>
-                </div>
-                <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); text-align: center; font-style: italic;">
-                    * Estes indicadores estão em fase de mapeamento de dados e serão ativados em futuras atualizações.
-                </p>
-            </div>
         </div>
 
         <!-- CONTEÚDO KPI / METRICA -->
@@ -1287,34 +1168,19 @@
     </main>
 
     <script>
-        var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null, transportes: null, desenvolvimento: null };
-        var currentModule = 'almoxarifado'; // Iniciar no almoxarifado conforme UI
+        var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null };
+        var currentModule = 'compras';
         var currentTab = 'main';
         var charts = {};
         var currentTheme = 'green';
         var currentModFilter = 'ALL';
 
-        // Supabase Configuration
-        const supabaseUrl = 'https://yqslplgfpfspzzhddvuq.supabase.co';
-        const supabaseKey = 'sb_publishable_ZlhQU-oSqSvbQlzbGs9dqQ_-jHRxOUj';
-        const sb = supabase.createClient(supabaseUrl, supabaseKey);
-
         function formatCurrency(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0); }
         function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v || 0); }
         function formatPercent(v) { return new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1 }).format(v || 0); }
 
-        function showLoader() { 
-            document.getElementById('loaderOverlay').classList.add('active'); 
-            showSkeletons();
-        }
+        function showLoader() { document.getElementById('loaderOverlay').classList.add('active'); }
         function hideLoader() { document.getElementById('loaderOverlay').classList.remove('active'); }
-
-        function showSkeletons() {
-            var kEl = document.getElementById('mainKpis');
-            var cEl = document.getElementById('mainCharts');
-            if(kEl) kEl.innerHTML = Array(5).fill('<div class="skeleton kpi-skeleton"></div>').join('');
-            if(cEl) cEl.innerHTML = Array(4).fill('<div class="skeleton chart-skeleton"></div>').join('');
-        }
 
         const parseBr = (val) => {
             if (typeof val === 'number') return val;
@@ -1379,287 +1245,233 @@
         });
         document.getElementById('btnExportCSV').addEventListener('click', () => {
             var data = sysData[currentModule];
-            if (!data || !data.rows || !data.rows.length) return showToast('Sem dados para exportar', 'warning');
+            if (!data || !data.rows || !data.rows.length) return alert('Sem dados para exportar');
             var keys = Object.keys(data.rows[0]);
             var csv = keys.join(',') + '\n' + data.rows.map(r => keys.map(k => '"' + (r[k] || '') + '"').join(',')).join('\n');
             var a = document.createElement('a');
             a.href = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
             a.download = currentModule + '_export.csv';
             a.click();
-            showToast('CSV exportado com sucesso', 'success');
         });
 
         function loadExcel(file) {
             showLoader();
             var reader = new FileReader();
             reader.onload = function (e) {
-                var data = new Uint8Array(e.target.result);
-                
-                // Código do Web Worker empacotado em Blob (para não depender de arquivo externo)
-                const workerCode = `
-                    importScripts('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+                try {
+                    var data = new Uint8Array(e.target.result);
+                    var wb = XLSX.read(data, { type: 'array' });
+                    var rows = [];
 
-                    const COLUMN_MAP = {
-                        almoxarifado: {
-                            material: ['MATERIAL', 'ITEM', 'DESCRIÇÃO', 'PRODUTO', 'NOME DO ARTIGO'],
-                            unidade: ['UNIDADE', 'ESCOLA', 'SETOR', 'LOCAL'],
-                            modalidade: ['MODALIDADE', 'TIPO', 'CATEGORIA', 'GRUPO', 'MOD'],
-                            saldo_atual: ['SALDO', 'ATUAL', 'QTD'],
-                            estoque_minimo: ['MÍNIMO', 'MINIMO', 'RESERVA'],
-                            requisicoes: ['REQUISI', 'ATENDID'],
-                            req_integral: ['INTEGRAL'],
-                            tempo_atendimento: ['TEMPO', 'PRAZO', 'DIAS'],
-                            valor_total: ['VALOR_TOTAL', 'V.TOTAL', 'ESTOCADO', 'PREÇO_TOTAL', 'CUSTO_TOTAL'],
-                            perdas: ['PERDA', 'AVARIA', 'VENCID'],
-                            consumo_mensal: ['CONSUMO', 'MÉDIA', 'MEDIO'],
-                            atendidos: ['ALUNOS', 'ATENDID', 'ESTUDANTE', 'TOTAL DE ALUNOS']
-                        },
-                        compras: {
-                            processo: ['PROCESSO', 'ID', 'NÚMERO'],
-                            solicitante: ['SOLICITANTE', 'DEP', 'ÓRGÃO'],
-                            objeto: ['OBJETO', 'DESCRIÇÃO', 'ITEM'],
-                            valor_solicitado: ['SOLICITADO', 'ESTIMADO', 'PREVISTO'],
-                            valor_contratado: ['CONTRATADO', 'HOMOLOGADO', 'FINAL'],
-                            fornecedor: ['FORNECEDOR', 'EMPRESA', 'VENCEDOR'],
-                            status: ['STATUS', 'SITUAÇÃO', 'FASE'],
-                            prazo_dias: ['PRAZO', 'DIAS'],
-                            gestao: ['GESTÃO', 'GESTAO', 'SETOR']
-                        },
-                        financeiro: {
-                            processo: ['PROCESSO', 'EMPENHO'],
-                            departamento: ['DEPARTAMENTO', 'SETOR', 'SECRETARIA'],
-                            categoria: ['CATEGORIA', 'ELEMENTO', 'NATUREZA'],
-                            fonte: ['FONTE', 'RECURSO'],
-                            dotacao_inicial: ['INICIAL', 'PREVISTO', 'DOTAÇÃO'],
-                            dotacao_atualizada: ['ATUALIZADA', 'RESERVADO'],
-                            empenhado: ['EMPENHADO'],
-                            liquidado: ['LIQUIDADO'],
-                            pago: ['PAGO'],
-                            status: ['STATUS', 'SITUAÇÃO']
-                        },
-                        nutricao: {
-                            unidade: ['UNIDADE', 'ESCOLA', 'CRECHE'],
-                            atendidos: ['ATENDIDOS', 'ALUNOS', 'CRIANÇAS'],
-                            refeicoes: ['REFEI', 'PRATOS', 'CONSUMO'],
-                            custo_total: ['CUSTO', 'VALOR', 'GIRA'],
-                            desperdicio: ['DESPERD', 'RESTO'],
-                            planejamento: ['PLANEJA', 'PREVISTO'],
-                            item_falta: ['FALTA', 'FALTANTE'],
-                            conformidade: ['CONFORMIDADE', 'STATUS', 'SITUAÇÃO']
-                        },
-                        assistencia: {
-                            chamado: ['CHAMADO', 'ID', 'NÚMERO', 'TICKET'],
-                            unidade: ['UNIDADE', 'ESCOLA', 'LOCAL'],
-                            tipo: ['TIPO', 'CATEGORIA', 'ASSUNTO'],
-                            data_abertura: ['ABERTURA', 'DATA', 'INÍCIO'],
-                            prazo: ['PRAZO', 'LIMITE', 'SLA'],
-                            status: ['STATUS', 'SITUAÇÃO', 'ESTADO'],
-                            tempo_resposta: ['RESPOSTA', 'REAÇÃO'],
-                            tempo_resolucao: ['RESOLU', 'FECHAMENTO', 'SOLUÇÃO'],
-                            prioridade: ['PRIORIDADE', 'URGÊNCIA', 'GRAVIDADE'],
-                            reincidente: ['REINCIDENTE', 'REPETIDO'],
-                            custo: ['CUSTO', 'VALOR', 'PREÇO']
-                        },
-                        transportes: {
-                            veiculo: ['VEÍCULO', 'CARRO', 'PLACA'],
-                            motorista: ['MOTORISTA', 'CONDUTOR'],
-                            destino: ['DESTINO', 'LOCAL', 'ROTA'],
-                            km_inicial: ['INICIAL', 'KM_I'],
-                            km_final: ['FINAL', 'KM_F'],
-                            status: ['STATUS', 'SITUAÇÃO'],
-                            custo: ['CUSTO', 'VALOR', 'PREÇO']
-                        },
-                        desenvolvimento: {
-                            projeto: ['PROJETO', 'NOME', 'AÇÃO'],
-                            responsavel: ['RESPONSÁVEL', 'GESTOR'],
-                            inicio: ['INÍCIO', 'DATA', 'ABERTURA'],
-                            prazo: ['PRAZO', 'ENTREGA'],
-                            progresso: ['PROGRESSO', '%', 'CONCLU'],
-                            status: ['STATUS', 'SITUAÇÃO'],
-                            custo: ['CUSTO', 'VALOR', 'ORÇAMENTO']
-                        }
-                    };
+                    console.log("--- INICIANDO IMPORTAÇÃO ---");
+                    console.log("Arquivo:", file.name);
+                    console.log("Módulo Selecionado:", currentModule);
 
-                    const parseBr = (val) => {
-                        if (typeof val === 'number') return val;
-                        if (!val) return 0;
-                        var s = String(val).replace('R$', '').trim();
-                        if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
-                        else if (s.includes(',')) s = s.replace(',', '.');
-                        return parseFloat(s) || 0;
-                    };
+                    wb.SheetNames.forEach(sheetName => {
+                        var json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+                        if (json.length < 1) return;
 
-                    self.onmessage = function(e) {
-                        try {
-                            const { dataArray, currentModule, mes_list } = e.data;
-                            var wb = XLSX.read(dataArray, { type: 'array' });
-                            var rows = [];
+                        // Encontrar a linha de cabeçalho (exige 2+ palavras-chave para evitar títulos)
+                        var headerRowIndex = -1;
+                        var keywords = ['MATERIAL', 'ITEM', 'UNIDADE', 'ESCOLA', 'PROCESSO', 'CHAMADO', 'MODALIDADE', 'STATUS', 'VALOR', 'SALDO'];
 
-                            wb.SheetNames.forEach(sheetName => {
-                                var json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-                                if (json.length < 1) return;
-                                console.log("Processando aba:", sheetName, "Linhas totais:", json.length);
-                                var headerRowIndex = -1;
-                                var keywords = ['MATERIAL', 'ITEM', 'UNIDADE', 'ESCOLA', 'PROCESSO', 'CHAMADO', 'MODALIDADE', 'STATUS', 'VALOR', 'SALDO'];
-
-                                for (var i = 0; i < Math.min(json.length, 15); i++) {
-                                    if (!json[i]) continue;
-                                    var rowCheck = json[i].map(v => String(v || '').toUpperCase());
-                                    var hits = rowCheck.filter(v => keywords.some(k => v.includes(k))).length;
-                                    if (hits >= 2) { 
-                                        headerRowIndex = i; 
-                                        console.log("Cabeçalho detectado na linha:", i + 1, "Hits:", hits);
-                                        break; 
-                                    }
-                                }
-
-                                if (headerRowIndex === -1) {
-                                    console.warn("Cabeçalho não encontrado na aba:", sheetName);
-                                    return;
-                                }
-
-                                var headers = json[headerRowIndex].map(h => String(h || '').toUpperCase().trim());
-                                console.log("Headers detectados:", headers);
-
-                                const getIdx = (terms) => {
-                                    let idx = headers.findIndex(h => terms.some(t => h === t));
-                                    if (idx === -1) idx = headers.findIndex(h => terms.some(t => h.includes(t)));
-                                    return idx;
-                                };
-
-                                const map = COLUMN_MAP[currentModule];
-                                if (!map) return;
-                                
-                                var indices = {};
-                                for (let key in map) indices[key] = getIdx(map[key]);
-                                console.log("Mapeamento de índices:", indices);
-
-                                // Fallbacks e meses específicos (Almoxarifado)
-                                if (currentModule === 'almoxarifado') {
-                                    if (indices.valor_total === -1) {
-                                        indices.valor_total = headers.findIndex(h => mes_list.some(m => h.includes(m)));
-                                    }
-                                    // Guardar índices de todos os meses para troca dinâmica
-                                    indices.mensal = {};
-                                    mes_list.forEach(m => {
-                                        indices.mensal[m] = headers.findIndex(h => h.includes(m));
-                                    });
-                                }
-                                if (currentModule === 'compras' && indices.doc === undefined) {
-                                    indices.doc = headers.findIndex(h => h.includes('DOC'));
-                                }
-                                console.log("Iniciando processamento de", json.length - headerRowIndex - 1, "linhas.");
-
-                                for (var i = headerRowIndex + 1; i < json.length; i++) {
-                                    var r = json[i];
-                                    if (!r || r.length === 0) continue;
-                                    
-                                    var rowStr = r.join(' ').toUpperCase();
-                                    if (rowStr.includes('QUANTIDADE') && (rowStr.includes('MATERIAL') || rowStr.includes('PRODUTO'))) break;
-
-                                    var obj = {};
-                                    for (let key in indices) {
-                                        if (key === 'mensal') continue;
-                                        let idx = indices[key];
-                                        if (idx !== -1 && idx !== undefined) {
-                                            if (['saldo_atual', 'estoque_minimo', 'requisicoes', 'tempo_atendimento', 'valor_total', 'perdas', 'consumo_mensal', 'atendidos', 'valor_solicitado', 'valor_contratado', 'prazo_dias', 'dotacao_inicial', 'dotacao_atualizada', 'empenhado', 'liquidado', 'pago', 'refeicoes', 'custo_total', 'desperdicio', 'planejamento', 'item_falta', 'prazo', 'tempo_resposta', 'tempo_resolucao', 'reincidente', 'custo'].includes(key)) {
-                                                obj[key] = parseBr(r[idx]);
-                                            } else {
-                                                const numericKeys = ['saldo_atual', 'estoque_minimo', 'requisicoes', 'tempo_atendimento', 'valor_total', 'perdas', 'consumo_mensal', 'atendidos', 'valor_solicitado', 'valor_contratado', 'prazo_dias', 'dotacao_inicial', 'dotacao_atualizada', 'empenhado', 'liquidado', 'pago', 'refeicoes', 'custo_total', 'desperdicio', 'planejamento', 'item_falta', 'prazo', 'tempo_resposta', 'tempo_resolucao', 'reincidente', 'custo', 'km_inicial', 'km_final', 'progresso'];
-                                                const rawVal = r[idx];
-                                                if (numericKeys.includes(key)) {
-                                                    obj[key] = parseBr(rawVal);
-                                                } else {
-                                                    obj[key] = rawVal || '';
-                                                }
-                                            }
-                                        } else {
-                                            const numericKeys = ['saldo_atual', 'estoque_minimo', 'requisicoes', 'tempo_atendimento', 'valor_total', 'perdas', 'consumo_mensal', 'atendidos', 'valor_solicitado', 'valor_contratado', 'prazo_dias', 'dotacao_inicial', 'dotacao_atualizada', 'empenhado', 'liquidado', 'pago', 'refeicoes', 'custo_total', 'desperdicio', 'planejamento', 'item_falta', 'prazo', 'tempo_resposta', 'tempo_resolucao', 'reincidente', 'custo', 'km_inicial', 'km_final', 'progresso'];
-                                            obj[key] = numericKeys.includes(key) ? 0 : '';
-                                            
-                                            if (key === 'status' && ['compras', 'assistencia'].includes(currentModule)) obj[key] = 'Em Aberto';
-                                            if (key === 'status' && currentModule === 'financeiro') obj[key] = 'Normal';
-                                            if (key === 'conformidade' && currentModule === 'nutricao') obj[key] = 'Conforme';
-                                            if (key === 'prioridade' && currentModule === 'assistencia') obj[key] = 'Média';
-                                            if (key === 'req_integral' && currentModule === 'almoxarifado') obj[key] = 1;
-                                            if (key === 'tipo' && currentModule === 'assistencia') obj[key] = 'Suporte';
-                                            if (key === 'dotacao_atualizada' && currentModule === 'financeiro') obj[key] = obj.dotacao_inicial || 0;
-                                            if (key === 'planejamento' && currentModule === 'nutricao') obj[key] = obj.refeicoes || 0;
-                                        }
-                                    }
-
-                                    // Adicionar valores mensais se disponíveis (Almoxarifado)
-                                    if (currentModule === 'almoxarifado' && indices.mensal) {
-                                        for (let m in indices.mensal) {
-                                            let midx = indices.mensal[m];
-                                            if (midx !== -1) obj['mes_' + m] = parseBr(r[midx]);
-                                        }
-                                    }
-
-                                    // Lógica especial req_integral
-                                    if (currentModule === 'almoxarifado' && indices.req_integral !== -1) {
-                                        let val = String(r[indices.req_integral] || '').toLowerCase();
-                                        obj.req_integral = (val.includes('sim') || parseBr(r[indices.req_integral]) > 0) ? 1 : 0;
-                                    }
-
-                                    // Filtros base obrigatórios
-                                    if (currentModule === 'almoxarifado' && !obj.material && !obj.unidade) continue;
-                                    if (currentModule === 'compras' && !obj.processo) continue;
-                                    if (currentModule === 'financeiro' && !obj.departamento && !obj.empenhado) continue;
-                                    if (currentModule === 'nutricao' && !obj.unidade) continue;
-                                    if (currentModule === 'assistencia' && !obj.chamado) continue;
-
-                                    rows.push(obj);
-                                }
-                            });
-
-                            self.postMessage({ success: true, rows: rows });
-                        } catch (err) {
-                            self.postMessage({ success: false, error: err.message });
-                        }
-                    };
-                `;
-                
-                const blob = new Blob([workerCode], {type: 'application/javascript'});
-                const worker = new Worker(URL.createObjectURL(blob));
-
-                worker.onmessage = function(ev) {
-                    if (ev.data.success) {
-                        var rows = ev.data.rows;
-                        console.log("Linhas processadas pelo Worker:", rows.length);
-                        
-                        var chk = document.getElementById('chkMesclar');
-                        if (chk && chk.checked && sysData[currentModule] && !sysData[currentModule].isDemo) {
-                            var c = sysData[currentModule].rows.concat(rows);
-                            sysData[currentModule] = { rows: c, filtered: c };
-                        } else {
-                            sysData[currentModule] = { rows: rows, filtered: rows };
+                        for (var i = 0; i < Math.min(json.length, 15); i++) {
+                            if (!json[i]) continue;
+                            var rowCheck = json[i].map(v => String(v || '').toUpperCase());
+                            var hits = rowCheck.filter(v => keywords.some(k => v.includes(k))).length;
+                            if (hits >= 2) {
+                                headerRowIndex = i;
+                                break;
+                            }
                         }
 
-                        try {
-                            renderModalityFilters();
-                        } catch(e) {
-                            console.warn("Erro ao renderizar filtros:", e);
+                        if (headerRowIndex === -1) {
+                            console.warn("Cabeçalho não identificado na aba:", sheetName);
+                            return;
                         }
+
+                        var headers = json[headerRowIndex].map(h => String(h || '').toUpperCase().trim());
+                        console.log("Aba:", sheetName, "Cabeçalhos:", headers);
+
+                        // getIdx inteligente: Prioriza correspondência exata
+                        const getIdx = (terms) => {
+                            let idx = headers.findIndex(h => terms.some(t => h === t));
+                            if (idx === -1) {
+                                idx = headers.findIndex(h => terms.some(t => h.includes(t)));
+                            }
+                            return idx;
+                        };
+
+                        for (var i = headerRowIndex + 1; i < json.length; i++) {
+                            var r = json[i];
+                            if (!r || r.length === 0) continue;
+                            
+                            // Detectar e ignorar tabelas secundárias de resumo no final da planilha
+                            var rowStr = r.join(' ').toUpperCase();
+                            if (rowStr.includes('QUANTIDADE') && (rowStr.includes('MATERIAL') || rowStr.includes('PRODUTO'))) {
+                                console.log("Tabela de resumo secundária detectada. Encerrando leitura.");
+                                break;
+                            }
+
+                            var obj = {};
+
+                            if (currentModule === 'almoxarifado') {
+                                var matIdx = getIdx(['MATERIAL', 'ITEM', 'DESCRIÇÃO', 'PRODUTO']);
+                                var uniIdx = getIdx(['UNIDADE', 'ESCOLA', 'SETOR', 'LOCAL']);
+                                var modIdx = getIdx(['MODALIDADE', 'TIPO', 'CATEGORIA', 'GRUPO']);
+                                var salIdx = getIdx(['SALDO', 'ATUAL', 'QTD']);
+                                var minIdx = getIdx(['MÍNIMO', 'MINIMO', 'RESERVA']);
+                                var reqIdx = getIdx(['REQUISI', 'ATENDID']);
+                                var temIdx = getIdx(['TEMPO', 'PRAZO', 'DIAS']);
+                                // Removido 'TOTAL' genérico para evitar conflito com 'TOTAL DE ALUNOS'
+                                var valIdx = getIdx(['VALOR_TOTAL', 'V.TOTAL', 'ESTOCADO', 'PREÇO_TOTAL', 'CUSTO_TOTAL', 'ABRIL', 'MAIO', 'MARÇO']);
+                                var perIdx = getIdx(['PERDA', 'AVARIA', 'VENCID']);
+                                var conIdx = getIdx(['CONSUMO', 'MÉDIA', 'MEDIO']);
+                                var ateIdx = getIdx(['ALUNOS', 'ATENDID', 'ESTUDANTE']);
+
+                                // Fallback para colunas de meses se valor_total não for encontrado
+                                if (valIdx === -1) {
+                                    valIdx = headers.findIndex(h => mes_list.some(m => h.includes(m)));
+                                }
+
+                                obj.material = matIdx !== -1 ? r[matIdx] || '' : '';
+                                obj.unidade = uniIdx !== -1 ? r[uniIdx] || '' : '';
+                                obj.modalidade = modIdx !== -1 ? r[modIdx] || '' : '';
+                                obj.saldo_atual = salIdx !== -1 ? parseBr(r[salIdx]) : 0;
+                                obj.estoque_minimo = minIdx !== -1 ? parseBr(r[minIdx]) : 0;
+                                obj.requisicoes = reqIdx !== -1 ? parseBr(r[reqIdx]) : 0;
+                                obj.tempo_atendimento = temIdx !== -1 ? parseBr(r[temIdx]) : 0;
+                                obj.valor_total = valIdx !== -1 ? parseBr(r[valIdx]) : 0;
+                                obj.perdas = perIdx !== -1 ? parseBr(r[perIdx]) : 0;
+                                obj.consumo_mensal = conIdx !== -1 ? parseBr(r[conIdx]) : 0;
+                                obj.atendidos = ateIdx !== -1 ? parseBr(r[ateIdx]) : 0;
+
+                                var reqIntIdx = getIdx(['INTEGRAL']);
+                                if (reqIntIdx !== -1) {
+                                    var val = String(r[reqIntIdx] || '').toLowerCase();
+                                    obj.req_integral = (val.includes('sim') || parseBr(r[reqIntIdx]) > 0) ? 1 : 0;
+                                } else {
+                                    obj.req_integral = 1;
+                                }
+                                if (!obj.material && !obj.unidade) continue;
+                            }
+                            else if (currentModule === 'compras') {
+                                var prcIdx = getIdx(['PROCESSO', 'ID', 'NÚMERO']);
+                                var solIdx = getIdx(['SOLICITANTE', 'DEP', 'ÓRGÃO']);
+                                var objIdx = getIdx(['OBJETO', 'DESCRIÇÃO', 'ITEM']);
+                                var vsoIdx = getIdx(['SOLICITADO', 'ESTIMADO', 'PREVISTO']);
+                                var vcoIdx = getIdx(['CONTRATADO', 'HOMOLOGADO', 'FINAL']);
+                                var forIdx = getIdx(['FORNECEDOR', 'EMPRESA', 'VENCEDOR']);
+                                var stsIdx = getIdx(['STATUS', 'SITUAÇÃO', 'FASE']);
+                                var przIdx = getIdx(['PRAZO', 'DIAS']);
+
+                                obj.processo = prcIdx !== -1 ? r[prcIdx] || '' : '';
+                                obj.solicitante = solIdx !== -1 ? r[solIdx] || '' : '';
+                                obj.objeto = objIdx !== -1 ? r[objIdx] || '' : '';
+                                obj.valor_solicitado = vsoIdx !== -1 ? parseBr(r[vsoIdx]) : 0;
+                                obj.valor_contratado = vcoIdx !== -1 ? parseBr(r[vcoIdx]) : 0;
+                                obj.fornecedor = forIdx !== -1 ? r[forIdx] || '' : '';
+                                obj.status = stsIdx !== -1 ? r[stsIdx] || 'Em Aberto' : 'Em Aberto';
+                                obj.prazo_dias = przIdx !== -1 ? parseBr(r[przIdx]) : 0;
+                                obj.doc = r[headers.findIndex(h => h.includes('DOC'))] || '';
+                                if (!obj.processo) continue;
+                            }
+                            else if (currentModule === 'financeiro') {
+                                var prcIdx = getIdx(['PROCESSO', 'EMPENHO']);
+                                var depIdx = getIdx(['DEPARTAMENTO', 'SETOR', 'SECRETARIA']);
+                                var catIdx = getIdx(['CATEGORIA', 'ELEMENTO', 'NATUREZA']);
+                                var fteIdx = getIdx(['FONTE', 'RECURSO']);
+                                var dInIdx = getIdx(['INICIAL', 'PREVISTO', 'DOTAÇÃO']);
+                                var dAtIdx = getIdx(['ATUALIZADA', 'RESERVADO']);
+                                var empIdx = getIdx(['EMPENHADO']);
+                                var liqIdx = getIdx(['LIQUIDADO']);
+                                var pagIdx = getIdx(['PAGO']);
+                                var stsIdx = getIdx(['STATUS', 'SITUAÇÃO']);
+
+                                obj.processo = prcIdx !== -1 ? r[prcIdx] || '' : '';
+                                obj.departamento = depIdx !== -1 ? r[depIdx] || '' : '';
+                                obj.categoria = catIdx !== -1 ? r[catIdx] || '' : '';
+                                obj.fonte = fteIdx !== -1 ? r[fteIdx] || '' : '';
+                                obj.dotacao_inicial = dInIdx !== -1 ? parseBr(r[dInIdx]) : 0;
+                                obj.dotacao_atualizada = dAtIdx !== -1 ? parseBr(r[dAtIdx]) : obj.dotacao_inicial;
+                                obj.empenhado = empIdx !== -1 ? parseBr(r[empIdx]) : 0;
+                                obj.liquidado = liqIdx !== -1 ? parseBr(r[liqIdx]) : 0;
+                                obj.pago = pagIdx !== -1 ? parseBr(r[pagIdx]) : 0;
+                                obj.status = stsIdx !== -1 ? r[stsIdx] || 'Normal' : 'Normal';
+                                if (!obj.departamento && !obj.empenhado) continue;
+                            }
+                            else if (currentModule === 'nutricao') {
+                                var uniIdx = getIdx(['UNIDADE', 'ESCOLA', 'CRECHE']);
+                                var ateIdx = getIdx(['ATENDIDOS', 'ALUNOS', 'CRIANÇAS']);
+                                var refIdx = getIdx(['REFEI', 'PRATOS', 'CONSUMO']);
+                                var cusIdx = getIdx(['CUSTO', 'VALOR', 'GIRA']);
+                                var dspIdx = getIdx(['DESPERD', 'RESTO']);
+                                var plaIdx = getIdx(['PLANEJA', 'PREVISTO']);
+                                var fltIdx = getIdx(['FALTA', 'FALTANTE']);
+                                var cfmIdx = getIdx(['CONFORMIDADE', 'STATUS', 'SITUAÇÃO']);
+
+                                obj.unidade = uniIdx !== -1 ? r[uniIdx] || '' : '';
+                                obj.atendidos = ateIdx !== -1 ? parseBr(r[ateIdx]) : 0;
+                                obj.refeicoes = refIdx !== -1 ? parseBr(r[refIdx]) : 0;
+                                obj.custo_total = cusIdx !== -1 ? parseBr(r[cusIdx]) : 0;
+                                obj.desperdicio = dspIdx !== -1 ? parseBr(r[dspIdx]) : 0;
+                                obj.planejamento = plaIdx !== -1 ? parseBr(r[plaIdx]) : obj.refeicoes;
+                                obj.item_falta = fltIdx !== -1 ? parseBr(r[fltIdx]) : 0;
+                                obj.conformidade = cfmIdx !== -1 ? r[cfmIdx] || 'Conforme' : 'Conforme';
+                                if (!obj.unidade) continue;
+                            }
+                            else if (currentModule === 'assistencia') {
+                                var chmIdx = getIdx(['CHAMADO', 'ID', 'NÚMERO', 'TICKET']);
+                                var uniIdx = getIdx(['UNIDADE', 'ESCOLA', 'LOCAL']);
+                                var tipIdx = getIdx(['TIPO', 'CATEGORIA', 'ASSUNTO']);
+                                var dabIdx = getIdx(['ABERTURA', 'DATA', 'INÍCIO']);
+                                var przIdx = getIdx(['PRAZO', 'LIMITE', 'SLA']);
+                                var stsIdx = getIdx(['STATUS', 'SITUAÇÃO', 'ESTADO']);
+                                var trpIdx = getIdx(['RESPOSTA', 'REAÇÃO']);
+                                var trsIdx = getIdx(['RESOLU', 'FECHAMENTO', 'SOLUÇÃO']);
+                                var priIdx = getIdx(['PRIORIDADE', 'URGÊNCIA', 'GRAVIDADE']);
+                                var reiIdx = getIdx(['REINCIDENTE', 'REPETIDO']);
+                                var cstIdx = getIdx(['CUSTO', 'VALOR', 'PREÇO']);
+
+                                obj.chamado = chmIdx !== -1 ? r[chmIdx] || '' : '';
+                                obj.unidade = uniIdx !== -1 ? r[uniIdx] || '' : '';
+                                obj.tipo = tipIdx !== -1 ? r[tipIdx] || 'Suporte' : 'Suporte';
+                                obj.data_abertura = dabIdx !== -1 ? r[dabIdx] || '' : '';
+                                obj.prazo = przIdx !== -1 ? parseBr(r[przIdx]) : 0;
+                                obj.status = stsIdx !== -1 ? r[stsIdx] || 'Aberto' : 'Aberto';
+                                obj.tempo_resposta = trpIdx !== -1 ? parseBr(r[trpIdx]) : 0;
+                                obj.tempo_resolucao = trsIdx !== -1 ? parseBr(r[trsIdx]) : 0;
+                                obj.prioridade = priIdx !== -1 ? r[priIdx] || 'Média' : 'Média';
+                                obj.reincidente = reiIdx !== -1 ? parseBr(r[reiIdx]) : 0;
+                                obj.custo = cstIdx !== -1 ? parseBr(r[cstIdx]) : 0;
+                                if (!obj.chamado) continue;
+                            }
+                            rows.push(obj);
+                        }
+                    });
+
+                    console.log("Linhas processadas:", rows.length);
+                    if (rows.length > 0) console.table(rows.slice(0, 5));
+
+                    var chk = document.getElementById('chkMesclar');
+                    if (chk && chk.checked && sysData[currentModule] && !sysData[currentModule].isDemo) {
+                        var c = sysData[currentModule].rows.concat(rows);
+                        sysData[currentModule] = { rows: c, filtered: c };
+                    } else {
+                        sysData[currentModule] = { rows: rows, filtered: rows };
+                    }
+
+                    setTimeout(() => {
                         refreshView();
                         hideLoader();
-                        showToast('Planilha processada com sucesso! (' + rows.length + ' linhas)', 'success');
-                    } else {
-                        hideLoader();
-                        console.error("Erro no Worker:", ev.data.error);
-                        showToast('Erro no processamento: ' + ev.data.error, 'error');
-                    }
-                    worker.terminate();
-                };
+                        console.log("--- IMPORTAÇÃO CONCLUÍDA ---");
+                    }, 500);
 
-                worker.onerror = function(err) {
+                } catch (e) {
                     hideLoader();
-                    console.error("Worker erro fatal:", err);
-                    showToast('Erro fatal no processamento da planilha.', 'error');
-                    worker.terminate();
-                };
-
-                worker.postMessage({ dataArray: data, currentModule: currentModule, mes_list: mes_list });
+                    console.error("Erro na importação:", e);
+                    alert('Erro: ' + e);
+                }
             };
             reader.readAsArrayBuffer(file);
         }
@@ -1672,18 +1484,10 @@
                 compras: ['Compras', 'Gestão de processos e fornecedores'],
                 financeiro: ['Financeiro', 'Orçamento, empenho e execução'],
                 nutricao: ['Nutrição Escolar', 'Alimentação e consumo na rede'],
-                assistencia: ['Assistência à Rede Escolar', 'Gestão de chamados e suporte técnico'],
-                transportes: ['Transportes', 'Gestão de frotas e logística'],
-                desenvolvimento: ['Dir. Desenvolvimento', 'Gestão de projetos e expansão']
+                assistencia: ['Assistência à Rede Escolar', 'Gestão de chamados e suporte técnico']
             };
             document.getElementById('mainHeaderTitle').textContent = titles[currentModule][0] + (currentTab !== 'main' ? ' - ' + document.querySelector(`[data-tab="${currentTab}"]`).textContent : '');
             document.getElementById('mainHeaderSub').textContent = titles[currentModule][1];
-
-            try {
-                renderModalityFilters();
-            } catch(e) {
-                console.warn("Erro ao renderizar filtros:", e);
-            }
 
             if (currentTab === 'main') renderMain();
             else if (currentTab === 'tabela') renderTabela();
@@ -1707,31 +1511,18 @@
             }
 
             if (currentModule === 'almoxarifado') {
-                var selectedMonth = document.getElementById('monthSelectFilter').value;
-                var vEstoque = 0, req = 0, min = 0, tempo = 0, perdas = 0, soma_consumo = 0, soma_saldo = 0, total_alunos = 0;
-
-                if (selectedMonth !== 'ALL') {
-                    vEstoque = data.reduce((s, r) => s + (r['mes_' + selectedMonth] || 0), 0);
-                } else {
-                    vEstoque = data.reduce((s, r) => s + (r.valor_total || 0), 0);
-                }
-
-                req = data.reduce((s, r) => s + (r.requisicoes || 0), 0);
-                min = data.filter(r => (r.saldo_atual || 0) < (r.estoque_minimo || 0)).length;
-                tempo = data.reduce((s, r) => s + (r.tempo_atendimento || 0), 0) / (data.length || 1);
-                perdas = data.reduce((s, r) => s + (r.perdas || 0), 0) / (data.length || 1);
-                soma_consumo = data.reduce((s, r) => s + (r.consumo_mensal || 0), 0);
-                soma_saldo = data.reduce((s, r) => s + (r.saldo_atual || 0), 0);
-                total_alunos = data.reduce((s, r) => s + (r.atendidos || 0), 0);
-                var cobertura_dias = soma_consumo > 0 ? (soma_saldo / (soma_consumo / 30)) : 0;
+                var vEstoque = data.reduce((s, r) => s + (r.valor_total || 0), 0);
+                var req = data.reduce((s, r) => s + (r.requisicoes || 0), 0);
+                var min = data.filter(r => (r.saldo_atual || 0) < (r.estoque_minimo || 0)).length;
+                var tempo = data.reduce((s, r) => s + (r.tempo_atendimento || 0), 0) / (data.length || 1);
+                var perdas = data.reduce((s, r) => s + (r.perdas || 0), 0) / (data.length || 1);
 
                 kEl.innerHTML = `
-            <div class="kpi"><div class="kpi-label">Valor Total Estocado ${selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : ''}</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
-            <div class="kpi"><div class="kpi-label">Total de Alunos</div><div class="kpi-value">${formatNumber(total_alunos)}</div><div class="kpi-sub">Atendimento na rede</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Total Estocado</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
+            <div class="kpi"><div class="kpi-label">Total de Requisições</div><div class="kpi-value">${formatNumber(req)}</div><div class="kpi-sub">Atendimentos no período</div></div>
             <div class="kpi"><div class="kpi-label">Itens Abaixo do Mínimo</div><div class="kpi-value ${min > 0 ? 'badge-warning' : ''}">${formatNumber(min)}</div><div class="kpi-sub">Risco de ruptura</div></div>
-            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo.toFixed(1))} dias</div><div class="kpi-sub">Agilidade interna</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo)} dias</div><div class="kpi-sub">Agilidade interna</div></div>
             <div class="kpi"><div class="kpi-label">Índice de Perdas</div><div class="kpi-value ${perdas > 0 ? 'badge-danger' : ''}">${formatPercent(perdas / 100)}</div><div class="kpi-sub">Materiais inutilizados</div></div>
-            <div class="kpi"><div class="kpi-label">Forecasting (Dias)</div><div class="kpi-value ${cobertura_dias < 15 ? 'badge-danger' : 'badge-success'}">${formatNumber(Math.round(cobertura_dias))}</div><div class="kpi-sub">Estoque restante estimado</div></div>
         `;
                 cEl.innerHTML = `
             <div class="chart"><h3 class="chart-title">Consumo Médio Mensal por Unidade (Top)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
@@ -1818,28 +1609,6 @@
                 var conf = {}; data.forEach(r => { conf[r.conformidade || 'N/A'] = (conf[r.conformidade || 'N/A'] || 0) + 1; });
                 charts.c2 = new Chart(document.getElementById('c2'), { type: 'doughnut', data: { labels: Object.keys(conf), datasets: [{ data: Object.values(conf), backgroundColor: [cl.primary, cl.warning, cl.danger] }] }, options: { responsive: true, maintainAspectRatio: false } });
             }
-            else if (currentModule === 'transportes') {
-                var totalV = data.length;
-                var custoT = data.reduce((s, r) => s + (r.custo || 0), 0);
-                kEl.innerHTML = `
-                    <div class="kpi"><div class="kpi-label">Veículos em Operação</div><div class="kpi-value highlight">${totalV}</div></div>
-                    <div class="kpi"><div class="kpi-label">Custo Total de Manutenção</div><div class="kpi-value">${formatCurrency(custoT)}</div></div>
-                `;
-                cEl.innerHTML = `<div class="chart"><h3 class="chart-title">Status da Frota</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>`;
-                var st = {}; data.forEach(r => { st[r.status || 'N/A'] = (st[r.status || 'N/A'] || 0) + 1; });
-                charts.c1 = new Chart(document.getElementById('c1'), { type: 'doughnut', data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: [cl.primary, cl.secondary, cl.warning] }] }, options: { responsive: true, maintainAspectRatio: false } });
-            }
-            else if (currentModule === 'desenvolvimento') {
-                var totalP = data.length;
-                var custoP = data.reduce((s, r) => s + (r.custo || 0), 0);
-                kEl.innerHTML = `
-                    <div class="kpi"><div class="kpi-label">Projetos Ativos</div><div class="kpi-value highlight">${totalP}</div></div>
-                    <div class="kpi"><div class="kpi-label">Investimento Total</div><div class="kpi-value">${formatCurrency(custoP)}</div></div>
-                `;
-                cEl.innerHTML = `<div class="chart"><h3 class="chart-title">Status dos Projetos</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>`;
-                var st = {}; data.forEach(r => { st[r.status || 'N/A'] = (st[r.status || 'N/A'] || 0) + 1; });
-                charts.c1 = new Chart(document.getElementById('c1'), { type: 'doughnut', data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: [cl.primary, cl.secondary, cl.warning] }] }, options: { responsive: true, maintainAspectRatio: false } });
-            }
             else if (currentModule === 'assistencia') {
                 var totalCh = data.length;
                 var resolvidos = data.filter(r => r.status === 'Concluído').length;
@@ -1881,87 +1650,26 @@
 
         var tPage = 1, tSort = '', tDesc = false, tSearch = '';
         document.getElementById('tabelaSearch').addEventListener('input', e => { tSearch = e.target.value.toLowerCase(); tPage = 1; renderTabela(); });
-        document.getElementById('monthSelectFilter').addEventListener('change', () => { tPage = 1; refreshView(); });
         document.getElementById('btnPrevPage').addEventListener('click', () => { if (tPage > 1) { tPage--; renderTabela(); } });
         document.getElementById('btnNextPage').addEventListener('click', () => { tPage++; renderTabela(); });
 
-        function renderModalityFilters() {
-            const cont = document.getElementById('modalityFilters');
-            if (!cont) return;
-            const monthSelect = document.getElementById('monthSelectFilter');
-            let btns = '';
-
-            if (currentModule === 'compras') {
-                btns = `
-                    <button class="mod-btn" data-mod="ASS. A REDE">Ass. Rede</button>
-                    <button class="mod-btn" data-mod="INFRA">Infra</button>
-                    <button class="mod-btn" data-mod="EDUCAÇÃO">Educação</button>
-                    <button class="mod-btn" data-mod="GABINETE">Gabinete</button>
-                `;
-            } else {
-                btns = `
-                    <button class="mod-btn" data-mod="CRECHE">Creche</button>
-                    <button class="mod-btn" data-mod="ESCOLA">Escola</button>
-                    <button class="mod-btn" data-mod="CEMAEE">CEMAEE</button>
-                    <button class="mod-btn" data-mod="CESMI">CESMI</button>
-                    <button class="mod-btn" data-mod="SUBINFRA">SUBINFRA</button>
-                    <button class="mod-btn" data-mod="SUBEDUCAÇÃO">SUBEDUCAÇÃO</button>
-                    <button class="mod-btn" data-mod="GABINETE">GABINETE</button>
-                `;
-            }
-
-            btns += `<button class="mod-btn" data-mod="ALL">Todos</button>`;
-            cont.innerHTML = btns;
-            if (monthSelect) cont.appendChild(monthSelect);
-
-            cont.querySelectorAll('.mod-btn:not(select)').forEach(btn => {
-                if (btn.dataset.mod === currentModFilter) btn.classList.add('active');
-                btn.addEventListener('click', function () {
-                    cont.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentModFilter = this.dataset.mod;
-                    tPage = 1;
-                    renderTabela();
-                });
+        document.querySelectorAll('.mod-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentModFilter = this.dataset.mod;
+                tPage = 1;
+                renderTabela();
             });
-            
-            if (!cont.querySelector('.mod-btn.active')) {
-                const allBtn = cont.querySelector('[data-mod="ALL"]');
-                if (allBtn) {
-                    allBtn.classList.add('active');
-                    currentModFilter = 'ALL';
-                }
-            }
-        }
+        });
 
         function renderTabela() {
-            var tableContainer = document.querySelector('.table-section');
-            if (currentModFilter !== 'ALL' || tSearch) {
-                tableContainer.classList.add('filter-highlight');
-            } else {
-                tableContainer.classList.remove('filter-highlight');
-            }
-
             var cols = [];
             if (currentModule === 'compras') cols = [{ k: 'processo', l: 'Processo' }, { k: 'solicitante', l: 'Solicitante' }, { k: 'objeto', l: 'Objeto' }, { k: 'valor_solicitado', l: 'V. Solicitado' }, { k: 'valor_contratado', l: 'V. Contratado' }, { k: 'fornecedor', l: 'Fornecedor' }, { k: 'status', l: 'Status' }, { k: 'prazo_dias', l: 'Prazo (d)' }, { k: 'doc', l: 'Doc' }];
             else if (currentModule === 'financeiro') cols = [{ k: 'processo', l: 'Processo' }, { k: 'departamento', l: 'Depto' }, { k: 'categoria', l: 'Categoria' }, { k: 'fonte', l: 'Fonte' }, { k: 'empenhado', l: 'Empenhado' }, { k: 'liquidado', l: 'Liquidado' }, { k: 'pago', l: 'Pago' }, { k: 'status', l: 'Status' }];
             else if (currentModule === 'nutricao') cols = [{ k: 'unidade', l: 'Unidade' }, { k: 'atendidos', l: 'Alunos' }, { k: 'refeicoes', l: 'Refeições' }, { k: 'custo_total', l: 'Custo Total' }, { k: 'desperdicio', l: 'Desperdício' }, { k: 'item_falta', l: 'Itens Falta' }, { k: 'conformidade', l: 'Status' }];
             else if (currentModule === 'assistencia') cols = [{ k: 'chamado', l: 'Chamado' }, { k: 'unidade', l: 'Escola' }, { k: 'tipo', l: 'Tipo' }, { k: 'data_abertura', l: 'Abertura' }, { k: 'prazo', l: 'Prazo(d)' }, { k: 'status', l: 'Status' }, { k: 'tempo_resposta', l: 'T. Resposta' }, { k: 'tempo_resolucao', l: 'T. Resolução' }, { k: 'prioridade', l: 'Prioridade' }];
-            else if (currentModule === 'transportes') cols = [{ k: 'veiculo', l: 'Veículo' }, { k: 'motorista', l: 'Motorista' }, { k: 'destino', l: 'Destino' }, { k: 'km_inicial', l: 'KM Inicial' }, { k: 'km_final', l: 'KM Final' }, { k: 'status', l: 'Status' }, { k: 'custo', l: 'Custo' }];
-            else if (currentModule === 'desenvolvimento') cols = [{ k: 'projeto', l: 'Projeto' }, { k: 'responsavel', l: 'Responsável' }, { k: 'inicio', l: 'Início' }, { k: 'prazo', l: 'Prazo' }, { k: 'progresso', l: 'Progresso' }, { k: 'status', l: 'Status' }, { k: 'custo', l: 'Custo' }];
-            else {
-                var selectedMonth = document.getElementById('monthSelectFilter').value;
-                var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
-                cols = [
-                    { k: 'modalidade', l: 'Modalidade' }, 
-                    { k: 'unidade', l: 'Unidade' }, 
-                    { k: 'material', l: 'Material' }, 
-                    { k: 'atendidos', l: 'Alunos' },
-                    { k: 'saldo_atual', l: 'Saldo' }, 
-                    { k: valorKey, l: 'V. Estocado' }, 
-                    { k: 'consumo_mensal', l: 'Consumo Médio' }
-                ];
-            }
+            else cols = [{ k: 'modalidade', l: 'Modalidade' }, { k: 'unidade', l: 'Unidade' }, { k: 'material', l: 'Material' }, { k: 'saldo_atual', l: 'Saldo' }, { k: 'estoque_minimo', l: 'Minimo' }, { k: 'requisicoes', l: 'Req. Atendidas' }, { k: 'valor_total', l: 'V. Estocado' }, { k: 'consumo_mensal', l: 'Consumo Médio' }];
 
             var data = sysData[currentModule] ? sysData[currentModule].rows.slice() : [];
 
@@ -1974,65 +1682,6 @@
 
             if (tSearch) data = data.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(tSearch)));
             if (tSort) data.sort((a, b) => { var va = a[tSort], vb = b[tSort]; if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); } return (va < vb ? -1 : 1) * (tDesc ? -1 : 1); });
-
-            var sumEl = document.getElementById('tabelaSummary');
-            if (data.length > 0) {
-                var total1 = 0, total2 = 0, label1 = '', label2 = '';
-                var isMoney1 = false, isMoney2 = false;
-
-                if (currentModule === 'almoxarifado') {
-                    var selectedMonth = document.getElementById('monthSelectFilter').value;
-                    var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
-                    label1 = 'Valor Total Estocado ' + (selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : '(Geral)'); isMoney1 = true;
-                    total1 = data.reduce((s, r) => s + (r[valorKey] || 0), 0);
-                    label2 = 'Total de Alunos'; isMoney2 = false;
-                    total2 = data.reduce((s, r) => s + (r.atendidos || 0), 0);
-                } else if (currentModule === 'compras') {
-                    label1 = 'V. Solicitado Total'; isMoney1 = true;
-                    total1 = data.reduce((s, r) => s + (r.valor_solicitado || 0), 0);
-                    label2 = 'V. Contratado Total'; isMoney2 = true;
-                    total2 = data.reduce((s, r) => s + (r.valor_contratado || 0), 0);
-                } else if (currentModule === 'financeiro') {
-                    label1 = 'Total Empenhado'; isMoney1 = true;
-                    total1 = data.reduce((s, r) => s + (r.empenhado || 0), 0);
-                    label2 = 'Total Pago'; isMoney2 = true;
-                    total2 = data.reduce((s, r) => s + (r.pago || 0), 0);
-                } else if (currentModule === 'nutricao') {
-                    label1 = 'Total de Refeições'; isMoney1 = false;
-                    total1 = data.reduce((s, r) => s + (r.refeicoes || 0), 0);
-                    label2 = 'Custo Total'; isMoney2 = true;
-                    total2 = data.reduce((s, r) => s + (r.custo_total || 0), 0);
-                } else if (currentModule === 'assistencia') {
-                    label1 = 'Total de Chamados'; isMoney1 = false;
-                    total1 = data.length;
-                    label2 = 'Em Aberto'; isMoney2 = false;
-                    total2 = data.filter(r => r.status !== 'Concluído').length;
-                } else if (currentModule === 'transportes') {
-                    label1 = 'Total de Veículos'; isMoney1 = false;
-                    total1 = data.length;
-                    label2 = 'Custo Total Frota'; isMoney2 = true;
-                    total2 = data.reduce((s, r) => s + (r.custo || 0), 0);
-                } else if (currentModule === 'desenvolvimento') {
-                    label1 = 'Total de Projetos'; isMoney1 = false;
-                    total1 = data.length;
-                    label2 = 'Investimento Total'; isMoney2 = true;
-                    total2 = data.reduce((s, r) => s + (r.custo || 0), 0);
-                }
-
-                sumEl.innerHTML = `
-                    <div style="background: var(--bg-tertiary); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--accent-light); display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);">
-                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">${label1}</div>
-                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent-light);">${isMoney1 ? formatCurrency(total1) : formatNumber(total1)}</div>
-                    </div>
-                    <div style="background: var(--bg-tertiary); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--secondary); display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 0 15px rgba(228, 180, 52, 0.1);">
-                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">${label2}</div>
-                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--secondary);">${isMoney2 ? formatCurrency(total2) : formatNumber(total2)}</div>
-                    </div>
-                `;
-                sumEl.style.display = 'flex';
-            } else {
-                sumEl.style.display = 'none';
-            }
 
             var total = Math.ceil(data.length / 10) || 1;
             if (tPage > total) tPage = total;
@@ -2698,7 +2347,7 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const data = sysData[currentModule] ? sysData[currentModule].rows : [];
-            if (!data.length) return showToast('Sem dados para exportar.', 'warning');
+            if (!data.length) return alert('Sem dados para exportar.');
 
             const moduleNames = { almoxarifado: 'Almoxarifado', nutricao: 'Nutrição Escolar', compras: 'Compras', financeiro: 'Financeiro', assistencia: 'Assistência Rede' };
             const modName = moduleNames[currentModule] || currentModule;
@@ -2758,25 +2407,49 @@
                 doc.text(`Chamados Resolvidos: ${res} (${((res / data.length) * 100).toFixed(1)}%)`, 15, yPos); yPos += 15;
             }
 
-            // Gráficos Detalhados (Capturados via Canvas)
+            // Gráfico de barras simples
             doc.setFontSize(14); doc.setFont('helvetica', 'bold');
-            doc.text('Análise Visual', 15, yPos);
+            doc.text('Distribuição de Dados - Top 5', 15, yPos);
             doc.line(15, yPos + 2, 195, yPos + 2);
             yPos += 12;
 
-            const canvases = document.querySelectorAll('#mainCharts canvas');
-            if (canvases.length > 0) {
-                canvases.forEach((canvas) => {
-                    if (yPos > 240) { doc.addPage(); yPos = 20; }
-                    var imgData = canvas.toDataURL('image/png', 1.0);
-                    var imgWidth = 180;
-                    var imgHeight = (canvas.height * imgWidth) / canvas.width;
-                    doc.addImage(imgData, 'PNG', 15, yPos, imgWidth, imgHeight);
-                    yPos += imgHeight + 10;
+            let chartData = [];
+            if (currentModule === 'almoxarifado') {
+                let unids = {}; data.forEach(r => { if (r.unidade) unids[r.unidade] = (unids[r.unidade] || 0) + r.consumo_mensal; });
+                chartData = Object.keys(unids).map(k => ({ label: k, val: unids[k] })).sort((a, b) => unids[b] - unids[a]).slice(0, 5);
+                doc.setFontSize(10); doc.text('Top 5 Unidades por Consumo Mensal (em itens):', 15, yPos); yPos += 8;
+            } else if (currentModule === 'assistencia') {
+                let esc = {}; data.forEach(r => { if (r.unidade) esc[r.unidade] = (esc[r.unidade] || 0) + 1; });
+                chartData = Object.keys(esc).map(k => ({ label: k, val: esc[k] })).sort((a, b) => esc[b] - esc[a]).slice(0, 5);
+                doc.setFontSize(10); doc.text('Top 5 Unidades com mais Chamados:', 15, yPos); yPos += 8;
+            } else if (currentModule === 'compras') {
+                let forn = {}; data.forEach(r => { if (r.fornecedor) forn[r.fornecedor] = (forn[r.fornecedor] || 0) + r.valor_contratado; });
+                chartData = Object.keys(forn).map(k => ({ label: k, val: forn[k] })).sort((a, b) => forn[b] - forn[a]).slice(0, 5);
+                doc.setFontSize(10); doc.text('Top 5 Fornecedores por Valor Contratado:', 15, yPos); yPos += 8;
+            } else if (currentModule === 'financeiro') {
+                let dpt = {}; data.forEach(r => { if (r.departamento) dpt[r.departamento] = (dpt[r.departamento] || 0) + r.pago; });
+                chartData = Object.keys(dpt).map(k => ({ label: k, val: dpt[k] })).sort((a, b) => dpt[b] - dpt[a]).slice(0, 5);
+                doc.setFontSize(10); doc.text('Top 5 Departamentos por Valor Pago:', 15, yPos); yPos += 8;
+            } else if (currentModule === 'nutricao') {
+                let un = {}; data.forEach(r => { if (r.unidade) un[r.unidade] = (un[r.unidade] || 0) + r.refeicoes; });
+                chartData = Object.keys(un).map(k => ({ label: k, val: un[k] })).sort((a, b) => un[b] - un[a]).slice(0, 5);
+                doc.setFontSize(10); doc.text('Top 5 Unidades por Refeições Servidas:', 15, yPos); yPos += 8;
+            }
+
+            if (chartData.length) {
+                const maxVal = Math.max(...chartData.map(d => d.val));
+                const maxWidth = 100;
+                chartData.forEach(d => {
+                    const w = maxVal > 0 ? (d.val / maxVal) * maxWidth : 0;
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(d.label.substring(0, 25), 15, yPos + 4);
+                    doc.setFillColor(...primaryColor);
+                    doc.rect(75, yPos, w, 6, 'F');
+                    doc.text((currentModule === 'financeiro' || currentModule === 'compras' ? formatCurrency(d.val) : formatNumber(d.val)), 75 + w + 3, yPos + 4);
+                    yPos += 10;
                 });
             } else {
-                doc.setFontSize(10); doc.setFont('helvetica', 'normal');
-                doc.text('Sem gráficos disponíveis.', 15, yPos);
+                doc.text('Sem dados suficientes.', 15, yPos);
             }
 
             doc.save(modName + '_Visao_Executiva_' + new Date().toISOString().split('T')[0] + '.pdf');
@@ -2784,12 +2457,12 @@
 
         function gerarRelatorioKPIs() {
             if (currentModule !== 'almoxarifado' && currentModule !== 'assistencia') {
-                return showToast('O Relatório de KPIs e Métricas aprofundado está disponível apenas para os módulos Almoxarifado e Assistência Rede.', 'warning');
+                return alert('O Relatório de KPIs e Métricas aprofundado está disponível apenas para os módulos Almoxarifado e Assistência Rede.');
             }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const data = sysData[currentModule] ? sysData[currentModule].rows : [];
-            if (!data.length) return showToast('Sem dados para gerar relatório.', 'warning');
+            if (!data.length) return alert('Sem dados.');
 
             const modName = currentModule === 'almoxarifado' ? 'Almoxarifado' : 'Assistência Rede';
             const primaryColor = [38, 101, 140]; // Azul para diferenciar
@@ -2974,23 +2647,16 @@
             doc.save(modName + '_KPIs_Metricas_' + new Date().toISOString().split('T')[0] + '.pdf');
         }
 
-        // ==================== SISTEMA DE HISTÓRICO (DEXIE) ====================
-        var db = new Dexie("DashboardBIDatabase");
-        db.version(1).stores({
-            historico: 'id, module, createdAt'
-        });
-
-        async function getHistoricoData() {
+        // ==================== SISTEMA DE HISTÓRICO ====================
+        function getHistoricoData() {
             try {
-                return await db.historico.toArray();
-            } catch (e) { console.error('Erro Dexie:', e); return []; }
+                var stored = localStorage.getItem('dashboardbi_historico');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) { return []; }
         }
 
-        async function saveHistoricoData(data) {
-            try {
-                await db.historico.clear();
-                await db.historico.bulkPut(data);
-            } catch(e) { console.error('Erro salvar Dexie:', e); }
+        function saveHistoricoData(data) {
+            localStorage.setItem('dashboardbi_historico', JSON.stringify(data));
         }
 
         function generatePeriodId() {
@@ -3049,10 +2715,10 @@
             return kpis;
         }
 
-        document.getElementById('btnSalvarPeriodo').addEventListener('click', async function () {
+        document.getElementById('btnSalvarPeriodo').addEventListener('click', function () {
             var data = sysData[currentModule];
             if (!data || !data.rows || !data.rows.length) {
-                showToast('Nenhum dado carregado para salvar. Importe um arquivo primeiro.', 'warning');
+                alert('Nenhum dado carregado para salvar. Importe um arquivo primeiro.');
                 return;
             }
 
@@ -3061,6 +2727,7 @@
 
             if (!periodName || !periodName.trim()) return;
 
+            var historico = getHistoricoData();
             var kpis = getKPIsForModule(data.rows, currentModule);
 
             var novoPeriodo = {
@@ -3074,14 +2741,15 @@
                 data: data.rows
             };
 
-            await db.historico.put(novoPeriodo);
+            historico.push(novoPeriodo);
+            saveHistoricoData(historico);
 
-            showToast('Período "' + periodName + '" salvo com sucesso!', 'success');
+            alert('Período "' + periodName + '" salvo com sucesso!');
             if (currentTab === 'historico') renderHistorico();
         });
 
-        async function renderHistorico() {
-            var historico = await getHistoricoData();
+        function renderHistorico() {
+            var historico = getHistoricoData();
             var filter = document.getElementById('historicoModuleFilter').value;
             var modFilter = filter === 'all' ? null : filter;
 
@@ -3138,8 +2806,8 @@
             renderEvolucao();
         }
 
-        async function loadPeriodo(id) {
-            var historico = await getHistoricoData();
+        function loadPeriodo(id) {
+            var historico = getHistoricoData();
             var periodo = historico.find(h => h.id === id);
             if (!periodo) return;
 
@@ -3156,18 +2824,20 @@
             document.getElementById('mainContent').classList.add('active');
 
             refreshView();
-            showToast('Período "' + periodo.periodName + '" carregado!', 'success');
+            alert('Período "' + periodo.periodName + '" carregado!');
         }
 
-        async function deletePeriodo(id) {
+        function deletePeriodo(id) {
             if (!confirm('Tem certeza que deseja excluir este período? Esta ação não pode ser desfeita.')) return;
 
-            await db.historico.delete(id);
+            var historico = getHistoricoData();
+            historico = historico.filter(h => h.id !== id);
+            saveHistoricoData(historico);
             renderHistorico();
-            showToast('Período excluído com sucesso.', 'success');
+            alert('Período excluído.');
         }
 
-        async function renderComparacao() {
+        function renderComparacao() {
             var p1Id = document.getElementById('comparePeriod1').value;
             var p2Id = document.getElementById('comparePeriod2').value;
             var container = document.getElementById('historicoComparacao');
@@ -3177,7 +2847,7 @@
                 return;
             }
 
-            var historico = await getHistoricoData();
+            var historico = getHistoricoData();
             var p1 = historico.find(h => h.id === p1Id);
             var p2 = historico.find(h => h.id === p2Id);
 
@@ -3242,9 +2912,9 @@
             container.innerHTML = html;
         }
 
-        async function renderEvolucao() {
+        function renderEvolucao() {
             var container = document.getElementById('historicoEvolucao');
-            var historico = await getHistoricoData();
+            var historico = getHistoricoData();
 
             if (historico.length < 2) {
                 container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Salve ao menos 2 períodos para ver a evolução</div>';
@@ -3302,7 +2972,7 @@
             });
         }
 
-        async function renderComparacaoDetalhada() {
+        function renderComparacaoDetalhada() {
             var p1Id = document.getElementById('comparePeriod1').value;
             var p2Id = document.getElementById('comparePeriod2').value;
             var container = document.getElementById('analiseDetalhada');
@@ -3312,7 +2982,7 @@
                 return;
             }
 
-            var historico = await getHistoricoData();
+            var historico = getHistoricoData();
             var p1 = historico.find(h => h.id === p1Id);
             var p2 = historico.find(h => h.id === p2Id);
 
@@ -3398,10 +3068,10 @@
             container.innerHTML = html;
         }
 
-        async function showQuickAnalysis() {
-            var historico = await getHistoricoData();
+        function showQuickAnalysis() {
+            var historico = getHistoricoData();
             if (historico.length < 2) {
-                showToast('Salve ao menos 2 períodos para usar a análise rápida.', 'warning');
+                alert('Salve ao menos 2 períodos para usar a análise rápida.');
                 return;
             }
 
@@ -3410,7 +3080,7 @@
             var filtered = modFilter ? historico.filter(h => h.module === modFilter) : historico;
 
             if (filtered.length < 2) {
-                showToast('Salve ao menos 2 períodos do mesmo módulo para análise.', 'warning');
+                alert('Salve ao menos 2 períodos do mesmo módulo para análise.');
                 return;
             }
 
@@ -3430,66 +3100,6 @@
             originalRenderComparacao();
             renderComparacaoDetalhada();
         };
-
-        // --- FUNÇÕES DE TOAST NOTIFICATION ---
-        function showToast(msg, type = 'info') {
-            var container = document.getElementById('toastContainer');
-            if (!container) return;
-            var t = document.createElement('div');
-            t.className = 'toast ' + type;
-            var icon = type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : '✅');
-            t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`;
-            container.appendChild(t);
-            setTimeout(() => {
-                t.style.animation = 'fadeOutToast 0.3s forwards';
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
-        }
-
-        async function saveToSupabase() {
-            const data = sysData[currentModule];
-            if (!data || !data.rows || data.rows.length === 0) return showToast('Nenhum dado para salvar.', 'warning');
-
-            const periodName = prompt("Nome para este período no Supabase (ex: Maio/2026):", 
-                "Importação " + (new Date().toLocaleDateString('pt-BR')));
-            if (!periodName) return;
-
-            try {
-                showLoader();
-                const { data: session, error: sErr } = await sb.from('import_sessions').insert([
-                    { module: currentModule, period_name: periodName, filename: document.getElementById('fileName').textContent }
-                ]).select().single();
-
-                if (sErr) throw sErr;
-
-                // Preparar dados: remover chaves técnicas que não existem no banco
-                const rowsToInsert = data.rows.map(r => {
-                    const cleanRow = { ...r, session_id: session.id };
-                    // Remover colunas de meses (mes_JAN...) e a chave técnica 'mensal'
-                    Object.keys(cleanRow).forEach(key => {
-                        if (key.startsWith('mes_') || key === 'mensal') delete cleanRow[key];
-                    });
-                    return cleanRow;
-                });
-
-                // Inserção em Chunks para evitar limites da API
-                const chunkSize = 500;
-                for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
-                    const chunk = rowsToInsert.slice(i, i + chunkSize);
-                    const { error: iErr } = await sb.from(currentModule).insert(chunk);
-                    if (iErr) throw iErr;
-                }
-
-                hideLoader();
-                showToast('Dados sincronizados com Supabase com sucesso!', 'success');
-            } catch (err) {
-                hideLoader();
-                console.error('Erro Supabase:', err);
-                showToast('Erro ao sincronizar com Nuvem: ' + err.message, 'error');
-            }
-        }
-
-        document.getElementById('btnSalvarSupabase').addEventListener('click', saveToSupabase);
 
         window.onload = loadDemo;
     </script>
