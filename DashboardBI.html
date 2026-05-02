@@ -1012,6 +1012,8 @@
         <div class="nav-module" data-module="compras">Compras</div>
         <div class="nav-module" data-module="financeiro">Financeiro</div>
         <div class="nav-module" data-module="assistencia">Assistência Rede</div>
+        <div class="nav-module" data-module="transportes">Transportes</div>
+        <div class="nav-module" data-module="desenvolvimento">Dir. Desenvolvimento</div>
 
         <div class="sidebar-section" style="margin-top: 1.5rem;">Visões</div>
         <div class="nav-item active" data-tab="main">Visão Executiva</div>
@@ -1283,7 +1285,7 @@
     </main>
 
     <script>
-        var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null };
+        var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null, transportes: null, desenvolvimento: null };
         var currentModule = 'almoxarifado'; // Iniciar no almoxarifado conforme UI
         var currentTab = 'main';
         var charts = {};
@@ -1413,7 +1415,8 @@
                             valor_contratado: ['CONTRATADO', 'HOMOLOGADO', 'FINAL'],
                             fornecedor: ['FORNECEDOR', 'EMPRESA', 'VENCEDOR'],
                             status: ['STATUS', 'SITUAÇÃO', 'FASE'],
-                            prazo_dias: ['PRAZO', 'DIAS']
+                            prazo_dias: ['PRAZO', 'DIAS'],
+                            gestao: ['GESTÃO', 'GESTAO', 'SETOR']
                         },
                         financeiro: {
                             processo: ['PROCESSO', 'EMPENHO'],
@@ -1449,6 +1452,24 @@
                             prioridade: ['PRIORIDADE', 'URGÊNCIA', 'GRAVIDADE'],
                             reincidente: ['REINCIDENTE', 'REPETIDO'],
                             custo: ['CUSTO', 'VALOR', 'PREÇO']
+                        },
+                        transportes: {
+                            veiculo: ['VEÍCULO', 'CARRO', 'PLACA'],
+                            motorista: ['MOTORISTA', 'CONDUTOR'],
+                            destino: ['DESTINO', 'LOCAL', 'ROTA'],
+                            km_inicial: ['INICIAL', 'KM_I'],
+                            km_final: ['FINAL', 'KM_F'],
+                            status: ['STATUS', 'SITUAÇÃO'],
+                            custo: ['CUSTO', 'VALOR', 'PREÇO']
+                        },
+                        desenvolvimento: {
+                            projeto: ['PROJETO', 'NOME', 'AÇÃO'],
+                            responsavel: ['RESPONSÁVEL', 'GESTOR'],
+                            inicio: ['INÍCIO', 'DATA', 'ABERTURA'],
+                            prazo: ['PRAZO', 'ENTREGA'],
+                            progresso: ['PROGRESSO', '%', 'CONCLU'],
+                            status: ['STATUS', 'SITUAÇÃO'],
+                            custo: ['CUSTO', 'VALOR', 'ORÇAMENTO']
                         }
                     };
 
@@ -1470,7 +1491,7 @@
                             wb.SheetNames.forEach(sheetName => {
                                 var json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
                                 if (json.length < 1) return;
-
+                                console.log("Processando aba:", sheetName, "Linhas totais:", json.length);
                                 var headerRowIndex = -1;
                                 var keywords = ['MATERIAL', 'ITEM', 'UNIDADE', 'ESCOLA', 'PROCESSO', 'CHAMADO', 'MODALIDADE', 'STATUS', 'VALOR', 'SALDO'];
 
@@ -1478,12 +1499,20 @@
                                     if (!json[i]) continue;
                                     var rowCheck = json[i].map(v => String(v || '').toUpperCase());
                                     var hits = rowCheck.filter(v => keywords.some(k => v.includes(k))).length;
-                                    if (hits >= 2) { headerRowIndex = i; break; }
+                                    if (hits >= 2) { 
+                                        headerRowIndex = i; 
+                                        console.log("Cabeçalho detectado na linha:", i + 1, "Hits:", hits);
+                                        break; 
+                                    }
                                 }
 
-                                if (headerRowIndex === -1) return;
+                                if (headerRowIndex === -1) {
+                                    console.warn("Cabeçalho não encontrado na aba:", sheetName);
+                                    return;
+                                }
 
                                 var headers = json[headerRowIndex].map(h => String(h || '').toUpperCase().trim());
+                                console.log("Headers detectados:", headers);
 
                                 const getIdx = (terms) => {
                                     let idx = headers.findIndex(h => terms.some(t => h === t));
@@ -1496,6 +1525,7 @@
                                 
                                 var indices = {};
                                 for (let key in map) indices[key] = getIdx(map[key]);
+                                console.log("Mapeamento de índices:", indices);
 
                                 // Fallbacks e meses específicos (Almoxarifado)
                                 if (currentModule === 'almoxarifado') {
@@ -1511,6 +1541,7 @@
                                 if (currentModule === 'compras' && indices.doc === undefined) {
                                     indices.doc = headers.findIndex(h => h.includes('DOC'));
                                 }
+                                console.log("Iniciando processamento de", json.length - headerRowIndex - 1, "linhas.");
 
                                 for (var i = headerRowIndex + 1; i < json.length; i++) {
                                     var r = json[i];
@@ -1590,6 +1621,11 @@
                             sysData[currentModule] = { rows: rows, filtered: rows };
                         }
 
+                        try {
+                            renderModalityFilters();
+                        } catch(e) {
+                            console.warn("Erro ao renderizar filtros:", e);
+                        }
                         refreshView();
                         hideLoader();
                         showToast('Planilha processada com sucesso! (' + rows.length + ' linhas)', 'success');
@@ -1621,10 +1657,18 @@
                 compras: ['Compras', 'Gestão de processos e fornecedores'],
                 financeiro: ['Financeiro', 'Orçamento, empenho e execução'],
                 nutricao: ['Nutrição Escolar', 'Alimentação e consumo na rede'],
-                assistencia: ['Assistência à Rede Escolar', 'Gestão de chamados e suporte técnico']
+                assistencia: ['Assistência à Rede Escolar', 'Gestão de chamados e suporte técnico'],
+                transportes: ['Transportes', 'Gestão de frotas e logística'],
+                desenvolvimento: ['Dir. Desenvolvimento', 'Gestão de projetos e expansão']
             };
             document.getElementById('mainHeaderTitle').textContent = titles[currentModule][0] + (currentTab !== 'main' ? ' - ' + document.querySelector(`[data-tab="${currentTab}"]`).textContent : '');
             document.getElementById('mainHeaderSub').textContent = titles[currentModule][1];
+
+            try {
+                renderModalityFilters();
+            } catch(e) {
+                console.warn("Erro ao renderizar filtros:", e);
+            }
 
             if (currentTab === 'main') renderMain();
             else if (currentTab === 'tabela') renderTabela();
@@ -1759,6 +1803,28 @@
                 var conf = {}; data.forEach(r => { conf[r.conformidade || 'N/A'] = (conf[r.conformidade || 'N/A'] || 0) + 1; });
                 charts.c2 = new Chart(document.getElementById('c2'), { type: 'doughnut', data: { labels: Object.keys(conf), datasets: [{ data: Object.values(conf), backgroundColor: [cl.primary, cl.warning, cl.danger] }] }, options: { responsive: true, maintainAspectRatio: false } });
             }
+            else if (currentModule === 'transportes') {
+                var totalV = data.length;
+                var custoT = data.reduce((s, r) => s + (r.custo || 0), 0);
+                kEl.innerHTML = `
+                    <div class="kpi"><div class="kpi-label">Veículos em Operação</div><div class="kpi-value highlight">${totalV}</div></div>
+                    <div class="kpi"><div class="kpi-label">Custo Total de Manutenção</div><div class="kpi-value">${formatCurrency(custoT)}</div></div>
+                `;
+                cEl.innerHTML = `<div class="chart"><h3 class="chart-title">Status da Frota</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>`;
+                var st = {}; data.forEach(r => { st[r.status || 'N/A'] = (st[r.status || 'N/A'] || 0) + 1; });
+                charts.c1 = new Chart(document.getElementById('c1'), { type: 'doughnut', data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: [cl.primary, cl.secondary, cl.warning] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            }
+            else if (currentModule === 'desenvolvimento') {
+                var totalP = data.length;
+                var custoP = data.reduce((s, r) => s + (r.custo || 0), 0);
+                kEl.innerHTML = `
+                    <div class="kpi"><div class="kpi-label">Projetos Ativos</div><div class="kpi-value highlight">${totalP}</div></div>
+                    <div class="kpi"><div class="kpi-label">Investimento Total</div><div class="kpi-value">${formatCurrency(custoP)}</div></div>
+                `;
+                cEl.innerHTML = `<div class="chart"><h3 class="chart-title">Status dos Projetos</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>`;
+                var st = {}; data.forEach(r => { st[r.status || 'N/A'] = (st[r.status || 'N/A'] || 0) + 1; });
+                charts.c1 = new Chart(document.getElementById('c1'), { type: 'doughnut', data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: [cl.primary, cl.secondary, cl.warning] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            }
             else if (currentModule === 'assistencia') {
                 var totalCh = data.length;
                 var resolvidos = data.filter(r => r.status === 'Concluído').length;
@@ -1804,15 +1870,54 @@
         document.getElementById('btnPrevPage').addEventListener('click', () => { if (tPage > 1) { tPage--; renderTabela(); } });
         document.getElementById('btnNextPage').addEventListener('click', () => { tPage++; renderTabela(); });
 
-        document.querySelectorAll('.mod-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentModFilter = this.dataset.mod;
-                tPage = 1;
-                renderTabela();
+        function renderModalityFilters() {
+            const cont = document.getElementById('modalityFilters');
+            if (!cont) return;
+            const monthSelect = document.getElementById('monthSelectFilter');
+            let btns = '';
+
+            if (currentModule === 'compras') {
+                btns = `
+                    <button class="mod-btn" data-mod="ASS. A REDE">Ass. Rede</button>
+                    <button class="mod-btn" data-mod="INFRA">Infra</button>
+                    <button class="mod-btn" data-mod="EDUCAÇÃO">Educação</button>
+                    <button class="mod-btn" data-mod="GABINETE">Gabinete</button>
+                `;
+            } else {
+                btns = `
+                    <button class="mod-btn" data-mod="CRECHE">Creche</button>
+                    <button class="mod-btn" data-mod="ESCOLA">Escola</button>
+                    <button class="mod-btn" data-mod="CEMAEE">CEMAEE</button>
+                    <button class="mod-btn" data-mod="CESMI">CESMI</button>
+                    <button class="mod-btn" data-mod="SUBINFRA">SUBINFRA</button>
+                    <button class="mod-btn" data-mod="SUBEDUCAÇÃO">SUBEDUCAÇÃO</button>
+                    <button class="mod-btn" data-mod="GABINETE">GABINETE</button>
+                `;
+            }
+
+            btns += `<button class="mod-btn" data-mod="ALL">Todos</button>`;
+            cont.innerHTML = btns;
+            if (monthSelect) cont.appendChild(monthSelect);
+
+            cont.querySelectorAll('.mod-btn:not(select)').forEach(btn => {
+                if (btn.dataset.mod === currentModFilter) btn.classList.add('active');
+                btn.addEventListener('click', function () {
+                    cont.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentModFilter = this.dataset.mod;
+                    tPage = 1;
+                    renderTabela();
+                });
             });
-        });
+            
+            if (!cont.querySelector('.mod-btn.active')) {
+                const allBtn = cont.querySelector('[data-mod="ALL"]');
+                if (allBtn) {
+                    allBtn.classList.add('active');
+                    currentModFilter = 'ALL';
+                }
+            }
+        }
 
         function renderTabela() {
             var tableContainer = document.querySelector('.table-section');
@@ -1827,6 +1932,8 @@
             else if (currentModule === 'financeiro') cols = [{ k: 'processo', l: 'Processo' }, { k: 'departamento', l: 'Depto' }, { k: 'categoria', l: 'Categoria' }, { k: 'fonte', l: 'Fonte' }, { k: 'empenhado', l: 'Empenhado' }, { k: 'liquidado', l: 'Liquidado' }, { k: 'pago', l: 'Pago' }, { k: 'status', l: 'Status' }];
             else if (currentModule === 'nutricao') cols = [{ k: 'unidade', l: 'Unidade' }, { k: 'atendidos', l: 'Alunos' }, { k: 'refeicoes', l: 'Refeições' }, { k: 'custo_total', l: 'Custo Total' }, { k: 'desperdicio', l: 'Desperdício' }, { k: 'item_falta', l: 'Itens Falta' }, { k: 'conformidade', l: 'Status' }];
             else if (currentModule === 'assistencia') cols = [{ k: 'chamado', l: 'Chamado' }, { k: 'unidade', l: 'Escola' }, { k: 'tipo', l: 'Tipo' }, { k: 'data_abertura', l: 'Abertura' }, { k: 'prazo', l: 'Prazo(d)' }, { k: 'status', l: 'Status' }, { k: 'tempo_resposta', l: 'T. Resposta' }, { k: 'tempo_resolucao', l: 'T. Resolução' }, { k: 'prioridade', l: 'Prioridade' }];
+            else if (currentModule === 'transportes') cols = [{ k: 'veiculo', l: 'Veículo' }, { k: 'motorista', l: 'Motorista' }, { k: 'destino', l: 'Destino' }, { k: 'km_inicial', l: 'KM Inicial' }, { k: 'km_final', l: 'KM Final' }, { k: 'status', l: 'Status' }, { k: 'custo', l: 'Custo' }];
+            else if (currentModule === 'desenvolvimento') cols = [{ k: 'projeto', l: 'Projeto' }, { k: 'responsavel', l: 'Responsável' }, { k: 'inicio', l: 'Início' }, { k: 'prazo', l: 'Prazo' }, { k: 'progresso', l: 'Progresso' }, { k: 'status', l: 'Status' }, { k: 'custo', l: 'Custo' }];
             else {
                 var selectedMonth = document.getElementById('monthSelectFilter').value;
                 var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
@@ -1854,14 +1961,14 @@
             if (tSort) data.sort((a, b) => { var va = a[tSort], vb = b[tSort]; if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); } return (va < vb ? -1 : 1) * (tDesc ? -1 : 1); });
 
             var sumEl = document.getElementById('tabelaSummary');
-            if (currentModFilter !== 'ALL' || tSearch) {
+            if (data.length > 0) {
                 var total1 = 0, total2 = 0, label1 = '', label2 = '';
                 var isMoney1 = false, isMoney2 = false;
 
                 if (currentModule === 'almoxarifado') {
                     var selectedMonth = document.getElementById('monthSelectFilter').value;
                     var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
-                    label1 = 'Valor Total Estocado ' + (selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : ''); isMoney1 = true;
+                    label1 = 'Valor Total Estocado ' + (selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : '(Geral)'); isMoney1 = true;
                     total1 = data.reduce((s, r) => s + (r[valorKey] || 0), 0);
                     label2 = 'Total de Alunos'; isMoney2 = false;
                     total2 = data.reduce((s, r) => s + (r.atendidos || 0), 0);
@@ -1881,10 +1988,20 @@
                     label2 = 'Custo Total'; isMoney2 = true;
                     total2 = data.reduce((s, r) => s + (r.custo_total || 0), 0);
                 } else if (currentModule === 'assistencia') {
-                    label1 = 'Total de Chamados (Filtrados)'; isMoney1 = false;
+                    label1 = 'Total de Chamados'; isMoney1 = false;
                     total1 = data.length;
                     label2 = 'Em Aberto'; isMoney2 = false;
                     total2 = data.filter(r => r.status !== 'Concluído').length;
+                } else if (currentModule === 'transportes') {
+                    label1 = 'Total de Veículos'; isMoney1 = false;
+                    total1 = data.length;
+                    label2 = 'Custo Total Frota'; isMoney2 = true;
+                    total2 = data.reduce((s, r) => s + (r.custo || 0), 0);
+                } else if (currentModule === 'desenvolvimento') {
+                    label1 = 'Total de Projetos'; isMoney1 = false;
+                    total1 = data.length;
+                    label2 = 'Investimento Total'; isMoney2 = true;
+                    total2 = data.reduce((s, r) => s + (r.custo || 0), 0);
                 }
 
                 sumEl.innerHTML = `
