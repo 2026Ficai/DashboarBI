@@ -1259,7 +1259,7 @@
 
     <script>
         var sysData = { almoxarifado: null, nutricao: null, compras: null, financeiro: null, assistencia: null };
-        var currentModule = 'compras';
+        var currentModule = 'almoxarifado'; // Iniciar no almoxarifado conforme UI
         var currentTab = 'main';
         var charts = {};
         var currentTheme = 'green';
@@ -1369,16 +1369,16 @@
                         almoxarifado: {
                             material: ['MATERIAL', 'ITEM', 'DESCRIÇÃO', 'PRODUTO', 'NOME DO ARTIGO'],
                             unidade: ['UNIDADE', 'ESCOLA', 'SETOR', 'LOCAL'],
-                            modalidade: ['MODALIDADE', 'TIPO', 'CATEGORIA', 'GRUPO'],
+                            modalidade: ['MODALIDADE', 'TIPO', 'CATEGORIA', 'GRUPO', 'MOD'],
                             saldo_atual: ['SALDO', 'ATUAL', 'QTD'],
                             estoque_minimo: ['MÍNIMO', 'MINIMO', 'RESERVA'],
                             requisicoes: ['REQUISI', 'ATENDID'],
                             req_integral: ['INTEGRAL'],
                             tempo_atendimento: ['TEMPO', 'PRAZO', 'DIAS'],
-                            valor_total: ['VALOR_TOTAL', 'V.TOTAL', 'ESTOCADO', 'PREÇO_TOTAL', 'CUSTO_TOTAL', 'ABRIL', 'MAIO', 'MARÇO'],
+                            valor_total: ['VALOR_TOTAL', 'V.TOTAL', 'ESTOCADO', 'PREÇO_TOTAL', 'CUSTO_TOTAL'],
                             perdas: ['PERDA', 'AVARIA', 'VENCID'],
                             consumo_mensal: ['CONSUMO', 'MÉDIA', 'MEDIO'],
-                            atendidos: ['ALUNOS', 'ATENDID', 'ESTUDANTE']
+                            atendidos: ['ALUNOS', 'ATENDID', 'ESTUDANTE', 'TOTAL DE ALUNOS']
                         },
                         compras: {
                             processo: ['PROCESSO', 'ID', 'NÚMERO'],
@@ -1431,7 +1431,7 @@
                         if (typeof val === 'number') return val;
                         if (!val) return 0;
                         var s = String(val).replace('R$', '').trim();
-                        if (s.includes(',') && s.includes('.')) s = s.replace(/\\./g, '').replace(',', '.');
+                        if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
                         else if (s.includes(',')) s = s.replace(',', '.');
                         return parseFloat(s) || 0;
                     };
@@ -1472,9 +1472,16 @@
                                 var indices = {};
                                 for (let key in map) indices[key] = getIdx(map[key]);
 
-                                // Fallbacks específicos
-                                if (currentModule === 'almoxarifado' && indices.valor_total === -1) {
-                                    indices.valor_total = headers.findIndex(h => mes_list.some(m => h.includes(m)));
+                                // Fallbacks e meses específicos (Almoxarifado)
+                                if (currentModule === 'almoxarifado') {
+                                    if (indices.valor_total === -1) {
+                                        indices.valor_total = headers.findIndex(h => mes_list.some(m => h.includes(m)));
+                                    }
+                                    // Guardar índices de todos os meses para troca dinâmica
+                                    indices.mensal = {};
+                                    mes_list.forEach(m => {
+                                        indices.mensal[m] = headers.findIndex(h => h.includes(m));
+                                    });
                                 }
                                 if (currentModule === 'compras' && indices.doc === undefined) {
                                     indices.doc = headers.findIndex(h => h.includes('DOC'));
@@ -1507,6 +1514,14 @@
                                             if (key === 'dotacao_atualizada' && currentModule === 'financeiro') obj[key] = obj.dotacao_inicial || 0;
                                             if (key === 'planejamento' && currentModule === 'nutricao') obj[key] = obj.refeicoes || 0;
                                             if (key === 'saldo_atual' || key === 'estoque_minimo' || key === 'valor_total' || key === 'consumo_mensal' || key === 'perdas') obj[key] = obj[key] || 0;
+                                        }
+                                    }
+
+                                    // Adicionar valores mensais se disponíveis (Almoxarifado)
+                                    if (currentModule === 'almoxarifado' && indices.mensal) {
+                                        for (let m in indices.mensal) {
+                                            let midx = indices.mensal[m];
+                                            if (midx !== -1) obj['mes_' + m] = parseBr(r[midx]);
                                         }
                                     }
 
@@ -1608,22 +1623,29 @@
             }
 
             if (currentModule === 'almoxarifado') {
-                var vEstoque = data.reduce((s, r) => s + (r.valor_total || 0), 0);
-                var req = data.reduce((s, r) => s + (r.requisicoes || 0), 0);
-                var min = data.filter(r => (r.saldo_atual || 0) < (r.estoque_minimo || 0)).length;
-                var tempo = data.reduce((s, r) => s + (r.tempo_atendimento || 0), 0) / (data.length || 1);
-                var perdas = data.reduce((s, r) => s + (r.perdas || 0), 0) / (data.length || 1);
-                
-                // Forecasting / Cobertura
-                var soma_consumo = data.reduce((s, r) => s + (r.consumo_mensal || 0), 0);
-                var soma_saldo = data.reduce((s, r) => s + (r.saldo_atual || 0), 0);
+                var selectedMonth = document.getElementById('monthSelectFilter').value;
+                var vEstoque = 0, req = 0, min = 0, tempo = 0, perdas = 0, soma_consumo = 0, soma_saldo = 0, total_alunos = 0;
+
+                if (selectedMonth !== 'ALL') {
+                    vEstoque = data.reduce((s, r) => s + (r['mes_' + selectedMonth] || 0), 0);
+                } else {
+                    vEstoque = data.reduce((s, r) => s + (r.valor_total || 0), 0);
+                }
+
+                req = data.reduce((s, r) => s + (r.requisicoes || 0), 0);
+                min = data.filter(r => (r.saldo_atual || 0) < (r.estoque_minimo || 0)).length;
+                tempo = data.reduce((s, r) => s + (r.tempo_atendimento || 0), 0) / (data.length || 1);
+                perdas = data.reduce((s, r) => s + (r.perdas || 0), 0) / (data.length || 1);
+                soma_consumo = data.reduce((s, r) => s + (r.consumo_mensal || 0), 0);
+                soma_saldo = data.reduce((s, r) => s + (r.saldo_atual || 0), 0);
+                total_alunos = data.reduce((s, r) => s + (r.atendidos || 0), 0);
                 var cobertura_dias = soma_consumo > 0 ? (soma_saldo / (soma_consumo / 30)) : 0;
 
                 kEl.innerHTML = `
-            <div class="kpi"><div class="kpi-label">Valor Total Estocado</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
-            <div class="kpi"><div class="kpi-label">Total de Requisições</div><div class="kpi-value">${formatNumber(req)}</div><div class="kpi-sub">Atendimentos no período</div></div>
+            <div class="kpi"><div class="kpi-label">Valor Total Estocado ${selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : ''}</div><div class="kpi-value highlight">${formatCurrency(vEstoque)}</div><div class="kpi-sub">Patrimônio atual</div></div>
+            <div class="kpi"><div class="kpi-label">Total de Alunos</div><div class="kpi-value">${formatNumber(total_alunos)}</div><div class="kpi-sub">Atendimento na rede</div></div>
             <div class="kpi"><div class="kpi-label">Itens Abaixo do Mínimo</div><div class="kpi-value ${min > 0 ? 'badge-warning' : ''}">${formatNumber(min)}</div><div class="kpi-sub">Risco de ruptura</div></div>
-            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo)} dias</div><div class="kpi-sub">Agilidade interna</div></div>
+            <div class="kpi"><div class="kpi-label">Tempo Médio Atendimento</div><div class="kpi-value">${formatNumber(tempo.toFixed(1))} dias</div><div class="kpi-sub">Agilidade interna</div></div>
             <div class="kpi"><div class="kpi-label">Índice de Perdas</div><div class="kpi-value ${perdas > 0 ? 'badge-danger' : ''}">${formatPercent(perdas / 100)}</div><div class="kpi-sub">Materiais inutilizados</div></div>
             <div class="kpi"><div class="kpi-label">Forecasting (Dias)</div><div class="kpi-value ${cobertura_dias < 15 ? 'badge-danger' : 'badge-success'}">${formatNumber(Math.round(cobertura_dias))}</div><div class="kpi-sub">Estoque restante estimado</div></div>
         `;
@@ -1753,6 +1775,7 @@
 
         var tPage = 1, tSort = '', tDesc = false, tSearch = '';
         document.getElementById('tabelaSearch').addEventListener('input', e => { tSearch = e.target.value.toLowerCase(); tPage = 1; renderTabela(); });
+        document.getElementById('monthSelectFilter').addEventListener('change', () => { tPage = 1; refreshView(); });
         document.getElementById('btnPrevPage').addEventListener('click', () => { if (tPage > 1) { tPage--; renderTabela(); } });
         document.getElementById('btnNextPage').addEventListener('click', () => { tPage++; renderTabela(); });
 
@@ -1779,7 +1802,19 @@
             else if (currentModule === 'financeiro') cols = [{ k: 'processo', l: 'Processo' }, { k: 'departamento', l: 'Depto' }, { k: 'categoria', l: 'Categoria' }, { k: 'fonte', l: 'Fonte' }, { k: 'empenhado', l: 'Empenhado' }, { k: 'liquidado', l: 'Liquidado' }, { k: 'pago', l: 'Pago' }, { k: 'status', l: 'Status' }];
             else if (currentModule === 'nutricao') cols = [{ k: 'unidade', l: 'Unidade' }, { k: 'atendidos', l: 'Alunos' }, { k: 'refeicoes', l: 'Refeições' }, { k: 'custo_total', l: 'Custo Total' }, { k: 'desperdicio', l: 'Desperdício' }, { k: 'item_falta', l: 'Itens Falta' }, { k: 'conformidade', l: 'Status' }];
             else if (currentModule === 'assistencia') cols = [{ k: 'chamado', l: 'Chamado' }, { k: 'unidade', l: 'Escola' }, { k: 'tipo', l: 'Tipo' }, { k: 'data_abertura', l: 'Abertura' }, { k: 'prazo', l: 'Prazo(d)' }, { k: 'status', l: 'Status' }, { k: 'tempo_resposta', l: 'T. Resposta' }, { k: 'tempo_resolucao', l: 'T. Resolução' }, { k: 'prioridade', l: 'Prioridade' }];
-            else cols = [{ k: 'modalidade', l: 'Modalidade' }, { k: 'unidade', l: 'Unidade' }, { k: 'material', l: 'Material' }, { k: 'saldo_atual', l: 'Saldo' }, { k: 'estoque_minimo', l: 'Minimo' }, { k: 'requisicoes', l: 'Req. Atendidas' }, { k: 'valor_total', l: 'V. Estocado' }, { k: 'consumo_mensal', l: 'Consumo Médio' }];
+            else {
+                var selectedMonth = document.getElementById('monthSelectFilter').value;
+                var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
+                cols = [
+                    { k: 'modalidade', l: 'Modalidade' }, 
+                    { k: 'unidade', l: 'Unidade' }, 
+                    { k: 'material', l: 'Material' }, 
+                    { k: 'atendidos', l: 'Alunos' },
+                    { k: 'saldo_atual', l: 'Saldo' }, 
+                    { k: valorKey, l: 'V. Estocado' }, 
+                    { k: 'consumo_mensal', l: 'Consumo Médio' }
+                ];
+            }
 
             var data = sysData[currentModule] ? sysData[currentModule].rows.slice() : [];
 
@@ -1799,10 +1834,12 @@
                 var isMoney1 = false, isMoney2 = false;
 
                 if (currentModule === 'almoxarifado') {
-                    label1 = 'Valor Total Estocado'; isMoney1 = true;
-                    total1 = data.reduce((s, r) => s + (r.valor_total || 0), 0);
-                    label2 = 'Consumo Médio (Soma)'; isMoney2 = false;
-                    total2 = data.reduce((s, r) => s + (r.consumo_mensal || 0), 0);
+                    var selectedMonth = document.getElementById('monthSelectFilter').value;
+                    var valorKey = (selectedMonth !== 'ALL') ? 'mes_' + selectedMonth : 'valor_total';
+                    label1 = 'Valor Total Estocado ' + (selectedMonth !== 'ALL' ? '(' + selectedMonth + ')' : ''); isMoney1 = true;
+                    total1 = data.reduce((s, r) => s + (r[valorKey] || 0), 0);
+                    label2 = 'Total de Alunos'; isMoney2 = false;
+                    total2 = data.reduce((s, r) => s + (r.atendidos || 0), 0);
                 } else if (currentModule === 'compras') {
                     label1 = 'V. Solicitado Total'; isMoney1 = true;
                     total1 = data.reduce((s, r) => s + (r.valor_solicitado || 0), 0);
