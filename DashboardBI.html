@@ -197,6 +197,66 @@
             position: fixed;
             height: 100vh;
             z-index: 100;
+            transition: width 0.3s ease, padding 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            padding: 1rem 0.5rem;
+        }
+
+        .sidebar.collapsed .logo-text, 
+        .sidebar.collapsed .logo-sub, 
+        .sidebar.collapsed .sidebar-section,
+        .sidebar.collapsed .logout-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item, 
+        .sidebar.collapsed .nav-module {
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar.collapsed .nav-module::before, 
+        .sidebar.collapsed .nav-item::before {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .sidebar.collapsed .nav-module[data-module="almoxarifado"]::before { content: '📦'; }
+        .sidebar.collapsed .nav-module[data-module="nutricao"]::before { content: '🍎'; }
+        .sidebar.collapsed .nav-module[data-module="compras"]::before { content: '🛒'; }
+        .sidebar.collapsed .nav-module[data-module="financeiro"]::before { content: '💰'; }
+        .sidebar.collapsed .nav-module[data-module="assistencia"]::before { content: '🛠️'; }
+        .sidebar.collapsed .nav-module[data-module="transportes"]::before { content: '🚌'; }
+        .sidebar.collapsed .nav-module[data-module="desenvolvimento"]::before { content: '📈'; }
+
+        .sidebar.collapsed .nav-item[data-tab="main"]::before { content: '📊'; }
+        .sidebar.collapsed .nav-item[data-tab="tabela"]::before { content: '📋'; }
+        .sidebar.collapsed .nav-item[data-tab="insights"]::before { content: '💡'; }
+        .sidebar.collapsed .nav-item[data-tab="kpis"]::before { content: '🎯'; }
+        .sidebar.collapsed .nav-item[data-tab="historico"]::before { content: '⏳'; }
+        .sidebar.collapsed .nav-item[data-tab="relatorios"]::before { content: '📑'; }
+        
+        .sidebar-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        
+        .sidebar-toggle:hover {
+            color: var(--accent-light);
         }
 
         .logo {
@@ -265,6 +325,11 @@
             padding: 1.5rem;
             background: var(--bg-primary);
             overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main.collapsed {
+            margin-left: 70px;
         }
 
         .header {
@@ -431,6 +496,196 @@
 
         .chart-canvas {
             height: 220px;
+        }
+
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+
+        .valor-estocado-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .valor-estocado-content {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            flex: 1;
+            padding: 1.5rem 0;
+        }
+
+        @media (max-width: 900px) {
+            .valor-estocado-content {
+                flex-direction: column;
+            }
+        }
+
+        .ve-chart-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            flex-shrink: 0;
+        }
+
+        .ve-center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ve-center-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .ve-center-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .ve-center-value::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: var(--accent-light);
+            margin: 8px auto 0;
+        }
+
+        .ve-legend {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            width: 100%;
+        }
+
+        .ve-legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            gap: 1rem;
+        }
+
+        .ve-dot {
+            width: 6px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .ve-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+
+        .ve-dots {
+            flex: 1;
+            border-bottom: 1px dashed var(--border-light);
+            opacity: 0.4;
+            margin: 0 0.5rem;
+            position: relative;
+            top: -4px;
+        }
+
+        .ve-val {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 1.05rem;
+        }
+
+        .ve-perc {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-light);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            min-width: 65px;
+            text-align: center;
+        }
+
+        .ve-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .styled-bar-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .styled-chart-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .title-indicator {
+            width: 3px;
+            height: 20px;
+            background: var(--accent-light);
+            border-radius: 2px;
+        }
+
+        .title-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(174, 241, 88, 0.1);
+            color: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            border: 1px solid rgba(174, 241, 88, 0.2);
+        }
+
+        .styled-chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .styled-chart-footer {
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-icon {
+            color: var(--accent-light);
+            font-size: 0.9rem;
         }
 
         .table-section {
@@ -816,6 +1071,158 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        /* Novo Modal Premium */
+        .modal-modern-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-modern-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .modal-modern-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .modal-modern-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-modern-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-modern-close:hover {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            border-color: var(--accent-light);
+        }
+        
+        .modal-modern-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .modal-modern-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .modal-modern-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(174, 241, 88, 0.05);
+            border: 1px solid rgba(174, 241, 88, 0.1);
+            color: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .modal-modern-card-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-modern-card-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .modal-modern-card-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .modal-modern-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .modal-modern-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .modal-modern-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        .modal-modern-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .modal-modern-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+        .modal-modern-item-key {
+            color: var(--text-muted);
+        }
+        .modal-modern-item-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .modal-modern-item-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-modern-item-box .key {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .modal-modern-item-box .val {
+            color: var(--text-primary);
+            font-weight: 700;
         }
 
         @media (max-width: 1200px) {
@@ -1338,29 +1745,32 @@
     <!-- CONTEÚDO DO DASHBOARD -->
     <div id="dashboardApp">
         <nav class="sidebar">
-        <div class="logo">DashboardBI</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <div class="logo logo-text">DashboardBI</div>
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Recolher/Abrir Menu" title="Recolher/Abrir Menu">☰</button>
+        </div>
         <div class="logo-sub">Sistema de Gestão</div>
 
         <div class="sidebar-section">Módulos</div>
-        <div class="nav-module active" data-module="almoxarifado">Almoxarifado</div>
-        <div class="nav-module" data-module="nutricao">Nutrição Escolar</div>
-        <div class="nav-module" data-module="compras">Compras</div>
-        <div class="nav-module" data-module="financeiro">Financeiro</div>
-        <div class="nav-module" data-module="assistencia">Assistência Rede</div>
-        <div class="nav-module" data-module="transportes">Transportes</div>
-        <div class="nav-module" data-module="desenvolvimento">Dir. Desenvolvimento</div>
+        <div class="nav-module active" data-module="almoxarifado" title="Almoxarifado">Almoxarifado</div>
+        <div class="nav-module" data-module="nutricao" title="Nutrição Escolar">Nutrição Escolar</div>
+        <div class="nav-module" data-module="compras" title="Compras">Compras</div>
+        <div class="nav-module" data-module="financeiro" title="Financeiro">Financeiro</div>
+        <div class="nav-module" data-module="assistencia" title="Assistência Rede">Assistência Rede</div>
+        <div class="nav-module" data-module="transportes" title="Transportes">Transportes</div>
+        <div class="nav-module" data-module="desenvolvimento" title="Dir. Desenvolvimento">Dir. Desenvolvimento</div>
 
         <div class="sidebar-section" style="margin-top: 1.5rem;">Visões</div>
-        <div class="nav-item active" data-tab="main">Visão Executiva</div>
-        <div class="nav-item" data-tab="tabela">Tabela Analítica</div>
-        <div class="nav-item" data-tab="insights">Insights Automáticos</div>
-        <div class="nav-item" data-tab="kpis">KPI / Métrica</div>
-        <div class="nav-item" data-tab="historico">Histórico e Comparação</div>
-        <div class="nav-item" data-tab="relatorios">Relatórios e Exportação</div>
+        <div class="nav-item active" data-tab="main" title="Visão Executiva">Visão Executiva</div>
+        <div class="nav-item" data-tab="tabela" title="Tabela Analítica">Tabela Analítica</div>
+        <div class="nav-item" data-tab="insights" title="Insights Automáticos">Insights Automáticos</div>
+        <div class="nav-item" data-tab="kpis" title="KPI / Métrica">KPI / Métrica</div>
+        <div class="nav-item" data-tab="historico" title="Histórico e Comparação">Histórico e Comparação</div>
+        <div class="nav-item" data-tab="relatorios" title="Relatórios e Exportação">Relatórios e Exportação</div>
 
         <div style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--border);">
             <button class="btn" onclick="handleLogout()" style="width: 100%; background: var(--danger); color: white; border: none; padding: 0.75rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <span>🚪</span> Sair do Sistema
+                <span>🚪</span> <span class="logout-text">Sair do Sistema</span>
             </button>
         </div>
     </nav>
@@ -1613,15 +2023,8 @@
 
         <!-- MODAL DINÂMICO DE INSIGHTS -->
         <div id="modalDynamicInsight" class="modal-overlay">
-            <div class="modal-content">
-                <button class="modal-close" onclick="closeModalInsight()">×</button>
-                <div class="modal-title" id="modalInsightTitle">📦 Título Dinâmico</div>
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead id="modalInsightHead"></thead>
-                        <tbody id="modalInsightBody"></tbody>
-                    </table>
-                </div>
+            <div class="modal-content" style="max-width: 900px; padding: 2rem; border-radius: 16px;">
+                <div id="modalInsightBody"></div>
             </div>
         </div>
 
@@ -1760,6 +2163,11 @@
                 document.getElementById(currentTab + 'Content').classList.add('active');
                 refreshView();
             });
+        });
+
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main').classList.toggle('collapsed');
         });
 
         document.getElementById('btnTrocar').addEventListener('click', () => document.getElementById('fileInput').click());
@@ -2128,17 +2536,215 @@
             <div class="kpi"><div class="kpi-label">Forecasting (Dias)</div><div class="kpi-value ${cobertura_dias < 15 ? 'badge-danger' : 'badge-success'}">${formatNumber(Math.round(cobertura_dias))}</div><div class="kpi-sub">Estoque restante estimado</div></div>
         `;
                 cEl.innerHTML = `
-            <div class="chart"><h3 class="chart-title">Consumo Médio Mensal por Unidade (Top)</h3><div class="chart-canvas"><canvas id="c1"></canvas></div></div>
-            <div class="chart"><h3 class="chart-title">Saldo Atual por Item (Top 10)</h3><div class="chart-canvas"><canvas id="c2"></canvas></div></div>
-            <div class="chart"><h3 class="chart-title">Valor Estocado por Unidade</h3><div class="chart-canvas"><canvas id="c3"></canvas></div></div>
-            <div class="chart"><h3 class="chart-title">Itens Críticos (Abaixo do Mínimo)</h3><div class="chart-canvas"><canvas id="c4"></canvas></div></div>
+            <div class="chart styled-bar-card">
+                <div class="styled-chart-header">
+                    <div class="title-indicator"></div>
+                    <div class="title-icon">📈</div>
+                    <h3 class="styled-chart-title">Consumo Médio Mensal por Unidade (Top)</h3>
+                </div>
+                <div class="chart-canvas" style="height: 320px;"><canvas id="c1"></canvas></div>
+                <div class="styled-chart-footer">
+                    <span class="info-icon">ℹ️</span> Valores expressos na mesma unidade da métrica.
+                </div>
+            </div>
+            <div class="chart styled-bar-card">
+                <div class="styled-chart-header">
+                    <div class="title-indicator"></div>
+                    <div class="title-icon">📦</div>
+                    <h3 class="styled-chart-title">Saldo Atual por Item (Top 10)</h3>
+                </div>
+                <div class="chart-canvas" style="height: 320px;"><canvas id="c2"></canvas></div>
+                <div class="styled-chart-footer">
+                    <span class="info-icon">ℹ️</span> Valores expressos na mesma unidade da métrica.
+                </div>
+            </div>
+            <div class="chart chart-full valor-estocado-card">
+                <h3 class="chart-title" style="margin-bottom: 0;">📦 Valor Estocado por Unidade</h3>
+                <div class="valor-estocado-content">
+                    <div class="ve-chart-wrapper">
+                        <canvas id="c3"></canvas>
+                        <div class="ve-center-label">
+                            <div class="ve-center-title">TOTAL GERAL</div>
+                            <div class="ve-center-value" id="c3Total">0</div>
+                        </div>
+                    </div>
+                    <div class="ve-legend" id="c3Legend"></div>
+                </div>
+                <div class="ve-footer">📊 Valores expressos na mesma unidade de medida do estoque.</div>
+            </div>
+            <div class="chart chart-full"><h3 class="chart-title">Itens Críticos (Abaixo do Mínimo)</h3><div class="chart-canvas"><canvas id="c4"></canvas></div></div>
         `;
                 var dpt = {}; data.forEach(r => { dpt[r.unidade || 'N/A'] = (dpt[r.unidade || 'N/A'] || 0) + (r.consumo_mensal || 0); });
-                charts.c1 = new Chart(document.getElementById('c1'), { type: 'bar', data: { labels: Object.keys(dpt).slice(0, 10), datasets: [{ data: Object.values(dpt).slice(0, 10), backgroundColor: cl.primary }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+                var sortedDptKeys = Object.keys(dpt).sort((a, b) => dpt[b] - dpt[a]).slice(0, 10);
+                var c1Colors = ['#AEF158', '#06B6D4', '#3B82F6', '#64748B', '#EF4444', '#EAB308', '#06B6D4', '#8B5CF6', '#EC4899', '#F97316'];
+                charts.c1 = new Chart(document.getElementById('c1'), { 
+                    type: 'bar', 
+                    data: { 
+                        labels: sortedDptKeys, 
+                        datasets: [{ 
+                            data: sortedDptKeys.map(k => dpt[k]), 
+                            backgroundColor: c1Colors,
+                            borderRadius: 4,
+                            barThickness: 16
+                        }] 
+                    }, 
+                    options: { 
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        layout: { padding: { right: 40 } },
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { color: cl.textMuted }, title: { display: true, text: 'Consumo Médio', color: cl.primary, font: { size: 11 } } },
+                            y: { grid: { display: false, drawBorder: false }, ticks: { color: '#CBD5E1', font: { size: 10 } } }
+                        }
+                    },
+                    plugins: [{
+                        id: 'barLabels',
+                        afterDatasetsDraw(chart) {
+                            const ctx = chart.ctx;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((bar, index) => {
+                                    const val = dataset.data[index];
+                                    if(val) {
+                                        ctx.save();
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.font = 'bold 11px "Segoe UI", sans-serif';
+                                        ctx.textAlign = 'left';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(formatNumber(val), bar.x + 8, bar.y);
+                                        ctx.restore();
+                                    }
+                                });
+                            });
+                        }
+                    }]
+                });
+
                 var top = data.sort((a, b) => b.saldo_atual - a.saldo_atual).slice(0, 10);
-                charts.c2 = new Chart(document.getElementById('c2'), { type: 'bar', data: { labels: top.map(t => t.material), datasets: [{ data: top.map(t => t.saldo_atual), backgroundColor: cl.secondary }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-                var valUnid = {}; data.forEach(r => { valUnid[r.unidade || 'N/A'] = (valUnid[r.unidade || 'N/A'] || 0) + (r.valor_total || 0); });
-                charts.c3 = new Chart(document.getElementById('c3'), { type: 'polarArea', data: { labels: Object.keys(valUnid).slice(0, 8), datasets: [{ data: Object.values(valUnid).slice(0, 8), backgroundColor: [cl.primary, cl.secondary, cl.tertiary, cl.textMuted, '#A73F47', '#E4B434', '#06B6D4', '#6366F1'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+                charts.c2 = new Chart(document.getElementById('c2'), { 
+                    type: 'bar', 
+                    data: { 
+                        labels: top.map(t => t.material), 
+                        datasets: [{ 
+                            data: top.map(t => t.saldo_atual), 
+                            backgroundColor: '#AEF158',
+                            borderRadius: 4,
+                            barThickness: 16
+                        }] 
+                    }, 
+                    options: { 
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        layout: { padding: { right: 40 } },
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { color: cl.textMuted }, title: { display: true, text: 'Saldo Atual', color: cl.primary, font: { size: 11 } } },
+                            y: { grid: { display: false, drawBorder: false }, ticks: { color: '#CBD5E1', font: { size: 10 } } }
+                        }
+                    },
+                    plugins: [{
+                        id: 'barLabels2',
+                        afterDatasetsDraw(chart) {
+                            const ctx = chart.ctx;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((bar, index) => {
+                                    const val = dataset.data[index];
+                                    if(val) {
+                                        ctx.save();
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.font = 'bold 11px "Segoe UI", sans-serif';
+                                        ctx.textAlign = 'left';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(formatNumber(val), bar.x + 8, bar.y);
+                                        ctx.restore();
+                                    }
+                                });
+                            });
+                        }
+                    }]
+                });
+                var valUnid = {}; 
+                var selectedMonthC3 = document.getElementById('monthSelectFilter').value;
+                var valorKeyC3 = (selectedMonthC3 !== 'ALL') ? 'mes_' + selectedMonthC3 : 'valor_total';
+                data.forEach(r => { valUnid[r.unidade || 'N/A'] = (valUnid[r.unidade || 'N/A'] || 0) + (r[valorKeyC3] || 0); });
+                
+                var sortedUnid = Object.keys(valUnid).sort((a,b) => valUnid[b] - valUnid[a]).slice(0, 8);
+                var totalVe = 0;
+                var c3Labels = [];
+                var c3Data = [];
+                var c3Colors = ['#10B981', '#3B82F6', '#6366F1', '#EF4444', '#06B6D4', '#EAB308', '#64748B', '#8B5CF6'];
+
+                sortedUnid.forEach(u => {
+                    c3Labels.push(u);
+                    c3Data.push(valUnid[u]);
+                    totalVe += valUnid[u];
+                });
+
+                var legendHTML = '';
+                c3Labels.forEach((lbl, i) => {
+                    var val = c3Data[i];
+                    var perc = totalVe > 0 ? ((val / totalVe) * 100).toFixed(1).replace('.', ',') + '%' : '0%';
+                    legendHTML += `
+                        <div class="ve-legend-item">
+                            <span class="ve-dot" style="background: ${c3Colors[i]}"></span>
+                            <span class="ve-label" title="${lbl}">${lbl}</span>
+                            <span class="ve-dots"></span>
+                            <span class="ve-val">${formatNumber(val)}</span>
+                            <span class="ve-perc">${perc}</span>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('c3Legend').innerHTML = legendHTML;
+                document.getElementById('c3Total').innerHTML = formatCurrency(totalVe).replace(',00', '');
+
+                charts.c3 = new Chart(document.getElementById('c3'), { 
+                    type: 'doughnut', 
+                    data: { 
+                        labels: c3Labels, 
+                        datasets: [{ 
+                            data: c3Data, 
+                            backgroundColor: c3Colors,
+                            borderWidth: 2,
+                            borderColor: 'var(--card-bg)',
+                            hoverOffset: 4
+                        }] 
+                    }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    },
+                    plugins: [{
+                        id: 'sliceLabels',
+                        afterDraw: (chart) => {
+                            const ctx = chart.ctx;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                chart.getDatasetMeta(i).data.forEach((datapoint, index) => {
+                                    const val = dataset.data[index];
+                                    const percent = val / totalVe;
+                                    if (percent > 0.04) { // Só desenha se a fatia não for muito fina
+                                        const { x, y } = datapoint.tooltipPosition();
+                                        ctx.save();
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.font = 'bold 12px "Segoe UI", sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(formatNumber(val), x, y);
+                                        ctx.restore();
+                                    }
+                                });
+                            });
+                        }
+                    }]
+                });
                 var criticos = data.filter(r => (r.saldo_atual || 0) < (r.estoque_minimo || 0)).slice(0, 8);
                 charts.c4 = new Chart(document.getElementById('c4'), { type: 'bar', data: { labels: criticos.map(t => t.material), datasets: [{ label: 'Saldo', data: criticos.map(t => t.saldo_atual), backgroundColor: cl.danger }, { label: 'Mínimo', data: criticos.map(t => t.estoque_minimo), backgroundColor: cl.warning }] }, options: { responsive: true, maintainAspectRatio: false } });
             }
@@ -2452,25 +3058,126 @@
             var row = window.currentPageData[index];
             if (!row) return;
 
-            var title = '📄 Detalhes do Registro';
-            var thead = '<tr><th style="width:40%">Campo</th><th>Valor</th></tr>';
-            var tbody = Object.keys(row).map(k => {
-                var val = row[k];
-                var formatVal = val;
-                var label = k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ');
+            var formatField = (k, val) => {
                 if (typeof val === 'number') {
-                    if (k.includes('valor') || k.includes('custo') || k === 'empenhado' || k === 'liquidado' || k === 'pago') formatVal = formatCurrency(val);
-                    else formatVal = formatNumber(val);
+                    if (k.includes('valor') || k.includes('custo') || k === 'empenhado' || k === 'liquidado' || k === 'pago') return formatCurrency(val);
+                    return formatNumber(val);
                 }
                 if (k === 'status' || k === 'conformidade') {
-                    formatVal = `<span class="badge ${val === 'Concluído' || val === 'Conforme' || val === 'Normal' ? 'badge-success' : (val === 'Pendente' ? 'badge-warning' : 'badge-danger')}">${val}</span>`;
+                    return `<span class="badge ${val === 'Concluído' || val === 'Conforme' || val === 'Normal' ? 'badge-success' : (val === 'Pendente' ? 'badge-warning' : 'badge-danger')}">${val}</span>`;
                 }
-                return `<tr><td style="font-weight:600; color:var(--text-secondary);">${label}</td><td>${formatVal || '—'}</td></tr>`;
-            }).join('');
+                return val || '—';
+            };
 
-            document.getElementById('modalInsightTitle').textContent = title;
-            document.getElementById('modalInsightHead').innerHTML = thead;
-            document.getElementById('modalInsightBody').innerHTML = tbody;
+            // Detectar KPIs baseados no módulo atual
+            var kpiKeys = [];
+            var kpiLabels = [];
+            var kpiIcons = [];
+
+            if (currentModule === 'almoxarifado') {
+                kpiKeys = ['unidade', 'modalidade', 'valor_total'];
+                kpiLabels = ['Unidade', 'Modalidade', 'Valor total'];
+                kpiIcons = ['🏢', '🎓', '💰'];
+            } else if (currentModule === 'compras') {
+                kpiKeys = ['processo', 'fornecedor', 'valor_contratado'];
+                kpiLabels = ['Processo', 'Fornecedor', 'V. Contratado'];
+                kpiIcons = ['📄', '🤝', '💰'];
+            } else if (currentModule === 'financeiro') {
+                kpiKeys = ['processo', 'departamento', 'pago'];
+                kpiLabels = ['Processo', 'Departamento', 'Valor Pago'];
+                kpiIcons = ['📄', '🏢', '💰'];
+            } else if (currentModule === 'assistencia') {
+                kpiKeys = ['chamado', 'unidade', 'prioridade'];
+                kpiLabels = ['Chamado', 'Escola', 'Prioridade'];
+                kpiIcons = ['🎫', '🏢', '🚨'];
+            } else {
+                // Padrão genérico: pega as 3 primeiras colunas disponíveis
+                var allK = Object.keys(row).filter(k => k !== 'mes_JANEIRO' && k !== 'mensal'); // ignora algumas
+                kpiKeys = allK.slice(0, 3);
+                kpiLabels = kpiKeys.map(k => k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' '));
+                kpiIcons = ['📌', '📊', '💡'];
+            }
+
+            var htmlCards = '';
+            for (let i = 0; i < kpiKeys.length; i++) {
+                if(row[kpiKeys[i]] !== undefined) {
+                    htmlCards += `
+                        <div class="modal-modern-card">
+                            <div class="modal-modern-card-icon">${kpiIcons[i]}</div>
+                            <div class="modal-modern-card-info">
+                                <div class="modal-modern-card-label">${kpiLabels[i]}</div>
+                                <div class="modal-modern-card-value">${formatField(kpiKeys[i], row[kpiKeys[i]])}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            var generalHtml = '';
+            var monthHtml = '';
+            
+            Object.keys(row).forEach(k => {
+                if (kpiKeys.includes(k) && currentModule === 'almoxarifado') {
+                    // ignora os kpis se for almoxarifado para não repetir
+                    if (k === 'unidade' || k === 'modalidade' || k === 'valor_total') return;
+                }
+                
+                var label = k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ');
+                var formatted = formatField(k, row[k]);
+
+                if (k.startsWith('mes_')) {
+                    var monthName = label.replace('Mes ', '');
+                    monthHtml += `
+                        <div class="modal-modern-item-box">
+                            <div class="key">📅 <span>${monthName}</span></div>
+                            <div class="val">${formatted}</div>
+                        </div>
+                    `;
+                } else {
+                    generalHtml += `
+                        <div class="modal-modern-item">
+                            <span class="modal-modern-item-key">${label}</span>
+                            <span class="modal-modern-item-value">${formatted}</span>
+                        </div>
+                        <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0;"></div>
+                    `;
+                }
+            });
+
+            var rightCol = monthHtml ? `
+                <div class="modal-modern-section">
+                    <div class="modal-modern-section-title"><span>📊</span> Consumo por Mês</div>
+                    <div style="display:flex; flex-direction:column;">
+                        ${monthHtml}
+                    </div>
+                </div>
+            ` : '';
+
+            var leftColStyle = monthHtml ? '' : 'grid-column: 1 / -1;';
+
+            var finalHTML = `
+                <div class="modal-modern-header">
+                    <div class="modal-modern-title-group">
+                        <div class="modal-modern-icon">📄</div>
+                        <div class="modal-modern-title">Detalhes do Registro</div>
+                    </div>
+                    <button class="modal-modern-close" onclick="closeModalInsight()">×</button>
+                </div>
+                
+                ${htmlCards ? `<div class="modal-modern-cards">${htmlCards}</div>` : ''}
+                
+                <div class="modal-modern-split">
+                    <div class="modal-modern-section" style="${leftColStyle}">
+                        <div class="modal-modern-section-title"><span>ℹ️</span> Informações Gerais</div>
+                        <div class="modal-modern-list">
+                            ${generalHtml}
+                        </div>
+                    </div>
+                    ${rightCol}
+                </div>
+            `;
+
+            document.getElementById('modalInsightBody').innerHTML = finalHTML;
             document.getElementById('modalDynamicInsight').classList.add('active');
         }
 
