@@ -2161,7 +2161,8 @@
                     id: id,
                     data_importacao: dataStr,
                     nome_arquivo: filename,
-                    dados_json: dataObj
+                    dados_json: dataObj,
+                    modulo: currentModule
                 };
                 const req = store.put(record);
                 req.onsuccess = () => { if (callback) callback(id); loadHistoryToSelect(id); };
@@ -2199,7 +2200,7 @@
             });
         }
 
-        function loadHistoryToSelect(selectedId = null) {
+        function loadHistoryToSelect(selectedId = null, autoLoadLatest = true) {
             openDB((db) => {
                 const transaction = db.transaction([STORE_NAME], 'readonly');
                 const store = transaction.objectStore(STORE_NAME);
@@ -2210,19 +2211,23 @@
                     const btnClear = document.getElementById('btnLimparHistorico');
                     if (!select) return;
                     
-                    if (records.length === 0) {
+                    // Filtrar registros do módulo atual. Mantém os registros antigos (sem módulo) se o nome do arquivo coincidir
+                    let moduleRecords = records.filter(r => r.modulo === currentModule || (!r.modulo && r.nome_arquivo && r.nome_arquivo.toLowerCase().includes(currentModule.toLowerCase())));
+                    
+                    if (moduleRecords.length === 0) {
                         select.style.display = 'none';
                         btnClear.style.display = 'none';
-                        if (!selectedId) loadDemo(); // Carrega mock se não houver histórico e estiver bootando
+                        select.innerHTML = '<option value="">-- Histórico de Importações --</option>';
+                        if (autoLoadLatest && !selectedId) loadDemo(); // Carrega mock se não houver histórico e estiver bootando
                         return;
                     }
                     
                     select.style.display = 'inline-block';
                     btnClear.style.display = 'inline-block';
-                    records.sort((a,b) => b.id - a.id); // Mais recentes primeiro
+                    moduleRecords.sort((a,b) => b.id - a.id); // Mais recentes primeiro
                     
                     select.innerHTML = '<option value="">-- Histórico de Importações --</option>';
-                    records.forEach(r => {
+                    moduleRecords.forEach(r => {
                         const opt = document.createElement('option');
                         opt.value = r.id;
                         opt.textContent = r.data_importacao + " - " + r.nome_arquivo;
@@ -2231,8 +2236,8 @@
                     });
 
                     // Auto-carregar o mais recente no boot se selectedId não foi passado mas não estiver em demo
-                    if (!selectedId && records.length > 0) {
-                        const latest = records[0];
+                    if (autoLoadLatest && !selectedId && moduleRecords.length > 0) {
+                        const latest = moduleRecords[0];
                         select.value = latest.id;
                         sysData = latest.dados_json;
                         document.getElementById('fileName').textContent = latest.nome_arquivo;
@@ -2321,6 +2326,7 @@
                 document.querySelectorAll('.nav-module').forEach(n => n.classList.remove('active'));
                 item.classList.add('active');
                 currentModule = item.dataset.module;
+                loadHistoryToSelect(null, false); // Atualiza select mas não auto-carrega mudando dados
                 refreshView();
             });
         });
