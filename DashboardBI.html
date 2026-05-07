@@ -1800,6 +1800,10 @@
         <div class="file-bar">
             <span class="file-name" id="fileName">Nenhum arquivo importado</span>
             <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+            <select id="historicoSelect" class="mod-btn" style="background: var(--bg-tertiary); border-color: var(--border); color: var(--text-primary); margin-left: auto; outline: none; cursor: pointer; display: none; max-width: 200px; text-overflow: ellipsis;">
+                <option value="">Carregando histórico...</option>
+            </select>
+            <button class="btn" id="btnLimparHistorico" style="display: none; background: var(--danger); color: #fff;">🗑️ Limpar</button>
             <label
                 style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); cursor: pointer; margin-right: 1rem;">
                 <input type="checkbox" id="chkMesclar" checked
@@ -2047,10 +2051,26 @@
         // Supabase Configuration
         const supabaseUrl = 'https://yqslplgfpfspzzhddvuq.supabase.co';
         const supabaseKey = 'sb_publishable_ZlhQU-oSqSvbQlzbGs9dqQ_-jHRxOUj';
-        const sb = supabase.createClient(supabaseUrl, supabaseKey);
+        let sb = null;
+        try {
+            if (typeof supabase !== 'undefined') {
+                sb = supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch (e) {
+            console.warn('Supabase não inicializado:', e);
+        }
 
         // --- AUTH LOGIC ---
         async function checkSession() {
+            // Bypass completo no ambiente local para evitar problemas de login
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.getElementById('userEmailDisplay').textContent = 'Admin Local';
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardApp').style.display = 'block';
+                loadHistoryToSelect();
+                return;
+            }
+
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 showDashboard();
@@ -2066,7 +2086,7 @@
             }
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardApp').style.display = 'block';
-            loadDemo();
+            loadHistoryToSelect();
         }
 
         function showLogin() {
@@ -2079,6 +2099,18 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
             
+            // Bypass para o usuário local
+            const cleanEmail = email.trim().toLowerCase();
+            const cleanPass = password.trim();
+            if (cleanEmail === 'repositoriocpd3@edu.itaguai.rj.gov.br' && cleanPass === 'T3c4n3x0') {
+                document.getElementById('userEmailDisplay').textContent = cleanEmail;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardApp').style.display = 'block';
+                loadHistoryToSelect();
+                showToast('Bem-vindo!', 'success');
+                return;
+            }
+
             showLoader();
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
             hideLoader();
@@ -2099,6 +2131,145 @@
         function formatCurrency(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0); }
         function formatNumber(v) { return new Intl.NumberFormat('pt-BR').format(v || 0); }
         function formatPercent(v) { return new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1 }).format(v || 0); }
+
+        // --- INÍCIO DO INDEXEDDB: HISTÓRICO DE IMPORTAÇÕES ---
+        const DB_NAME = 'DashboardBIDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'importacoes';
+        let db;
+
+        function openDB(callback) {
+            if (db) return callback(db);
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = (e) => console.error("Erro no IndexedDB:", e);
+            request.onsuccess = (e) => { db = e.target.result; callback(db); };
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+        }
+
+        function saveImportToDB(filename, dataObj, callback) {
+            openDB((db) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const id = new Date().getTime().toString();
+                const dataStr = new Date().toLocaleString('pt-BR');
+                const record = {
+                    id: id,
+                    data_importacao: dataStr,
+                    nome_arquivo: filename,
+                    dados_json: dataObj
+                };
+                const req = store.put(record);
+                req.onsuccess = () => { if (callback) callback(id); loadHistoryToSelect(id); };
+                req.onerror = (e) => console.error("Erro ao salvar histórico:", e);
+            });
+        }
+
+        function loadImportFromDB(id, callback) {
+            openDB((db) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const req = store.get(id);
+                req.onsuccess = (e) => {
+                    const record = e.target.result;
+                    if (record && callback) callback(record);
+                };
+            });
+        }
+
+        function deleteImportFromDB(id, callback) {
+            openDB((db) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const req = store.delete(id);
+                req.onsuccess = () => { if(callback) callback(); };
+            });
+        }
+
+        function clearAllImports(callback) {
+            openDB((db) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const req = store.clear();
+                req.onsuccess = () => { if(callback) callback(); };
+            });
+        }
+
+        function loadHistoryToSelect(selectedId = null) {
+            openDB((db) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const req = store.getAll();
+                req.onsuccess = (e) => {
+                    const records = e.target.result || [];
+                    const select = document.getElementById('historicoSelect');
+                    const btnClear = document.getElementById('btnLimparHistorico');
+                    if (!select) return;
+                    
+                    if (records.length === 0) {
+                        select.style.display = 'none';
+                        btnClear.style.display = 'none';
+                        if (!selectedId) loadDemo(); // Carrega mock se não houver histórico e estiver bootando
+                        return;
+                    }
+                    
+                    select.style.display = 'inline-block';
+                    btnClear.style.display = 'inline-block';
+                    records.sort((a,b) => b.id - a.id); // Mais recentes primeiro
+                    
+                    select.innerHTML = '<option value="">-- Histórico de Importações --</option>';
+                    records.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r.id;
+                        opt.textContent = r.data_importacao + " - " + r.nome_arquivo;
+                        if (selectedId && r.id === selectedId) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+
+                    // Auto-carregar o mais recente no boot se selectedId não foi passado mas não estiver em demo
+                    if (!selectedId && records.length > 0) {
+                        const latest = records[0];
+                        select.value = latest.id;
+                        sysData = latest.dados_json;
+                        document.getElementById('fileName').textContent = latest.nome_arquivo;
+                        refreshView();
+                    }
+                };
+            });
+        }
+        
+        document.getElementById('historicoSelect').addEventListener('change', (e) => {
+            const id = e.target.value;
+            if(!id) return;
+            showLoader();
+            loadImportFromDB(id, (record) => {
+                if(record && record.dados_json) {
+                    sysData = record.dados_json; // Restaura estado completo
+                    document.getElementById('fileName').textContent = record.nome_arquivo;
+                    refreshView();
+                    showToast('Histórico carregado com sucesso!', 'success');
+                }
+                hideLoader();
+            });
+        });
+
+        document.getElementById('btnLimparHistorico').addEventListener('click', () => {
+            if(confirm("Tem certeza que deseja apagar todo o histórico de planilhas?")) {
+                clearAllImports(() => {
+                    sysData = {};
+                    document.getElementById('fileName').textContent = "Nenhum arquivo importado";
+                    loadHistoryToSelect();
+                    refreshView();
+                    showToast('Histórico limpo!', 'info');
+                });
+            }
+        });
+        
+        // --- FIM DO INDEXEDDB ---
 
         function showLoader() { 
             document.getElementById('loaderOverlay').classList.add('active'); 
@@ -2446,6 +2617,11 @@
                         refreshView();
                         hideLoader();
                         showToast('Planilha processada com sucesso! (' + rows.length + ' linhas)', 'success');
+                        
+                        // Salvar importação no Histórico IndexedDB
+                        const fileNameStr = document.getElementById('fileName').textContent;
+                        saveImportToDB(fileNameStr, sysData);
+                        
                     } else {
                         hideLoader();
                         console.error("Erro no Worker:", ev.data.error);
@@ -2732,12 +2908,33 @@
                                     const percent = val / totalVe;
                                     if (percent > 0.04) { // Só desenha se a fatia não for muito fina
                                         const { x, y } = datapoint.tooltipPosition();
+                                        const text = formatNumber(val);
                                         ctx.save();
+                                        ctx.font = 'bold 11px "Segoe UI", sans-serif';
+                                        const textWidth = ctx.measureText(text).width;
+                                        const boxWidth = textWidth + 16;
+                                        const boxHeight = 22;
+                                        
+                                        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                                        ctx.shadowBlur = 4;
+                                        ctx.shadowOffsetY = 2;
+                                        
+                                        ctx.fillStyle = 'rgba(28, 34, 51, 0.85)';
+                                        if (ctx.roundRect) {
+                                            ctx.beginPath();
+                                            ctx.roundRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight, 11);
+                                            ctx.fill();
+                                        } else {
+                                            ctx.fillRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
+                                        }
+                                        
+                                        ctx.shadowColor = 'transparent';
+                                        ctx.shadowBlur = 0;
+                                        
                                         ctx.fillStyle = '#ffffff';
-                                        ctx.font = 'bold 12px "Segoe UI", sans-serif';
                                         ctx.textAlign = 'center';
                                         ctx.textBaseline = 'middle';
-                                        ctx.fillText(formatNumber(val), x, y);
+                                        ctx.fillText(text, x, y + 1);
                                         ctx.restore();
                                     }
                                 });
@@ -4076,21 +4273,30 @@
         }
 
         // ==================== SISTEMA DE HISTÓRICO (DEXIE) ====================
-        var db = new Dexie("DashboardBIDatabase");
-        db.version(1).stores({
-            historico: 'id, module, createdAt'
-        });
+        var dexieDb = null;
+        try {
+            if (typeof Dexie !== 'undefined') {
+                dexieDb = new Dexie("DashboardBIDatabase");
+                dexieDb.version(1).stores({
+                    historico: 'id, module, createdAt'
+                });
+            } else {
+                console.warn('Dexie não carregado.');
+            }
+        } catch (e) {
+            console.warn('Erro ao inicializar Dexie:', e);
+        }
 
         async function getHistoricoData() {
             try {
-                return await db.historico.toArray();
+                return await dexieDb.historico.toArray();
             } catch (e) { console.error('Erro Dexie:', e); return []; }
         }
 
         async function saveHistoricoData(data) {
             try {
-                await db.historico.clear();
-                await db.historico.bulkPut(data);
+                await dexieDb.historico.clear();
+                await dexieDb.historico.bulkPut(data);
             } catch(e) { console.error('Erro salvar Dexie:', e); }
         }
 
@@ -4114,7 +4320,7 @@
                     valorSolicitado: rows.reduce((s, r) => s + (r.valor_solicitado || 0), 0),
                     valorContratado: rows.reduce((s, r) => s + (r.valor_contratado || 0), 0),
                     totalProcessos: rows.length,
-                    processosAbertos: rows.filter(r = !r.status || r.status.toLowerCase().includes('aberto')).length,
+                    processosAbertos: rows.filter(r => !r.status || r.status.toLowerCase().includes('aberto')).length,
                     processosConcluidos: rows.filter(r => r.status && r.status.toLowerCase().includes('conclu')).length,
                     avgPrazoDias: rows.length ? rows.reduce((s, r) => s + (r.prazo_dias || 0), 0) / rows.length : 0
                 };
